@@ -4,35 +4,110 @@
 
 @layer base {
   * {
-    @apply border-surface-700;
+    @apply border-gpu-700;
   }
   body {
-    @apply bg-surface-900 text-surface-50;
+    @apply bg-gpu-950 text-text-primary overflow-hidden;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gpu-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gpu-500;
   }
 }
 
 @layer components {
+  .card {
+    @apply rounded-xl border border-gpu-700 bg-surface-card shadow-card;
+  }
+  .card-glass {
+    @apply rounded-xl border border-gpu-700/50 bg-gpu-800/60 backdrop-blur-sm shadow-card;
+  }
+  .card-hover {
+    @apply transition-all duration-200 hover:border-gpu-500 hover:bg-gpu-700 cursor-pointer;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
+      transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+      focus:ring-offset-gpu-950 disabled:opacity-50 disabled:pointer-events-none;
+  }
   .btn-primary {
-    @apply rounded-lg bg-primary-600 px-4 py-2 font-medium text-white
-      transition-colors hover:bg-primary-500 focus:outline-none focus:ring-2
-      focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-900;
+    @apply btn bg-accent text-white hover:bg-accent-dim shadow-glow
+      focus:ring-accent/50;
   }
   .btn-secondary {
-    @apply rounded-lg border border-surface-600 bg-surface-800 px-4 py-2
-      font-medium text-surface-200 transition-colors hover:bg-surface-700
-      focus:outline-none focus:ring-2 focus:ring-surface-500 focus:ring-offset-2
-      focus:ring-offset-surface-900;
+    @apply btn border border-gpu-600 text-text-secondary bg-gpu-800
+      hover:bg-gpu-700 hover:text-text-primary focus:ring-gpu-500;
   }
-  .card {
-    @apply rounded-xl border border-surface-700 bg-surface-800 p-4;
+  .btn-ghost {
+    @apply btn text-text-secondary hover:text-text-primary hover:bg-gpu-700;
+  }
+  .btn-icon {
+    @apply p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-gpu-700
+      transition-colors duration-150;
+  }
+  .btn-danger {
+    @apply btn bg-red-600/20 text-red-400 border border-red-600/30
+      hover:bg-red-600/30 hover:text-red-300;
   }
   .input {
-    @apply rounded-lg border border-surface-600 bg-surface-800 px-3 py-2
-      text-surface-50 placeholder-surface-400 focus:border-primary-500
-      focus:outline-none focus:ring-1 focus:ring-primary-500;
+    @apply rounded-lg border border-gpu-600 bg-gpu-900 px-3 py-2 text-sm text-text-primary
+      placeholder-text-dim focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30
+      transition-colors duration-150;
   }
   .label {
-    @apply text-sm font-medium text-surface-300;
+    @apply text-xs font-medium text-text-secondary tracking-wide uppercase;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-semibold
+      uppercase tracking-wider;
+  }
+  .badge-green {
+    @apply badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/20;
+  }
+  .badge-red {
+    @apply badge bg-red-500/15 text-red-400 border border-red-500/20;
+  }
+  .badge-yellow {
+    @apply badge bg-amber-500/15 text-amber-400 border border-amber-500/20;
+  }
+  .badge-blue {
+    @apply badge bg-sky-500/15 text-sky-400 border border-sky-500/20;
+  }
+  .divider {
+    @apply border-t border-gpu-700;
+  }
+  .metric-value {
+    @apply font-mono font-semibold tabular-nums;
+  }
+  .slider-gpu {
+    @apply w-full h-1.5 appearance-none rounded-full bg-gpu-700 outline-none
+      cursor-pointer;
+  }
+  .slider-gpu::-webkit-slider-thumb {
+    @apply appearance-none w-4 h-4 rounded-full bg-accent border-2 border-gpu-900
+      shadow-glow cursor-pointer transition-transform duration-150;
+  }
+  .slider-gpu::-webkit-slider-thumb:hover {
+    @apply scale-125;
+  }
+  .gauge-ring {
+    @apply rounded-full;
+  }
+  .section-header {
+    @apply flex items-center justify-between mb-4;
+  }
+  .section-title {
+    @apply text-sm font-semibold text-text-primary tracking-wide;
   }
 }

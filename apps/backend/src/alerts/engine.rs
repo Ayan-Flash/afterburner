@@ -110,6 +110,10 @@ impl AlertEngine {
         history.clear();
     }
 
+    pub fn push_event(&self, event: AlertEvent) {
+        self.add_to_history(event);
+    }
+
     fn add_to_history(&self, event: AlertEvent) {
         let mut history = self.history.write().unwrap();
         history.push(event);

@@ -10,6 +10,8 @@ pub struct AppState {
     pub alerts: Arc<AlertEngine>,
     pub remote: RwLock<Option<RemoteServer>>,
     pub overlay: RwLock<Option<OverlayController>>,
+    pub obs_source: crate::integrations::obs::ObsSource,
+    pub sync_server: crate::sync::SyncServer,
 }
 
 impl AppState {
@@ -29,6 +31,8 @@ impl AppState {
             alerts,
             remote: RwLock::new(None),
             overlay: RwLock::new(Some(overlay)),
+            obs_source: crate::integrations::obs::ObsSource::new(9877),
+            sync_server: crate::sync::SyncServer::new(9878),
         }
     }
 }

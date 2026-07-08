@@ -2,10 +2,16 @@
 
 use std::sync::Arc;
 
+mod ai;
 mod alerts;
+mod automation;
 mod commands;
+mod enterprise;
 mod hardware;
+mod integrations;
 mod monitoring;
+mod reporting;
+mod sync;
 mod plugins;
 mod stores;
 mod utils;
@@ -71,6 +77,52 @@ fn main() {
             commands::get_detected_games,
             commands::is_game_running,
             commands::get_overlay_data,
+            commands::get_automation_rules,
+            commands::create_automation_rule,
+            commands::update_automation_rule,
+            commands::delete_automation_rule,
+            commands::toggle_automation_rule,
+            commands::add_automation_condition,
+            commands::add_automation_action,
+            commands::start_automation_engine,
+            commands::stop_automation_engine,
+            commands::get_integration_config,
+            commands::save_integration_config,
+            commands::test_discord_webhook,
+            commands::send_discord_alert,
+            commands::send_discord_report,
+            commands::start_obs_source,
+            commands::stop_obs_source,
+            commands::is_obs_running,
+            commands::generate_report,
+            commands::list_reports,
+            commands::get_report,
+            commands::delete_report,
+            commands::export_report_csv,
+            commands::get_enterprise_config,
+            commands::save_enterprise_config,
+            commands::list_group_policies,
+            commands::create_group_policy,
+            commands::update_group_policy,
+            commands::delete_group_policy,
+            commands::toggle_group_policy,
+            commands::get_sync_status,
+            commands::register_device,
+            commands::unregister_device,
+            commands::sync_now,
+            commands::start_sync_client,
+            commands::stop_sync_client,
+            commands::update_sync_settings,
+            commands::start_sync_server,
+            commands::stop_sync_server,
+            commands::is_sync_server_running,
+            commands::get_ai_anomalies,
+            commands::get_ai_suggestions,
+            commands::clear_ai_anomalies,
+            commands::dismiss_ai_suggestion,
+            commands::run_ai_analysis,
+            commands::predict_gpu_temperature,
+            commands::predict_gpu_utilization,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

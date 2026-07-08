@@ -8,6 +8,12 @@ type Page =
   | 'alerts'
   | 'remote'
   | 'overlay'
+  | 'automation'
+  | 'integrations'
+  | 'reports'
+  | 'enterprise'
+  | 'sync'
+  | 'ai'
   | 'monitoring'
   | 'settings';
 

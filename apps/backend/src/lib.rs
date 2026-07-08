@@ -1,7 +1,13 @@
+pub mod ai;
 pub mod alerts;
+pub mod automation;
 pub mod commands;
+pub mod enterprise;
 pub mod hardware;
+pub mod sync;
+pub mod integrations;
 pub mod monitoring;
+pub mod reporting;
 pub mod overlay;
 pub mod plugins;
 pub mod remote;

@@ -8,21 +8,11 @@ export function SettingsPage() {
   const [csvExporting, setCsvExporting] = useState(false);
 
   const handleStartMonitoring = async () => {
-    try {
-      await monitoringService.start();
-      setRunning(true);
-    } catch {
-      // ignore
-    }
+    try { await monitoringService.start(); setRunning(true); } catch { /* ignore */ }
   };
 
   const handleStopMonitoring = async () => {
-    try {
-      await monitoringService.stop();
-      setRunning(false);
-    } catch {
-      // ignore
-    }
+    try { await monitoringService.stop(); setRunning(false); } catch { /* ignore */ }
   };
 
   const handleExportCsv = async () => {
@@ -36,72 +26,52 @@ export function SettingsPage() {
       a.download = 'gpu-data.csv';
       a.click();
       URL.revokeObjectURL(url);
-    } catch {
-      // ignore
-    } finally {
-      setCsvExporting(false);
-    }
+    } catch { /* ignore */ } finally { setCsvExporting(false); }
   };
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-6">
-      <div className="card flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-surface-200">Monitoring</h3>
+    <div className="flex flex-col gap-5 max-w-xl">
+      <div className="card p-5 flex flex-col gap-4">
+        <span className="text-sm font-semibold text-text-primary">Monitoring</span>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-surface-300">Status</span>
+          <span className="text-xs text-text-secondary">Status</span>
           <div className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full ${isRunning ? 'bg-green-500' : 'bg-surface-500'}`} />
-            <span className="text-sm text-surface-400">{isRunning ? 'Running' : 'Stopped'}</span>
+            <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
+            <span className="text-xs font-medium text-text-secondary">{isRunning ? 'Running' : 'Stopped'}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-surface-300">Sample Rate</span>
+          <span className="text-xs text-text-secondary">Sample Rate</span>
           <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={100}
-              max={5000}
-              step={100}
-              value={sampleRate}
+            <input type="number" min={100} max={5000} step={100} value={sampleRate}
               onChange={(e) => setSampleRate(Number(e.target.value))}
-              className="input w-20 text-sm"
-            />
-            <span className="text-sm text-surface-400">ms</span>
+              className="input w-20 text-xs" />
+            <span className="text-xs text-text-muted">ms</span>
           </div>
         </div>
 
         <div className="flex gap-2">
           {isRunning ? (
-            <button onClick={handleStopMonitoring} className="btn-secondary flex-1 text-sm">
-              Stop
-            </button>
+            <button onClick={handleStopMonitoring} className="btn-danger flex-1 text-xs">Stop</button>
           ) : (
-            <button onClick={handleStartMonitoring} className="btn-primary flex-1 text-sm">
-              Start
-            </button>
+            <button onClick={handleStartMonitoring} className="btn-primary flex-1 text-xs">Start</button>
           )}
-          <button
-            onClick={handleExportCsv}
-            disabled={csvExporting}
-            className="btn-secondary text-sm disabled:opacity-50"
-          >
+          <button onClick={handleExportCsv} disabled={csvExporting}
+            className="btn-secondary text-xs disabled:opacity-50">
             {csvExporting ? 'Exporting...' : 'Export CSV'}
           </button>
         </div>
       </div>
 
-      <div className="card flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-surface-200">Appearance</h3>
+      <div className="card p-5 flex flex-col gap-4">
+        <span className="text-sm font-semibold text-text-primary">Appearance</span>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-surface-300">Theme</span>
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value as any)}
-            className="input text-sm"
-          >
+          <span className="text-xs text-text-secondary">Theme</span>
+          <select value={theme} onChange={(e) => setTheme(e.target.value as any)}
+            className="input text-xs w-28">
             <option value="dark">Dark</option>
             <option value="light">Light</option>
             <option value="system">System</option>
@@ -109,15 +79,19 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <div className="card flex flex-col gap-4">
-        <h3 className="text-sm font-semibold text-surface-200">About</h3>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-surface-400">Version</span>
-          <span className="text-surface-200">0.2.0</span>
+      <div className="card p-5 flex flex-col gap-4">
+        <span className="text-sm font-semibold text-text-primary">About</span>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-text-muted">Version</span>
+          <span className="text-text-primary font-mono">0.2.0</span>
         </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-surface-400">Platform</span>
-          <span className="text-surface-200">Windows</span>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-text-muted">Platform</span>
+          <span className="text-text-primary font-mono">Windows</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-text-muted">Engine</span>
+          <span className="text-text-primary font-mono">Rust + Tauri v2</span>
         </div>
       </div>
     </div>

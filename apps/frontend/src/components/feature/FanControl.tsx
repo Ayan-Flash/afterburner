@@ -17,7 +17,6 @@ export function FanControl({ gpuId, currentSpeed }: FanControlProps) {
     try {
       await controlService.setFanSpeed(gpuId, value);
     } catch {
-      // revert on error
       setSpeed(currentSpeed);
     } finally {
       setApplying(false);
@@ -25,26 +24,20 @@ export function FanControl({ gpuId, currentSpeed }: FanControlProps) {
   };
 
   return (
-    <div className="card flex flex-col gap-3">
+    <div className="card p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-surface-400">Fan Speed</span>
-        <span className="text-lg font-bold text-surface-100">{formatFanSpeed(speed)}</span>
+        <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Fan Speed</span>
+        <div className="flex items-center gap-2">
+          {applying && <span className="text-[10px] text-text-dim">Applying...</span>}
+          <span className="metric-value text-base text-cyan-400">{formatFanSpeed(speed)}</span>
+        </div>
       </div>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={1}
-        value={speed}
+      <input type="range" min={0} max={100} step={1} value={speed}
         onChange={(e) => handleChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-surface-700 accent-primary-500"
-      />
-      <div className="flex justify-between text-[10px] text-surface-500">
-        <span>0%</span>
-        <span>50%</span>
-        <span>100%</span>
+        className="slider-gpu" />
+      <div className="flex justify-between text-[10px] text-text-dim">
+        <span>0%</span><span>50%</span><span>100%</span>
       </div>
-      {applying && <span className="text-[10px] text-surface-500">Applying...</span>}
     </div>
   );
 }
