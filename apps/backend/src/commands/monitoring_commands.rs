@@ -4,10 +4,10 @@ use std::thread;
 use std::time::Duration;
 
 use tauri::State;
-use tracing::{error, info};
+use tracing::info;
 
 use super::state::SharedState;
-use crate::utils::error::{AppError, AppResult};
+use crate::utils::error::AppResult;
 
 static MONITORING_ACTIVE: AtomicBool = AtomicBool::new(false);
 
@@ -21,7 +21,7 @@ pub fn start_monitoring(state: State<'_, SharedState>) -> AppResult<()> {
     state.monitoring.start();
     MONITORING_ACTIVE.store(true, Ordering::Relaxed);
 
-    let app_state: Arc<crate::commands::AppState> = state.inner().clone();
+    let app_state = (*state).clone();
     let sample_rate = 1000u64;
 
     thread::spawn(move || {
