@@ -5,20 +5,23 @@ export interface GPUInfo {
   name: string;
   vendor: string;
   index: number;
+  memory_total_mb?: number;
 }
 
 export interface GPUData {
-  gpuId: string;
+  gpu_id: string;
   timestamp: number;
-  temperature: number;
-  clockSpeed: number;
-  memoryClock: number;
-  memoryUsage: number;
-  fanSpeed: number;
-  powerUsage: number;
-  voltage: number;
-  coreUtilizationPercent?: number;
-  name?: string;
+  temperature_celsius: number;
+  core_clock_mhz: number;
+  memory_clock_mhz: number;
+  memory_used_mb: number;
+  memory_total_mb: number;
+  fan_speed_percent: number;
+  fan_rpm: number;
+  power_watts: number;
+  core_voltage_mv: number;
+  core_utilization_percent: number;
+  memory_utilization_percent: number;
 }
 
 export interface GpuDataResponse {
@@ -40,6 +43,8 @@ export interface ExportedSample {
   power: number;
   core_util: number;
   mem_util: number;
+  mem_used_mb: number;
+  mem_total_mb: number;
 }
 
 export interface AggregatedMetrics {
@@ -147,6 +152,41 @@ export const alertService = {
   getHistory: (limit: number) => invoke<AlertEvent[]>('get_alert_history', { limit }),
   acknowledge: (alertId: string) => invoke<boolean>('acknowledge_alert', { alertId }),
   clearHistory: () => invoke<void>('clear_alert_history'),
+};
+
+export const remoteService = {
+  start: (port: number, apiKey?: string) =>
+    invoke<string>('start_remote_server', { port, apiKey }),
+  stop: () => invoke<void>('stop_remote_server'),
+  getStatus: () => invoke<{ running: boolean; port?: number; url?: string }>('get_remote_server_status'),
+  generateKey: () => invoke<string>('generate_api_key'),
+};
+
+export interface OverlayMetric {
+  metric: string;
+  label: string;
+  color: string;
+  enabled: boolean;
+}
+
+export interface OverlayConfig {
+  enabled: boolean;
+  metrics: OverlayMetric[];
+  position: 'TopLeft' | 'TopRight' | 'BottomLeft' | 'BottomRight';
+  opacity: number;
+  auto_hide_no_game: boolean;
+  scale: number;
+}
+
+export const overlayService = {
+  start: () => invoke<void>('start_overlay'),
+  stop: () => invoke<void>('stop_overlay'),
+  isRunning: () => invoke<boolean>('is_overlay_running'),
+  getConfig: () => invoke<OverlayConfig>('get_overlay_config'),
+  updateConfig: (config: OverlayConfig) => invoke<void>('update_overlay_config', { config }),
+  getDetectedGames: () => invoke<string[]>('get_detected_games'),
+  isGameRunning: () => invoke<boolean>('is_game_running'),
+  getData: () => invoke<{ running: boolean; should_show: boolean; data: [string, string, number][] }>('get_overlay_data'),
 };
 
 export const appService = {

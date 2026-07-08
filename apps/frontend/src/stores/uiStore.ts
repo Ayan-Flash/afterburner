@@ -6,6 +6,8 @@ type Page =
   | 'control'
   | 'profiles'
   | 'alerts'
+  | 'remote'
+  | 'overlay'
   | 'monitoring'
   | 'settings';
 

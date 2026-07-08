@@ -1,7 +1,6 @@
 import type { GPUData, GPUInfo } from '../../services';
 import { useUiStore } from '../../stores';
-import { useGpuStore } from '../../stores';
-import { formatTemperature, formatClockSpeed, formatFanSpeed, formatPowerUsage, formatPercent } from '@common/utils';
+import { formatTemperature, formatClockSpeed, formatFanSpeed, formatPowerUsage } from '@common/utils';
 
 interface GpuCardProps {
   gpu: GPUInfo;
@@ -9,13 +8,12 @@ interface GpuCardProps {
 }
 
 export function GpuCard({ gpu, data }: GpuCardProps) {
-  const { selectedGpuId } = useUiStore();
-  const { selectGpu } = useGpuStore();
+  const { selectedGpuId, setSelectedGpu } = useUiStore();
   const isSelected = selectedGpuId === gpu.id;
 
   return (
     <button
-      onClick={() => selectGpu(gpu.id)}
+      onClick={() => setSelectedGpu(gpu.id)}
       className={`card flex w-full flex-col gap-3 text-left transition-all ${
         isSelected ? 'ring-2 ring-primary-500' : 'hover:border-primary-600'
       }`}
@@ -35,42 +33,42 @@ export function GpuCard({ gpu, data }: GpuCardProps) {
             <span className="h-2 w-2 rounded-full bg-red-500" />
             <span className="text-surface-400">Temp</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatTemperature(data.temperature)}
+              {formatTemperature(data.temperature_celsius)}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-blue-500" />
             <span className="text-surface-400">Core</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatClockSpeed(data.clockSpeed)}
+              {formatClockSpeed(data.core_clock_mhz)}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-green-500" />
             <span className="text-surface-400">Fan</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatFanSpeed(data.fanSpeed)}
+              {formatFanSpeed(data.fan_speed_percent)}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-yellow-500" />
             <span className="text-surface-400">Power</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatPowerUsage(data.powerUsage)}
+              {formatPowerUsage(data.power_watts)}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-purple-500" />
             <span className="text-surface-400">Core Util</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatPercent(data.coreUtilizationPercent ?? 0)}
+              {data.core_utilization_percent.toFixed(1)}%
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-cyan-500" />
             <span className="text-surface-400">VRAM</span>
             <span className="ml-auto font-medium text-surface-200">
-              {formatPercent(data.memoryUsage)}
+              {((data.memory_used_mb / data.memory_total_mb) * 100).toFixed(0)}%
             </span>
           </div>
         </div>

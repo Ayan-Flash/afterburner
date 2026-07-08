@@ -50,27 +50,27 @@ export function ControlPage() {
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-surface-200">Current Status</h3>
-            <span className="text-xs text-surface-400">{data.name ?? selectedGpuId}</span>
+            <span className="text-xs text-surface-400">{selectedGpuId}</span>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-xs text-surface-500">Core Clock</div>
-              <div className="text-lg font-bold text-surface-100">{formatClockSpeed(data.clockSpeed)}</div>
+              <div className="text-lg font-bold text-surface-100">{formatClockSpeed(data.core_clock_mhz)}</div>
             </div>
             <div>
               <div className="text-xs text-surface-500">Memory Clock</div>
-              <div className="text-lg font-bold text-surface-100">{formatClockSpeed(data.memoryClock)}</div>
+              <div className="text-lg font-bold text-surface-100">{formatClockSpeed(data.memory_clock_mhz)}</div>
             </div>
             <div>
               <div className="text-xs text-surface-500">Temperature</div>
-              <div className="text-lg font-bold text-surface-100">{data.temperature.toFixed(1)}°C</div>
+              <div className="text-lg font-bold text-surface-100">{data.temperature_celsius.toFixed(1)}°C</div>
             </div>
           </div>
         </div>
       )}
 
       {selectedGpuId && data && (
-        <FanControl gpuId={selectedGpuId} currentSpeed={data.fanSpeed} />
+        <FanControl gpuId={selectedGpuId} currentSpeed={data.fan_speed_percent} />
       )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -8,6 +8,8 @@ export function Header() {
     control: 'GPU Control',
     profiles: 'Profile Manager',
     alerts: 'Alerts',
+    remote: 'Remote Monitoring',
+    overlay: 'In-Game Overlay',
     settings: 'Settings',
   };
 

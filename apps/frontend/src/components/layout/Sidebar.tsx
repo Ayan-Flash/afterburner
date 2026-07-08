@@ -5,6 +5,8 @@ const navItems = [
   { id: 'control' as const, label: 'Control', icon: '◈' },
   { id: 'profiles' as const, label: 'Profiles', icon: '◇' },
   { id: 'alerts' as const, label: 'Alerts', icon: '▲' },
+  { id: 'remote' as const, label: 'Remote', icon: '⊙' },
+  { id: 'overlay' as const, label: 'Overlay', icon: '⊕' },
   { id: 'settings' as const, label: 'Settings', icon: '⚙' },
 ];
 

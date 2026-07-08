@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPUControl Pro - Remote Monitor</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f172a;--surface:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#64748b;--primary:#3b82f6;--red:#ef4444;--green:#22c55e;--yellow:#eab308;--purple:#a855f7;--cyan:#06b6d4}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;padding:20px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.header h1{font-size:20px;font-weight:600}
+.header .status{font-size:12px;color:var(--muted)}
+.gpu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+.gpu-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.gpu-card .name{font-size:14px;font-weight:600;margin-bottom:12px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
+.metric .label{color:var(--muted)}
+.metric .value{font-weight:600}
+.metric .value.red{color:var(--red)}
+.metric .value.green{color:var(--green)}
+.metric .value.blue{color:var(--primary)}
+.metric .value.yellow{color:var(--yellow)}
+.metric .value.purple{color:var(--purple)}
+.metric .value.cyan{color:var(--cyan)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card .title{font-size:12px;color:var(--muted);margin-bottom:8px}
+.chart-card svg{width:100%;height:100px}
+.alerts-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px}
+.alerts-section h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.alert-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.alert-item:last-child{border-bottom:none}
+.alert-item .severity{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px}
+.alert-item .severity.critical{background:rgba(239,68,68,0.15);color:var(--red)}
+.alert-item .severity.warning{background:rgba(234,179,8,0.15);color:var(--yellow)}
+.alert-item .severity.info{background:rgba(59,130,246,0.15);color:var(--primary)}
+.alert-item .msg{flex:1}
+.alert-item .time{font-size:11px;color:var(--muted)}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.error{text-align:center;padding:20px;color:var(--red)}
+.connection-bar{display:flex;gap:12px;align-items:center;font-size:12px;color:var(--muted)}
+.connection-bar .dot{width:8px;height:8px;border-radius:50%}
+.connection-bar .dot.green{background:var(--green)}
+.connection-bar .dot.red{background:var(--red)}
+.connection-bar .dot.yellow{background:var(--yellow)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>GPUControl Pro</h1>
+    <div class="status" id="statusText">Connecting...</div>
+  </div>
+  <div class="connection-bar">
+    <span class="dot" id="connectionDot"></span>
+    <span id="connectionText">Connecting</span>
+  </div>
+</div>
+<div class="loading" id="loading">Loading GPU data...</div>
+<div class="error" id="error" style="display:none"></div>
+<div id="content" style="display:none">
+  <div class="gpu-grid" id="gpuGrid"></div>
+  <div class="charts" id="charts"></div>
+  <div class="alerts-section" id="alertsSection"></div>
+</div>
+
+<script>
+const API_BASE = '';
+let apiKey = localStorage.getItem('remote_api_key') || '';
+let gpuHistory = {};
+
+function getHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  if (apiKey) headers['Authorization'] = apiKey;
+  return headers;
+}
+
+async function apiFetch(path) {
+  const res = await fetch(API_BASE + path, { headers: getHeaders() });
+  if (res.status === 401) {
+    const key = prompt('Enter API key:');
+    if (key) {
+      apiKey = key;
+      localStorage.setItem('remote_api_key', key);
+      return apiFetch(path);
+    }
+    throw new Error('Unauthorized');
+  }
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+function updateConnection(status) {
+  const dot = document.getElementById('connectionDot');
+  const text = document.getElementById('connectionText');
+  if (status === 'ok') {
+    dot.className = 'dot green';
+    text.textContent = 'Connected';
+  } else if (status === 'error') {
+    dot.className = 'dot red';
+    text.textContent = 'Disconnected';
+  } else {
+    dot.className = 'dot yellow';
+    text.textContent = status;
+  }
+}
+
+function formatValue(metric, value) {
+  if (metric === 'temperature_celsius') return value.toFixed(1) + '°C';
+  if (metric === 'core_clock_mhz' || metric === 'memory_clock_mhz') return value >= 1000 ? (value/1000).toFixed(2) + ' GHz' : value.toFixed(0) + ' MHz';
+  if (metric === 'fan_speed_percent') return value.toFixed(0) + '%';
+  if (metric === 'power_watts') return value.toFixed(1) + ' W';
+  if (metric === 'core_voltage_mv') return value.toFixed(0) + ' mV';
+  if (metric === 'core_utilization_percent' || metric === 'memory_utilization_percent') return value.toFixed(1) + '%';
+  return value.toString();
+}
+
+function valueColor(metric) {
+  if (metric === 'temperature_celsius') return 'red';
+  if (metric === 'core_clock_mhz' || metric === 'memory_clock_mhz') return 'blue';
+  if (metric === 'fan_speed_percent') return 'green';
+  if (metric === 'power_watts') return 'yellow';
+  if (metric === 'core_voltage_mv') return 'cyan';
+  if (metric === 'core_utilization_percent' || metric === 'memory_utilization_percent') return 'purple';
+  return '';
+}
+
+function renderGpuCards(gpus, dataMap) {
+  const grid = document.getElementById('gpuGrid');
+  grid.innerHTML = '';
+  for (const gpu of gpus) {
+    const data = dataMap[gpu.id];
+    const card = document.createElement('div');
+    card.className = 'gpu-card';
+    card.innerHTML = '<div class="name">' + gpu.name + '</div><div class="metrics">' +
+      (data ? [
+        ['temperature_celsius', 'Temp'],
+        ['core_clock_mhz', 'Core'],
+        ['memory_clock_mhz', 'Mem Clock'],
+        ['fan_speed_percent', 'Fan'],
+        ['power_watts', 'Power'],
+        ['core_utilization_percent', 'GPU'],
+        ['memory_utilization_percent', 'Mem Util'],
+      ].map(([key, label]) => '<div class="metric"><span class="label">' + label + '</span><span class="value ' + valueColor(key) + '">' + formatValue(key, data[key] || 0) + '</span></div>').join('') : '<div class="metric" style="grid-column:span 2;text-align:center;color:var(--muted)">No data</div>'
+    ) + '</div>';
+    grid.appendChild(card);
+  }
+}
+
+function renderChart(containerId, label, color, data, key) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '<div class="chart-card"><div class="title">' + label + '</div><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + data + '"/></svg><div style="text-align:right;font-size:11px;color:var(--muted);margin-top:4px">' + (key ? formatValue(key, 0).replace(/0[.0]*/, '') : '') + '</div></div>';
+}
+
+function renderCharts(history) {
+  const container = document.getElementById('charts');
+  if (!history || history.length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px">Waiting for data...</div>';
+    return;
+  }
+  container.innerHTML = '';
+
+  const metrics = [
+    { key: 'temp', label: 'Temperature', color: '#ef4444', unit: '°C' },
+    { key: 'core', label: 'Core Clock', color: '#3b82f6', unit: 'MHz' },
+    { key: 'mem', label: 'Memory Clock', color: '#06b6d4', unit: 'MHz' },
+    { key: 'fan', label: 'Fan Speed', color: '#22c55e', unit: '%' },
+    { key: 'power', label: 'Power', color: '#eab308', unit: 'W' },
+    { key: 'core_util', label: 'GPU Util', color: '#a855f7', unit: '%' },
+  ];
+
+  for (const m of metrics) {
+    const values = history.map(s => Number(s[m.key])).filter(v => !isNaN(v));
+    if (values.length < 2) {
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+      card.innerHTML = '<div class="title">' + m.label + '</div><div style="text-align:center;padding:30px;color:var(--muted)">Waiting...</div>';
+      container.appendChild(card);
+      continue;
+    }
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const width = 100;
+    const step = width / (values.length - 1);
+    const points = values.map((v, i) => (i * step).toFixed(1) + ',' + (100 - ((v - min) / range) * 90 - 5).toFixed(1)).join(' ');
+
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+    card.innerHTML = '<div class="title">' + m.label + '</div><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline fill="none" stroke="' + m.color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="' + points + '"/></svg>';
+    container.appendChild(card);
+  }
+}
+
+function renderAlerts(alerts) {
+  const section = document.getElementById('alertsSection');
+  if (!alerts || alerts.length === 0) {
+    section.innerHTML = '<h3>Alerts</h3><div style="font-size:13px;color:var(--muted)">No alerts</div>';
+    return;
+  }
+  section.innerHTML = '<h3>Alerts (' + alerts.length + ')</h3>';
+  for (const alert of alerts) {
+    const item = document.createElement('div');
+    item.className = 'alert-item';
+    item.innerHTML = '<span class="severity ' + alert.severity.toLowerCase() + '">' + alert.severity + '</span><span class="msg">' + alert.message + '</span><span class="time">' + new Date(alert.timestamp).toLocaleTimeString() + '</span>';
+    section.appendChild(item);
+  }
+}
+
+async function refresh() {
+  try {
+    const [status, gpus] = await Promise.all([apiFetch('/api/status'), apiFetch('/api/gpus')]);
+    updateConnection('ok');
+    document.getElementById('statusText').textContent = status.gpu_count + ' GPU(s) | ' + status.alert_rules + ' alert rules | v' + status.version;
+
+    const dataMap = {};
+    for (const gpu of gpus) {
+      try { const resp = await apiFetch('/api/gpus/' + gpu.id + '/data'); dataMap[gpu.id] = resp.sample; } catch(e) {}
+      try {
+        const hist = await apiFetch('/api/gpus/' + gpu.id + '/history');
+        if (hist.samples) gpuHistory[gpu.id] = hist.samples;
+      } catch(e) {}
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+
+    renderGpuCards(gpus, dataMap);
+
+    const firstGpu = gpus[0];
+    if (firstGpu && gpuHistory[firstGpu.id]) {
+      renderCharts(gpuHistory[firstGpu.id]);
+    }
+
+    try {
+      const alertsData = await apiFetch('/api/alerts');
+      renderAlerts(alertsData.events);
+    } catch(e) {}
+  } catch (err) {
+    updateConnection('error');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').textContent = 'Connection error: ' + err.message + '. Retrying in 5s...';
+  }
+}
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>

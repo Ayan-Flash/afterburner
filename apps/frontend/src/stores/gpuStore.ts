@@ -4,7 +4,6 @@ import type { GPUData, GPUInfo, GpuControlState, ExportedSample, AggregatedMetri
 
 interface GpuStore {
   gpus: GPUInfo[];
-  selectedGpuId: string | null;
   currentData: Map<string, GPUData>;
   history: Map<string, ExportedSample[]>;
   aggregated: Map<string, AggregatedMetrics | null>;
@@ -14,7 +13,6 @@ interface GpuStore {
   error: string | null;
 
   fetchGpus: () => Promise<void>;
-  selectGpu: (gpuId: string) => void;
   fetchData: (gpuId: string) => Promise<void>;
   fetchHistory: (gpuId: string, count?: number) => Promise<void>;
   fetchControlState: (gpuId: string) => Promise<void>;
@@ -27,7 +25,6 @@ interface GpuStore {
 
 export const useGpuStore = create<GpuStore>((set, get) => ({
   gpus: [],
-  selectedGpuId: null,
   currentData: new Map(),
   history: new Map(),
   aggregated: new Map(),
@@ -40,14 +37,10 @@ export const useGpuStore = create<GpuStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const gpus = await gpuService.list();
-      set({ gpus, loading: false, selectedGpuId: gpus[0]?.id ?? null });
+      set({ gpus, loading: false });
     } catch (err) {
       set({ loading: false, error: String(err) });
     }
-  },
-
-  selectGpu: (gpuId: string) => {
-    set({ selectedGpuId: gpuId });
   },
 
   fetchData: async (gpuId: string) => {

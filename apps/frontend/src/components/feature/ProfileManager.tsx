@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useGpuStore, useProfileStore } from '../../stores';
+import { useGpuStore, useProfileStore, useUiStore } from '../../stores';
 import { profileService } from '../../services';
 
 export function ProfileManager() {
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
-  const { selectedGpuId, controlStates } = useGpuStore();
+  const { controlStates } = useGpuStore();
+  const { selectedGpuId } = useUiStore();
   const { profiles, setProfiles } = useProfileStore();
 
   const control = selectedGpuId ? controlStates.get(selectedGpuId) : null;

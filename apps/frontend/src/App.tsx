@@ -1,6 +1,6 @@
 import { useUiStore, useGpuStore } from './stores';
 import { MainLayout } from './components/layout';
-import { DashboardPage, ControlPage, ProfilesPage, AlertsPage, SettingsPage } from './pages';
+import { DashboardPage, ControlPage, ProfilesPage, AlertsPage, SettingsPage, RemotePage, OverlayPage } from './pages';
 
 const pages: Record<string, React.FC> = {
   dashboard: DashboardPage,
@@ -8,6 +8,8 @@ const pages: Record<string, React.FC> = {
   profiles: ProfilesPage,
   alerts: AlertsPage,
   settings: SettingsPage,
+  remote: RemotePage,
+  overlay: OverlayPage,
 };
 
 export function App() {

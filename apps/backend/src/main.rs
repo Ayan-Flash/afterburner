@@ -24,8 +24,12 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .manage(app_state)
         .setup(|app| {
-            let _ = app.handle();
-            tracing::info!("GPUControl Pro started");
+            let handle = app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(1));
+                tracing::info!("GPUControl Pro started (PID: {})", std::process::id());
+            });
+            tracing::info!("GPUControl Pro initialized");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -55,6 +59,18 @@ fn main() {
             commands::get_alert_history,
             commands::acknowledge_alert,
             commands::clear_alert_history,
+            commands::start_remote_server,
+            commands::stop_remote_server,
+            commands::get_remote_server_status,
+            commands::generate_api_key,
+            commands::start_overlay,
+            commands::stop_overlay,
+            commands::is_overlay_running,
+            commands::get_overlay_config,
+            commands::update_overlay_config,
+            commands::get_detected_games,
+            commands::is_game_running,
+            commands::get_overlay_data,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

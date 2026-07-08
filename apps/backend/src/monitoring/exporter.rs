@@ -12,6 +12,8 @@ pub struct ExportedSample {
     pub power: f64,
     pub core_util: f64,
     pub mem_util: f64,
+    pub mem_used_mb: u64,
+    pub mem_total_mb: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -35,12 +37,14 @@ impl Exporter {
                 power: (s.power_watts * 10.0).round() / 10.0,
                 core_util: (s.core_utilization_percent * 10.0).round() / 10.0,
                 mem_util: (s.memory_utilization_percent * 10.0).round() / 10.0,
+                mem_used_mb: s.memory_used_mb,
+                mem_total_mb: s.memory_total_mb,
             })
             .collect()
     }
 
     pub fn export_to_csv(samples: &[&GpuSample]) -> String {
-        let mut csv = String::from("timestamp,temperature,core_clock,memory_clock,fan_speed,power,core_util,memory_util\n");
+        let mut csv = String::from("timestamp,temperature,core_clock,memory_clock,fan_speed,power,core_util,memory_util,memory_used_mb,memory_total_mb\n");
         for s in samples {
             csv.push_str(&format!(
                 "{},{},{},{},{},{},{},{}\n",
@@ -52,6 +56,8 @@ impl Exporter {
                 (s.power_watts * 10.0).round() / 10.0,
                 (s.core_utilization_percent * 10.0).round() / 10.0,
                 (s.memory_utilization_percent * 10.0).round() / 10.0,
+                s.memory_used_mb,
+                s.memory_total_mb,
             ));
         }
         csv

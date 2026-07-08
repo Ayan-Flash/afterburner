@@ -2,6 +2,8 @@ pub mod alerts;
 pub mod commands;
 pub mod hardware;
 pub mod monitoring;
+pub mod overlay;
 pub mod plugins;
+pub mod remote;
 pub mod stores;
 pub mod utils;
