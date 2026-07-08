@@ -14,6 +14,7 @@ type Page =
   | 'enterprise'
   | 'sync'
   | 'ai'
+  | 'backup'
   | 'monitoring'
   | 'settings';
 

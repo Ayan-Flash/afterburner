@@ -14,6 +14,7 @@ const pageTitles: Record<string, string> = {
   enterprise: 'Enterprise',
   sync: 'Cloud Sync',
   ai: 'AI Insights',
+  backup: 'Backup & Restore',
   settings: 'Settings',
 };
 

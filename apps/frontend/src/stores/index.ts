@@ -11,3 +11,4 @@ export { useReportingStore } from './reportingStore';
 export { useEnterpriseStore } from './enterpriseStore';
 export { useSyncStore } from './syncStore';
 export { useAiStore } from './aiStore';
+export { useBackupStore } from './backupStore';

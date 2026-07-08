@@ -11,3 +11,4 @@ export { ReportsPage } from './ReportsPage';
 export { EnterprisePage } from './EnterprisePage';
 export { SyncPage } from './SyncPage';
 export { AiPage } from './AiPage';
+export { BackupPage } from './BackupPage';

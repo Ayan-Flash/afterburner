@@ -12,6 +12,7 @@ pub mod reporting_commands;
 pub mod enterprise_commands;
 pub mod sync_commands;
 pub mod ai_commands;
+pub mod backup_commands;
 
 pub use gpu_commands::*;
 pub use control_commands::*;
@@ -26,4 +27,5 @@ pub use reporting_commands::*;
 pub use enterprise_commands::*;
 pub use sync_commands::*;
 pub use ai_commands::*;
+pub use backup_commands::*;
 pub use state::SharedState;

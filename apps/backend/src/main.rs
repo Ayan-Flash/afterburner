@@ -5,6 +5,7 @@ use std::sync::Arc;
 mod ai;
 mod alerts;
 mod automation;
+mod backup;
 mod commands;
 mod enterprise;
 mod hardware;
@@ -129,6 +130,12 @@ fn main() {
             commands::get_tuning_profiles,
             commands::save_tuning_profile,
             commands::apply_tuning_profile,
+            commands::create_backup,
+            commands::restore_backup,
+            commands::list_backups,
+            commands::delete_backup,
+            commands::export_backup,
+            commands::import_backup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

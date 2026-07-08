@@ -13,6 +13,7 @@ const navItems = [
   { id: 'reports' as const, label: 'Reports', icon: navIcons.reports },
   { id: 'enterprise' as const, label: 'Enterprise', icon: navIcons.enterprise },
   { id: 'sync' as const, label: 'Cloud Sync', icon: navIcons.sync },
+  { id: 'backup' as const, label: 'Backup', icon: navIcons.backup },
   { id: 'ai' as const, label: 'AI Insights', icon: navIcons.ai },
   { id: 'settings' as const, label: 'Settings', icon: navIcons.settings },
 ];

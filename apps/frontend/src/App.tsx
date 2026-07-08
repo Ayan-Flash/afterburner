@@ -1,6 +1,6 @@
 import { useUiStore, useGpuStore } from './stores';
 import { MainLayout } from './components/layout';
-import { DashboardPage, ControlPage, ProfilesPage, AlertsPage, SettingsPage, RemotePage, OverlayPage, AutomationPage, IntegrationsPage, ReportsPage, EnterprisePage, SyncPage, AiPage } from './pages';
+import { DashboardPage, ControlPage, ProfilesPage, AlertsPage, SettingsPage, RemotePage, OverlayPage, AutomationPage, IntegrationsPage, ReportsPage, EnterprisePage, SyncPage, AiPage, BackupPage } from './pages';
 import { IconMonitor } from './components/base/Icons';
 
 const pages: Record<string, React.FC> = {
@@ -17,6 +17,7 @@ const pages: Record<string, React.FC> = {
   enterprise: EnterprisePage,
   sync: SyncPage,
   ai: AiPage,
+  backup: BackupPage,
 };
 
 export function App() {
