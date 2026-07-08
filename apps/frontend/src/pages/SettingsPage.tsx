@@ -4,7 +4,7 @@ import { monitoringService } from '../services';
 
 export function SettingsPage() {
   const { sampleRate, setSampleRate, isRunning, setRunning } = useMonitoringStore();
-  const { theme, setTheme } = useUiStore();
+  const { theme, persistTheme } = useUiStore();
   const [csvExporting, setCsvExporting] = useState(false);
 
   const handleStartMonitoring = async () => {
@@ -70,7 +70,7 @@ export function SettingsPage() {
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-text-secondary">Theme</span>
-          <select value={theme} onChange={(e) => setTheme(e.target.value as any)}
+          <select value={theme} onChange={(e) => persistTheme(e.target.value as any)}
             className="input text-xs w-28">
             <option value="dark">Dark</option>
             <option value="light">Light</option>

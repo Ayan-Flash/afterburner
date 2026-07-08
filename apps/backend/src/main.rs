@@ -2,11 +2,15 @@
 
 use std::sync::Arc;
 
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{Manager, WindowEvent};
+
 mod ai;
 mod alerts;
 mod automation;
 mod backup;
 mod commands;
+mod database;
 mod enterprise;
 mod hardware;
 mod integrations;
@@ -18,25 +22,95 @@ mod plugins;
 mod stores;
 mod utils;
 
+fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    use tauri::menu::{MenuBuilder, MenuItemBuilder};
+
+    let show_hide = MenuItemBuilder::with_id("show_hide", "Show/Hide").build(app)?;
+    let separator = tauri::menu::PredefinedMenuItem::separator(app)?;
+    let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+
+    let menu = MenuBuilder::new(app)
+        .item(&show_hide)
+        .item(&separator)
+        .item(&quit)
+        .build()?;
+
+    let _tray = TrayIconBuilder::new()
+        .menu(&menu)
+        .on_menu_event(move |app, event| match event.id.as_ref() {
+            "show_hide" => {
+                if let Some(window) = app.get_webview_window("main") {
+                    if window.is_visible().unwrap_or(false) {
+                        let _ = window.hide();
+                    } else {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+            "quit" => {
+                app.exit(0);
+            }
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                if let Some(window) = tray.app_handle().get_webview_window("main") {
+                    if window.is_visible().unwrap_or(false) {
+                        let _ = window.hide();
+                    } else {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+        })
+        .build(app)?;
+
+    Ok(())
+}
+
 fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
-        )
-        .init();
+    let _log_guard = utils::logging::init_logging();
 
     let app_state = Arc::new(commands::AppState::new());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_updater::init())
         .manage(app_state)
         .setup(|app| {
+            setup_tray(app)?;
+
             let handle = app.handle().clone();
             std::thread::spawn(move || {
                 std::thread::sleep(std::time::Duration::from_secs(1));
                 tracing::info!("GPUControl Pro started (PID: {})", std::process::id());
             });
+
+            // Minimize to tray on close
+            if let Some(window) = app.get_webview_window("main") {
+                let handle = app.handle().clone();
+                window.on_window_event(move |event| {
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        if let Some(win) = handle.get_webview_window("main") {
+                            let _ = win.hide();
+                        }
+                    }
+                });
+            }
+
             tracing::info!("GPUControl Pro initialized");
             Ok(())
         })
@@ -151,6 +225,9 @@ fn main() {
             commands::download_marketplace_profile,
             commands::import_marketplace_profile,
             commands::export_marketplace_profile,
+            commands::get_setting,
+            commands::set_setting,
+            commands::get_all_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

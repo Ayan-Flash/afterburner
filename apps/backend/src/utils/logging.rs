@@ -1,10 +1,70 @@
+use std::fs;
+use std::path::PathBuf;
+use std::sync::OnceLock;
+use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::EnvFilter;
 
-pub fn init_logging() {
+static LOG_DIR: OnceLock<PathBuf> = OnceLock::new();
+
+pub fn log_dir() -> &'static PathBuf {
+    LOG_DIR.get().expect("logging not initialized")
+}
+
+pub fn init_logging() -> Option<WorkerGuard> {
+    let data_dir = dirs_next::config_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("gpucontrol-pro")
+        .join("logs");
+
+    fs::create_dir_all(&data_dir).ok()?;
+    let _ = LOG_DIR.set(data_dir.clone());
+
+    let file_appender = tracing_appender::rolling::daily(&data_dir, "gpucontrol.log");
+    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
+
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| "info".into());
+
     tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "info".into()),
-        )
+        .with_env_filter(env_filter)
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_target(true)
+        .with_thread_ids(true)
+        .with_file(true)
+        .with_line_number(true)
         .init();
+
+    std::panic::set_hook(Box::new(|panic_info| {
+        let msg = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+            s.to_string()
+        } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
+            s.clone()
+        } else {
+            "Unknown panic".to_string()
+        };
+        let location = panic_info
+            .location()
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_default();
+        tracing::error!(target: "panic", "PANIC: {} at {}", msg, location);
+
+        let crash_path = data_dir.join("crash.log");
+        if let Ok(mut f) = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&crash_path)
+        {
+            use std::io::Write;
+            let _ = writeln!(
+                f,
+                "[{}] PANIC: {} at {}",
+                chrono::Utc::now().format("%Y-%m-%d %H:%M:%S%.3f"),
+                msg,
+                location
+            );
+        }
+    }));
+
+    Some(guard)
 }

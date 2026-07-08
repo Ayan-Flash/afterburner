@@ -2,6 +2,7 @@ pub mod ai;
 pub mod alerts;
 pub mod automation;
 pub mod commands;
+pub mod database;
 pub mod enterprise;
 pub mod hardware;
 pub mod sync;

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useUiStore, useGpuStore } from './stores';
 import { MainLayout } from './components/layout';
 import { DashboardPage, ControlPage, ProfilesPage, AlertsPage, SettingsPage, RemotePage, OverlayPage, AutomationPage, IntegrationsPage, ReportsPage, EnterprisePage, SyncPage, AiPage, BackupPage, MarketplacePage } from './pages';
@@ -22,8 +23,23 @@ const pages: Record<string, React.FC> = {
 };
 
 export function App() {
-  const { currentPage } = useUiStore();
-  const { gpus } = useGpuStore();
+  const { currentPage, initialized, selectedGpuId, loadSettings, setSelectedGpu } = useUiStore();
+  const { gpus, fetchGpus } = useGpuStore();
+
+  useEffect(() => {
+    loadSettings();
+    fetchGpus();
+  }, []);
+
+  useEffect(() => {
+    if (gpus.length > 0 && !selectedGpuId) {
+      setSelectedGpu(gpus[0].id);
+    }
+  }, [gpus, selectedGpuId, setSelectedGpu]);
+
+  if (!initialized) {
+    return null;
+  }
 
   const PageComponent = pages[currentPage] ?? DashboardPage;
 

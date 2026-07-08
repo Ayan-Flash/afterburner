@@ -10,7 +10,7 @@ use super::aggregator::{AggregatedMetrics, Aggregator};
 use super::buffer::RingBuffer;
 use super::collector::Collector;
 use super::exporter::{ExportedSample, Exporter};
-use crate::hardware::{GpuControlState, GpuIdentity, GpuProvider, GpuSample};
+use crate::hardware::{GpuControlState, GpuIdentity, GpuProvider, GpuProviderError, GpuSample};
 
 pub struct MonitoringEngine {
     collector: Collector,
@@ -111,46 +111,34 @@ impl MonitoringEngine {
         Some(Aggregator::aggregate(gpu_id, &refs))
     }
 
-    pub fn get_control_state(&self, gpu_id: &str) -> Result<GpuControlState, String> {
-        self.collector
-            .provider_ref()
-            .read_control_state(gpu_id)
-            .map_err(|e| e.to_string())
+    pub fn get_control_state(&self, gpu_id: &str) -> Result<GpuControlState, GpuProviderError> {
+        self.collector.provider_ref().read_control_state(gpu_id)
     }
 
-    pub fn set_fan_speed(&self, gpu_id: &str, percent: f64) -> Result<(), String> {
-        self.collector
-            .provider_ref()
-            .set_fan_speed(gpu_id, percent)
-            .map_err(|e| e.to_string())
+    pub fn set_fan_speed(&self, gpu_id: &str, percent: f64) -> Result<(), GpuProviderError> {
+        self.collector.provider_ref().set_fan_speed(gpu_id, percent)
     }
 
-    pub fn set_core_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), String> {
+    pub fn set_core_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), GpuProviderError> {
         self.collector
             .provider_ref()
             .set_core_clock_offset(gpu_id, offset_mhz)
-            .map_err(|e| e.to_string())
     }
 
-    pub fn set_memory_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), String> {
+    pub fn set_memory_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), GpuProviderError> {
         self.collector
             .provider_ref()
             .set_memory_clock_offset(gpu_id, offset_mhz)
-            .map_err(|e| e.to_string())
     }
 
-    pub fn set_power_limit(&self, gpu_id: &str, percent: f64) -> Result<(), String> {
-        self.collector
-            .provider_ref()
-            .set_power_limit(gpu_id, percent)
-            .map_err(|e| e.to_string())
+    pub fn set_power_limit(&self, gpu_id: &str, percent: f64) -> Result<(), GpuProviderError> {
+        self.collector.provider_ref().set_power_limit(gpu_id, percent)
     }
 
-    pub fn set_voltage_offset(&self, gpu_id: &str, offset_mv: i32) -> Result<(), String> {
+    pub fn set_voltage_offset(&self, gpu_id: &str, offset_mv: i32) -> Result<(), GpuProviderError> {
         self.collector
             .provider_ref()
             .set_voltage_offset(gpu_id, offset_mv)
-            .map_err(|e| e.to_string())
     }
 
     pub fn export_csv(&self, gpu_id: &str, count: usize) -> String {

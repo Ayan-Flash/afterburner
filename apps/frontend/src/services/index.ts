@@ -1,2 +1,12 @@
 export { gpuService, controlService, monitoringService, profileService, alertService, remoteService, overlayService, appService } from './gpuService';
 export type { GPUInfo, GPUData, ExportedSample, AggregatedMetrics, MetricStats, GpuControlState, AlertRule, AlertEvent, OverlayConfig, OverlayMetric } from './gpuService';
+export { automationService } from './automationService';
+export { backupService } from './backupService';
+export { marketplaceService } from './marketplaceService';
+export { smartAlertService } from './smartAlertService';
+export { settingsService } from './settingsService';
+export * from './enterpriseService';
+export * from './integrationService';
+export * from './reportingService';
+export * from './syncService';
+export * from './aiService';
