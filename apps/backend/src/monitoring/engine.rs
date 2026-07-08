@@ -17,6 +17,7 @@ pub struct MonitoringEngine {
     buffers: RwLock<HashMap<String, RingBuffer>>,
     running: AtomicBool,
     gpus: RwLock<Vec<GpuIdentity>>,
+    sample_hooks: std::sync::Mutex<Vec<Box<dyn Fn(&GpuSample) + Send + Sync>>>,
 }
 
 impl MonitoringEngine {
@@ -35,6 +36,16 @@ impl MonitoringEngine {
             buffers: RwLock::new(buffers),
             running: AtomicBool::new(false),
             gpus: RwLock::new(gpus),
+            sample_hooks: std::sync::Mutex::new(vec![]),
+        }
+    }
+
+    pub fn add_sample_hook<F>(&self, hook: F)
+    where
+        F: Fn(&GpuSample) + Send + Sync + 'static,
+    {
+        if let Ok(mut hooks) = self.sample_hooks.lock() {
+            hooks.push(Box::new(hook));
         }
     }
 
@@ -51,6 +62,11 @@ impl MonitoringEngine {
         let mut buffers = self.buffers.blocking_write();
         if let Some(buf) = buffers.get_mut(gpu_id) {
             buf.push(sample.clone());
+        }
+        if let Ok(hooks) = self.sample_hooks.lock() {
+            for hook in hooks.iter() {
+                hook(&sample);
+            }
         }
         Some(sample)
     }

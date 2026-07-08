@@ -12,6 +12,7 @@ pub struct AppState {
     pub overlay: RwLock<Option<OverlayController>>,
     pub obs_source: crate::integrations::obs::ObsSource,
     pub sync_server: crate::sync::SyncServer,
+    pub smart_alerts: Arc<crate::ai::SmartAlertManager>,
 }
 
 impl AppState {
@@ -26,6 +27,12 @@ impl AppState {
 
         let overlay = OverlayController::new(monitoring.clone());
 
+        let smart_alerts = Arc::new(crate::ai::SmartAlertManager::new());
+        let sa = smart_alerts.clone();
+        monitoring.add_sample_hook(move |sample| {
+            sa.feed_sample(sample);
+        });
+
         Self {
             monitoring,
             alerts,
@@ -33,6 +40,7 @@ impl AppState {
             overlay: RwLock::new(Some(overlay)),
             obs_source: crate::integrations::obs::ObsSource::new(9877),
             sync_server: crate::sync::SyncServer::new(9878),
+            smart_alerts: crate::ai::SmartAlertManager::new(),
         }
     }
 }

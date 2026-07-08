@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAiStore } from '../stores/aiStore';
 import * as aiService from '../services/aiService';
-import { IconZap, IconRefresh, IconTrash2, IconCheck, IconSettings, IconSliders } from '../components/base/Icons';
+import { useSmartAlertStore } from '../stores/smartAlertStore';
+import { IconZap, IconRefresh, IconTrash2, IconCheck, IconSettings, IconSliders, IconBell } from '../components/base/Icons';
 
 function formatDate(ts: number) {
   return new Date(ts * 1000).toLocaleString();
@@ -28,8 +29,9 @@ function trendIcon(trend: string) {
 
 export function AiPage() {
   const { anomalies, suggestions, tempPrediction, utilPrediction, analyzing, error, fetchAnomalies, fetchSuggestions, clearAnomalies, dismissSuggestion, runAnalysis, predictTemp, predictUtil, clearError } = useAiStore();
+  const smartAlertStore = useSmartAlertStore();
   const [selectedGpu, setSelectedGpu] = useState('gpu_0');
-  const [activeTab, setActiveTab] = useState<'anomalies' | 'predictions' | 'suggestions' | 'tuning'>('anomalies');
+  const [activeTab, setActiveTab] = useState<'anomalies' | 'predictions' | 'suggestions' | 'tuning' | 'smart_alerts'>('anomalies');
 
   const [fanCurveResult, setFanCurveResult] = useState<aiService.FanCurveResult | null>(null);
   const [clockResult, setClockResult] = useState<aiService.ClockTuneResult | null>(null);
@@ -40,6 +42,7 @@ export function AiPage() {
   useEffect(() => {
     fetchAnomalies();
     fetchSuggestions();
+    smartAlertStore.fetchAll();
   }, [fetchAnomalies, fetchSuggestions]);
 
   const handlePredict = () => {
@@ -82,6 +85,9 @@ export function AiPage() {
         </button>
         <button onClick={() => setActiveTab('tuning')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'tuning' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
           Auto-Tuning
+        </button>
+        <button onClick={() => setActiveTab('smart_alerts')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'smart_alerts' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+          Smart Alerts
         </button>
       </div>
 
@@ -372,6 +378,167 @@ export function AiPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'smart_alerts' && (
+        <div className="space-y-4">
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                  <IconBell className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-text-primary">Smart Alert Engine</h3>
+                  <p className="text-xs text-text-secondary">AI-powered noise reduction and adaptive thresholds</p>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => smartAlertStore.fetchAll()} className="btn-ghost p-1.5" title="Refresh">
+                  <IconRefresh className="w-4 h-4" />
+                </button>
+                <button onClick={() => smartAlertStore.resetBaselines()} className="btn-ghost p-1.5 text-xs text-red-400/60 hover:text-red-400" title="Reset baselines">
+                  Reset Baselines
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="px-3 py-2 rounded-lg bg-gpu-800">
+                <p className="text-xs text-text-secondary">Context</p>
+                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.context ?? 'Unknown'}</p>
+                <p className="text-xs text-text-muted">{(smartAlertStore.context?.confidence ?? 0) >= 0.5 ? 'High confidence' : 'Low confidence'}</p>
+              </div>
+              <div className="px-3 py-2 rounded-lg bg-gpu-800">
+                <p className="text-xs text-text-secondary">Avg Utilization</p>
+                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.avg_utilization.toFixed(0) ?? '-'}%</p>
+              </div>
+              <div className="px-3 py-2 rounded-lg bg-gpu-800">
+                <p className="text-xs text-text-secondary">Avg Temperature</p>
+                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.avg_temperature.toFixed(0) ?? '-'}°C</p>
+              </div>
+              <div className="px-3 py-2 rounded-lg bg-gpu-800">
+                <p className="text-xs text-text-secondary">Suppressed Alerts</p>
+                <p className="text-sm font-medium text-text-primary">{smartAlertStore.suppressed.reduce((s, a) => s + a.suppress_count, 0)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-5">
+            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Learned Baselines</h4>
+            {smartAlertStore.baselines.length === 0 ? (
+              <p className="text-xs text-text-muted">No baselines learned yet. The engine needs more samples.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {smartAlertStore.baselines.map((b) => (
+                  <div key={b.metric} className="px-3 py-2 rounded-lg bg-gpu-800">
+                    <p className="text-xs font-medium text-accent-primary mb-1 capitalize">{b.metric.replace(/_/g, ' ')}</p>
+                    <div className="space-y-0.5 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-text-secondary">Mean</span>
+                        <span className="text-text-primary font-mono">{b.mean.toFixed(1)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-text-secondary">Std Dev</span>
+                        <span className="text-text-primary font-mono">{b.std_dev.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-text-secondary">Range</span>
+                        <span className="text-text-primary font-mono">{b.min.toFixed(0)} – {b.max.toFixed(0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-text-secondary">Samples</span>
+                        <span className="text-text-primary font-mono">{b.sample_count}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="card p-5">
+            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Configuration</h4>
+            <div className="space-y-3 max-w-md">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={smartAlertStore.config?.enabled ?? true}
+                  onChange={(e) => {
+                    if (smartAlertStore.config) {
+                      smartAlertStore.updateConfig({ ...smartAlertStore.config, enabled: e.target.checked });
+                    }
+                  }}
+                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                />
+                <span className="text-sm text-text-primary">Enable Smart Alerts</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={smartAlertStore.config?.context_aware ?? true}
+                  onChange={(e) => {
+                    if (smartAlertStore.config) {
+                      smartAlertStore.updateConfig({ ...smartAlertStore.config, context_aware: e.target.checked });
+                    }
+                  }}
+                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                />
+                <span className="text-sm text-text-primary">Context-aware filtering</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={smartAlertStore.config?.suppress_duplicates ?? true}
+                  onChange={(e) => {
+                    if (smartAlertStore.config) {
+                      smartAlertStore.updateConfig({ ...smartAlertStore.config, suppress_duplicates: e.target.checked });
+                    }
+                  }}
+                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                />
+                <span className="text-sm text-text-primary">Suppress duplicate alerts</span>
+              </label>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">Adaptive Sensitivity ({smartAlertStore.config?.adaptive_sensitivity.toFixed(1) ?? '1.0'})</label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="3.0"
+                  step="0.1"
+                  value={smartAlertStore.config?.adaptive_sensitivity ?? 1.0}
+                  onChange={(e) => {
+                    if (smartAlertStore.config) {
+                      smartAlertStore.updateConfig({ ...smartAlertStore.config, adaptive_sensitivity: parseFloat(e.target.value) });
+                    }
+                  }}
+                  className="slider-gpu w-full"
+                />
+                <div className="flex justify-between text-xs text-text-muted">
+                  <span>Strict</span>
+                  <span>Relaxed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {smartAlertStore.suppressed.length > 0 && (
+            <div className="card p-5">
+              <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Suppressed Alerts</h4>
+              <div className="space-y-1">
+                {smartAlertStore.suppressed.filter(s => s.suppress_count > 0).map((s, i) => (
+                  <div key={`${s.rule_id}-${i}`} className="px-3 py-2 rounded-lg bg-gpu-800 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-text-primary">{s.message}</p>
+                      <p className="text-xs text-text-muted">Suppressed {s.suppress_count} times</p>
+                    </div>
+                    <span className="text-xs text-emerald-400">-{s.suppress_count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

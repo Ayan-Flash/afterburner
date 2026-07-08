@@ -8,6 +8,7 @@ use crate::ai::optimizer::{OptimizationSuggestion, Optimizer};
 use crate::ai::predictor::{Prediction, Predictor};
 use crate::ai::store::AiStore;
 use crate::ai::tuner::{ClockTuner, FanCurveTuner, FanCurveResult, ClockTuneResult, PowerTuneResult, PowerTuner, TuningProfile};
+use crate::ai::smart_alerts::{SmartAlertConfig, ContextInfo, MetricBaseline, SuppressedAlert};
 
 #[tauri::command]
 pub fn get_ai_anomalies(limit: usize) -> Vec<Anomaly> {
@@ -187,5 +188,63 @@ pub fn apply_tuning_profile(gpu_id: String) -> Result<String, String> {
         Ok(format!("Applied tuning profile: {}", p.name))
     } else {
         Err("No profile to apply".into())
+    }
+}
+
+#[tauri::command]
+pub fn get_smart_alert_status(state: State<'_, Arc<AppState>>) -> SmartAlertConfig {
+    let manager = &state.smart_alerts;
+    if let Ok(engine) = manager.engine.lock() {
+        engine.config.clone()
+    } else {
+        SmartAlertConfig::default()
+    }
+}
+
+#[tauri::command]
+pub fn get_smart_baselines(state: State<'_, Arc<AppState>>) -> Vec<MetricBaseline> {
+    let manager = &state.smart_alerts;
+    if let Ok(engine) = manager.engine.lock() {
+        engine.get_baselines()
+    } else {
+        vec![]
+    }
+}
+
+#[tauri::command]
+pub fn get_smart_context(state: State<'_, Arc<AppState>>) -> serde_json::Value {
+    let manager = &state.smart_alerts;
+    if let Ok(engine) = manager.engine.lock() {
+        let ctx = engine.get_context();
+        serde_json::to_value(ctx).unwrap_or_default()
+    } else {
+        serde_json::Value::Null
+    }
+}
+
+#[tauri::command]
+pub fn get_smart_suppressed(state: State<'_, Arc<AppState>>) -> Vec<SuppressedAlert> {
+    let manager = &state.smart_alerts;
+    if let Ok(engine) = manager.engine.lock() {
+        engine.get_suppressed_alerts().to_vec()
+    } else {
+        vec![]
+    }
+}
+
+#[tauri::command]
+pub fn update_smart_config(config: SmartAlertConfig, state: State<'_, Arc<AppState>>) {
+    let manager = &state.smart_alerts;
+    if let Ok(mut engine) = manager.engine.lock() {
+        engine.update_config(config.clone());
+    }
+    manager.store.save_config(&config);
+}
+
+#[tauri::command]
+pub fn reset_smart_baselines(state: State<'_, Arc<AppState>>) {
+    let manager = &state.smart_alerts;
+    if let Ok(mut engine) = manager.engine.lock() {
+        engine.reset_baselines();
     }
 }
