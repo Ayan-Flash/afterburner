@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+target/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Rust
+apps/backend/target/
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Temp
+tmp/
+temp/
+
+# Configuration
+*.local.*

@@ -1,0 +1,94 @@
+# GPUControl Pro CI
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  lint-format:
+    name: Lint & Format
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy, rustfmt
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: Check Rust formatting
+        run: cargo fmt --check
+      - name: Check Rust linting
+        run: cargo clippy
+      - name: Check TypeScript formatting
+        run: pnpm format:check
+      - name: Check TypeScript linting
+        run: pnpm lint:frontend
+
+  typecheck:
+    name: Type Check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: TypeScript type check
+        run: pnpm typecheck
+
+  test:
+    name: Test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: Run Rust tests
+        run: cargo test
+      - name: Run frontend tests
+        run: pnpm test:frontend
+
+  build:
+    name: Build
+    runs-on: windows-latest
+    needs: [lint-format, typecheck, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: Build frontend
+        run: cd apps/frontend && npx vite build
+      - name: Check Rust build
+        run: cargo build --verbose

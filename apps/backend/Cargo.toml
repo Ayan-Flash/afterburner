@@ -1,0 +1,30 @@
+[package]
+name = "gpucontrol-pro-backend"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "gpucontrol_pro_backend"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = ["isolation"] }
+
+[dependencies]
+tauri = { version = "2.0", features = ["tray-icon"] }
+tauri-plugin-shell = "2.0"
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+rand = "0.8"
+dirs-next = "2.0"
+
+[features]
+default = []
+dev = ["tauri/dev"]
