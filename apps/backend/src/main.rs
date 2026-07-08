@@ -10,6 +10,7 @@ mod commands;
 mod enterprise;
 mod hardware;
 mod integrations;
+mod marketplace;
 mod monitoring;
 mod reporting;
 mod sync;
@@ -142,6 +143,14 @@ fn main() {
             commands::delete_backup,
             commands::export_backup,
             commands::import_backup,
+            commands::list_marketplace_profiles,
+            commands::get_marketplace_profile,
+            commands::publish_marketplace_profile,
+            commands::delete_marketplace_profile,
+            commands::rate_marketplace_profile,
+            commands::download_marketplace_profile,
+            commands::import_marketplace_profile,
+            commands::export_marketplace_profile,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

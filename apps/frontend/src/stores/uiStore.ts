@@ -15,6 +15,7 @@ type Page =
   | 'sync'
   | 'ai'
   | 'backup'
+  | 'marketplace'
   | 'monitoring'
   | 'settings';
 

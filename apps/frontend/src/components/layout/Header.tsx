@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   sync: 'Cloud Sync',
   ai: 'AI Insights',
   backup: 'Backup & Restore',
+  marketplace: 'Profile Marketplace',
   settings: 'Settings',
 };
 

@@ -34,6 +34,7 @@ export const IconPuzzle = createIcon('M19.439 7.85c-.049.322.059.648.289.878l1.5
 
 export const IconSave = createIcon('M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8');
 export const IconUpload = createIcon('M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12');
+export const IconStore = createIcon('M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10M7 7h.01M17 7h.01');
 
 export const navIcons = {
   dashboard: IconGrid,
@@ -49,5 +50,6 @@ export const navIcons = {
   sync: IconRefresh,
   ai: IconZap,
   backup: IconSave,
+  marketplace: IconStore,
   settings: IconSettings,
 };
