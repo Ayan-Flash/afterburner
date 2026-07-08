@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAiStore } from '../stores/aiStore';
-import { IconZap, IconRefresh, IconTrash2, IconCheck, IconSettings } from '../components/base/Icons';
+import * as aiService from '../services/aiService';
+import { IconZap, IconRefresh, IconTrash2, IconCheck, IconSettings, IconSliders } from '../components/base/Icons';
 
 function formatDate(ts: number) {
   return new Date(ts * 1000).toLocaleString();
@@ -28,7 +29,13 @@ function trendIcon(trend: string) {
 export function AiPage() {
   const { anomalies, suggestions, tempPrediction, utilPrediction, analyzing, error, fetchAnomalies, fetchSuggestions, clearAnomalies, dismissSuggestion, runAnalysis, predictTemp, predictUtil, clearError } = useAiStore();
   const [selectedGpu, setSelectedGpu] = useState('gpu_0');
-  const [activeTab, setActiveTab] = useState<'anomalies' | 'predictions' | 'suggestions'>('anomalies');
+  const [activeTab, setActiveTab] = useState<'anomalies' | 'predictions' | 'suggestions' | 'tuning'>('anomalies');
+
+  const [fanCurveResult, setFanCurveResult] = useState<aiService.FanCurveResult | null>(null);
+  const [clockResult, setClockResult] = useState<aiService.ClockTuneResult | null>(null);
+  const [powerResult, setPowerResult] = useState<aiService.PowerTuneResult | null>(null);
+  const [tuningLoading, setTuningLoading] = useState(false);
+  const [maxPower, setMaxPower] = useState(200);
 
   useEffect(() => {
     fetchAnomalies();
@@ -72,6 +79,9 @@ export function AiPage() {
         </button>
         <button onClick={() => setActiveTab('suggestions')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'suggestions' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
           Suggestions ({suggestions.filter(s => !s.applied).length})
+        </button>
+        <button onClick={() => setActiveTab('tuning')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'tuning' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+          Auto-Tuning
         </button>
       </div>
 
@@ -245,6 +255,123 @@ export function AiPage() {
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {activeTab === 'tuning' && (
+        <div className="space-y-4">
+          <div className="card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <IconSliders className="w-5 h-5 text-accent-primary" />
+              <h3 className="text-sm font-semibold text-text-primary">Auto-Tuner</h3>
+              <select
+                value={selectedGpu}
+                onChange={(e) => setSelectedGpu(e.target.value)}
+                className="ml-auto px-2 py-1.5 rounded bg-gpu-800 border border-gpu-700 text-text-primary text-sm"
+              >
+                <option value="gpu_0">GPU 0</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="px-4 py-3 rounded-lg bg-gpu-800">
+                <h4 className="text-xs font-medium text-text-secondary mb-2">Fan Curve</h4>
+                <p className="text-xs text-text-secondary mb-2">Analyze your GPU's thermal behavior and generate an optimal fan curve</p>
+                <button
+                  onClick={async () => {
+                    setTuningLoading(true);
+                    const result = await aiService.tuneFanCurve(selectedGpu);
+                    setFanCurveResult(result);
+                    setTuningLoading(false);
+                  }}
+                  disabled={tuningLoading}
+                  className="btn-primary text-xs px-3 py-1.5"
+                >
+                  Tune Fan Curve
+                </button>
+                {fanCurveResult && (
+                  <div className="mt-2 space-y-1 text-xs">
+                    <p className="text-text-secondary">Est. max temp: <span className="text-text-primary">{fanCurveResult.estimated_max_temp.toFixed(0)}°C</span></p>
+                    <p className="text-text-secondary">Noise: <span className="text-text-primary">{fanCurveResult.estimated_noise_level}</span></p>
+                    <div className="mt-1 space-y-0.5">
+                      {fanCurveResult.points.filter(p => p.temperature >= 40).map((p, i) => (
+                        <div key={i} className="flex justify-between text-text-muted">
+                          <span>{p.temperature.toFixed(0)}°C</span>
+                          <span className="text-text-primary">{p.fan_speed.toFixed(0)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-4 py-3 rounded-lg bg-gpu-800">
+                <h4 className="text-xs font-medium text-text-secondary mb-2">Clock Offsets</h4>
+                <p className="text-xs text-text-secondary mb-2">Find safe core and memory clock offsets based on your GPU's thermal headroom</p>
+                <button
+                  onClick={async () => {
+                    setTuningLoading(true);
+                    const result = await aiService.tuneClockOffsets(selectedGpu);
+                    setClockResult(result);
+                    setTuningLoading(false);
+                  }}
+                  disabled={tuningLoading}
+                  className="btn-primary text-xs px-3 py-1.5"
+                >
+                  Tune Clocks
+                </button>
+                {clockResult && (
+                  <div className="mt-2 space-y-1 text-xs">
+                    <div className="flex justify-between"><span className="text-text-secondary">Core offset</span><span className="text-emerald-400">+{clockResult.core_offset_mhz} MHz</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Mem offset</span><span className="text-emerald-400">+{clockResult.memory_offset_mhz} MHz</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Stability</span><span className="text-text-primary">{clockResult.stability}</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Avg temp</span><span className="text-text-primary">{clockResult.avg_temperature.toFixed(0)}°C</span></div>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-4 py-3 rounded-lg bg-gpu-800">
+                <h4 className="text-xs font-medium text-text-secondary mb-2">Power Limit</h4>
+                <p className="text-xs text-text-secondary mb-2">Optimize power limit for best efficiency or performance</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="number"
+                    value={maxPower}
+                    onChange={(e) => setMaxPower(Number(e.target.value))}
+                    className="w-20 px-2 py-1 rounded bg-gpu-700 border border-gpu-600 text-text-primary text-xs"
+                  />
+                  <span className="text-xs text-text-secondary">W max</span>
+                </div>
+                <button
+                  onClick={async () => {
+                    setTuningLoading(true);
+                    const result = await aiService.tunePowerLimit(selectedGpu, maxPower);
+                    setPowerResult(result);
+                    setTuningLoading(false);
+                  }}
+                  disabled={tuningLoading}
+                  className="btn-primary text-xs px-3 py-1.5"
+                >
+                  Tune Power
+                </button>
+                {powerResult && (
+                  <div className="mt-2 space-y-1 text-xs">
+                    <div className="flex justify-between"><span className="text-text-secondary">Limit</span><span className="text-text-primary">{powerResult.limit_percent.toFixed(0)}%</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Perf est.</span><span className="text-text-primary">{powerResult.estimated_performance.toFixed(0)}%</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Power save</span><span className="text-emerald-400">{powerResult.estimated_power_save.toFixed(0)}%</span></div>
+                    <div className="flex justify-between"><span className="text-text-secondary">Efficiency</span><span className="text-text-primary">x{powerResult.efficiency_score.toFixed(2)}</span></div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {tuningLoading && (
+              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent-primary" />
+                Tuning in progress...
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

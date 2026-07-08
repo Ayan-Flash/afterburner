@@ -64,3 +64,63 @@ export async function predictGpuTemperature(gpuId: string): Promise<Prediction> 
 export async function predictGpuUtilization(gpuId: string): Promise<Prediction> {
   return invoke('predict_gpu_utilization', { gpuId });
 }
+
+export interface FanCurvePoint {
+  temperature: number;
+  fan_speed: number;
+}
+
+export interface FanCurveResult {
+  points: FanCurvePoint[];
+  estimated_max_temp: number;
+  estimated_noise_level: string;
+}
+
+export interface ClockTuneResult {
+  core_offset_mhz: number;
+  memory_offset_mhz: number;
+  peak_performance_score: number;
+  avg_temperature: number;
+  stability: string;
+}
+
+export interface PowerTuneResult {
+  limit_percent: number;
+  estimated_performance: number;
+  estimated_power_save: number;
+  efficiency_score: number;
+}
+
+export interface TuningProfile {
+  id: string;
+  gpu_id: string;
+  name: string;
+  created_at: number;
+  fan_curve: FanCurveResult | null;
+  clock_offsets: ClockTuneResult | null;
+  power_limit: PowerTuneResult | null;
+}
+
+export async function tuneFanCurve(gpuId: string): Promise<FanCurveResult> {
+  return invoke('tune_fan_curve', { gpuId });
+}
+
+export async function tuneClockOffsets(gpuId: string): Promise<ClockTuneResult> {
+  return invoke('tune_clock_offsets', { gpuId });
+}
+
+export async function tunePowerLimit(gpuId: string, maxPowerWatts: number): Promise<PowerTuneResult> {
+  return invoke('tune_power_limit', { gpuId, maxPowerWatts });
+}
+
+export async function getTuningProfiles(gpuId: string): Promise<TuningProfile[]> {
+  return invoke('get_tuning_profiles', { gpuId });
+}
+
+export async function saveTuningProfile(profile: TuningProfile): Promise<void> {
+  return invoke('save_tuning_profile', { profile });
+}
+
+export async function applyTuningProfile(gpuId: string): Promise<string> {
+  return invoke('apply_tuning_profile', { gpuId });
+}

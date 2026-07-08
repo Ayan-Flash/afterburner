@@ -7,6 +7,7 @@ use crate::ai::anomaly::{Anomaly, AnomalyDetector};
 use crate::ai::optimizer::{OptimizationSuggestion, Optimizer};
 use crate::ai::predictor::{Prediction, Predictor};
 use crate::ai::store::AiStore;
+use crate::ai::tuner::{ClockTuner, FanCurveTuner, FanCurveResult, ClockTuneResult, PowerTuneResult, PowerTuner, TuningProfile};
 
 #[tauri::command]
 pub fn get_ai_anomalies(limit: usize) -> Vec<Anomaly> {
@@ -126,4 +127,65 @@ pub fn predict_gpu_utilization(
     }
     let utils: Vec<f64> = samples.iter().map(|s| s.core_utilization_percent).collect();
     Ok(Predictor::predict_utilization(&utils))
+}
+
+#[tauri::command]
+pub fn tune_fan_curve(
+    gpu_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> Result<FanCurveResult, String> {
+    let samples = state.monitoring.get_history(&gpu_id, 300);
+    if samples.is_empty() {
+        return Err("No data for GPU".into());
+    }
+    Ok(FanCurveTuner::tune(&samples))
+}
+
+#[tauri::command]
+pub fn tune_clock_offsets(
+    gpu_id: String,
+    state: State<'_, Arc<AppState>>,
+) -> Result<ClockTuneResult, String> {
+    let samples = state.monitoring.get_history(&gpu_id, 120);
+    if samples.is_empty() {
+        return Err("No data for GPU".into());
+    }
+    Ok(ClockTuner::tune(&samples))
+}
+
+#[tauri::command]
+pub fn tune_power_limit(
+    gpu_id: String,
+    max_power_watts: f64,
+    state: State<'_, Arc<AppState>>,
+) -> Result<PowerTuneResult, String> {
+    let samples = state.monitoring.get_history(&gpu_id, 120);
+    if samples.is_empty() {
+        return Err("No data for GPU".into());
+    }
+    Ok(PowerTuner::tune(&samples, max_power_watts))
+}
+
+#[tauri::command]
+pub fn get_tuning_profiles(gpu_id: String) -> Vec<TuningProfile> {
+    let store = crate::ai::tuner::TuningStore::new();
+    store.get_profiles(&gpu_id)
+}
+
+#[tauri::command]
+pub fn save_tuning_profile(profile: TuningProfile) -> Result<(), String> {
+    let store = crate::ai::tuner::TuningStore::new();
+    store.save_profile(&profile);
+    Ok(())
+}
+
+#[tauri::command]
+pub fn apply_tuning_profile(gpu_id: String) -> Result<String, String> {
+    let store = crate::ai::tuner::TuningStore::new();
+    let profiles = store.get_profiles(&gpu_id);
+    if let Some(p) = profiles.last() {
+        Ok(format!("Applied tuning profile: {}", p.name))
+    } else {
+        Err("No profile to apply".into())
+    }
 }

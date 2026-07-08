@@ -123,6 +123,12 @@ fn main() {
             commands::run_ai_analysis,
             commands::predict_gpu_temperature,
             commands::predict_gpu_utilization,
+            commands::tune_fan_curve,
+            commands::tune_clock_offsets,
+            commands::tune_power_limit,
+            commands::get_tuning_profiles,
+            commands::save_tuning_profile,
+            commands::apply_tuning_profile,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");
