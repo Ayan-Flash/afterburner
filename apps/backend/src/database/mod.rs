@@ -13,14 +13,12 @@ pub struct Database {
 
 impl Database {
     pub fn open() -> Result<Self, rusqlite::Error> {
-        let data_dir = crate::utils::logging::log_dir()
-            .parent()
-            .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| {
-                dirs_next::config_dir()
-                    .unwrap_or_else(|| PathBuf::from("."))
-                    .join("gpucontrol-pro")
-            });
+        let data_dir = match crate::utils::logging::log_dir().parent() {
+            Some(p) => p.to_path_buf(),
+            None => dirs_next::config_dir()
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join("gpucontrol-pro"),
+        };
 
         std::fs::create_dir_all(&data_dir).ok();
 

@@ -37,7 +37,13 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .item(&quit)
         .build()?;
 
-    let _tray = TrayIconBuilder::new()
+    let icon = app.default_window_icon().cloned();
+
+    let mut tray = TrayIconBuilder::new();
+    if let Some(icon) = icon {
+        tray = tray.icon(icon);
+    }
+    let _tray = tray
         .menu(&menu)
         .on_menu_event(move |app, event| match event.id.as_ref() {
             "show_hide" => {

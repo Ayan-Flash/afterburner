@@ -16,8 +16,8 @@ pub fn init_logging() -> Option<WorkerGuard> {
         .join("gpucontrol-pro")
         .join("logs");
 
-    fs::create_dir_all(&data_dir).ok()?;
     let _ = LOG_DIR.set(data_dir.clone());
+    fs::create_dir_all(&data_dir).ok()?;
 
     let file_appender = tracing_appender::rolling::daily(&data_dir, "gpucontrol.log");
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
