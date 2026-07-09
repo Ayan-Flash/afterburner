@@ -40,7 +40,7 @@ impl Optimizer {
                 .filter(|(t, _)| **t > 75.0)
                 .map(|(_, f)| *f)
                 .sum::<f64>()
-                / temps.iter().zip(fans.iter()).filter(|(t, _)| *t > 75.0).count().max(1) as f64;
+                / temps.iter().zip(fans.iter()).filter(|(t, _)| **t > 75.0).count().max(1) as f64;
 
             if avg_fan_at_high_temp < 70.0 {
                 suggestions.push(OptimizationSuggestion {

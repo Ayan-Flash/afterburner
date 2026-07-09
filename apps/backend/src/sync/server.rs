@@ -45,8 +45,8 @@ impl SyncServer {
 
             while running.load(Ordering::SeqCst) {
                 match server.recv_timeout(std::time::Duration::from_millis(500)) {
-                    Ok(Some(request)) => {
-                        let response = Self::handle_request(&request);
+                    Ok(Some(mut request)) => {
+                        let response = Self::handle_request(&mut request);
                         let _ = request.respond(response);
                     }
                     Ok(None) => {}
@@ -68,14 +68,14 @@ impl SyncServer {
         self.running.load(Ordering::SeqCst)
     }
 
-    fn read_body(request: &tiny_http::Request) -> String {
+    fn read_body(request: &mut tiny_http::Request) -> String {
         let mut body = String::new();
         let mut reader = request.as_reader();
         let _ = reader.read_to_string(&mut body);
         body
     }
 
-    fn handle_request(request: &tiny_http::Request) -> tiny_http::Response<String> {
+    fn handle_request(request: &mut tiny_http::Request) -> tiny_http::Response<std::io::Cursor<Vec<u8>>> {
         let url = request.url().to_string();
         let method = request.method().as_str().to_string();
 
@@ -100,7 +100,7 @@ impl SyncServer {
             )
     }
 
-    fn handle_register(request: &tiny_http::Request) -> (u16, String) {
+    fn handle_register(request: &mut tiny_http::Request) -> (u16, String) {
         let body = Self::read_body(request);
         match serde_json::from_str::<DeviceInfo>(&body) {
             Ok(info) => {
@@ -119,7 +119,7 @@ impl SyncServer {
         }
     }
 
-    fn handle_sync(request: &tiny_http::Request) -> (u16, String) {
+    fn handle_sync(request: &mut tiny_http::Request) -> (u16, String) {
         let body = Self::read_body(request);
         match serde_json::from_str::<SyncPayload>(&body) {
             Ok(payload) => {

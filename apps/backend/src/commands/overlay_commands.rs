@@ -8,22 +8,16 @@ use crate::overlay::OverlayConfig;
 pub fn start_overlay(state: State<'_, SharedState>) -> Result<(), String> {
     info!("Starting overlay");
     let mut overlay = state.overlay.write().map_err(|e| e.to_string())?;
-    if let Some(ref mut controller) = *overlay {
-        controller.start()
-    } else {
-        Err("Overlay not initialized".to_string())
-    }
+    let controller = overlay.as_mut().ok_or_else(|| "Overlay not initialized".to_string())?;
+    controller.start()
 }
 
 #[tauri::command]
 pub fn stop_overlay(state: State<'_, SharedState>) -> Result<(), String> {
     info!("Stopping overlay");
     let mut overlay = state.overlay.write().map_err(|e| e.to_string())?;
-    if let Some(ref mut controller) = *overlay {
-        controller.stop()
-    } else {
-        Err("Overlay not initialized".to_string())
-    }
+    let controller = overlay.as_mut().ok_or_else(|| "Overlay not initialized".to_string())?;
+    controller.stop()
 }
 
 #[tauri::command]

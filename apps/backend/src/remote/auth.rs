@@ -1,14 +1,15 @@
 use std::sync::RwLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct AuthManager {
-    enabled: bool,
+    enabled: AtomicBool,
     api_key: RwLock<Option<String>>,
 }
 
 impl AuthManager {
     pub fn new() -> Self {
         Self {
-            enabled: false,
+            enabled: AtomicBool::new(false),
             api_key: RwLock::new(None),
         }
     }
@@ -16,17 +17,17 @@ impl AuthManager {
     pub fn set_key(&self, key: String) {
         let mut api_key = self.api_key.write().unwrap();
         *api_key = Some(key);
-        self.enabled = true;
+        self.enabled.store(true, Ordering::SeqCst);
     }
 
     pub fn clear_key(&self) {
         let mut api_key = self.api_key.write().unwrap();
         *api_key = None;
-        self.enabled = false;
+        self.enabled.store(false, Ordering::SeqCst);
     }
 
     pub fn validate(&self, header: Option<&str>) -> bool {
-        if !self.enabled {
+        if !self.enabled.load(Ordering::SeqCst) {
             return true;
         }
         let api_key = self.api_key.read().unwrap();
@@ -37,7 +38,7 @@ impl AuthManager {
     }
 
     pub fn is_enabled(&self) -> bool {
-        self.enabled
+        self.enabled.load(Ordering::SeqCst)
     }
 
     pub fn generate_key(&self) -> String {

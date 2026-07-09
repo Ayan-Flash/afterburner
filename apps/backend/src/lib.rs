@@ -14,3 +14,5 @@ pub mod plugins;
 pub mod remote;
 pub mod stores;
 pub mod utils;
+pub mod backup;
+pub mod marketplace;

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tracing::error;
+use super::MarketplaceStore;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProfileRating {

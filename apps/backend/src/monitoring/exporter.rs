@@ -47,7 +47,7 @@ impl Exporter {
         let mut csv = String::from("timestamp,temperature,core_clock,memory_clock,fan_speed,power,core_util,memory_util,memory_used_mb,memory_total_mb\n");
         for s in samples {
             csv.push_str(&format!(
-                "{},{},{},{},{},{},{},{}\n",
+                "{},{},{},{},{},{},{},{},{},{}\n",
                 s.timestamp,
                 (s.temperature_celsius * 10.0).round() / 10.0,
                 s.core_clock_mhz.round(),

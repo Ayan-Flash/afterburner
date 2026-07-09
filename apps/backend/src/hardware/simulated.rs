@@ -95,9 +95,9 @@ impl SimulatedGpuProvider {
         let temp_offset = (state.core_util / 100.0) * 35.0 + rng.gen_range(-1.0..1.0);
         let load_factor = state.core_util / 100.0;
 
-        state.mem_used = ((state.identity.memory_total_mb as f64)
+        state.mem_used = (((state.identity.memory_total_mb as f64)
             * ((state.mem_util / 100.0) + rng.gen_range(-0.02..0.02)))
-            as u64
+            as u64)
             .clamp(0, state.identity.memory_total_mb);
 
         let clock_boost_mhz = (state.core_offset as f64) + (load_factor * 150.0) + rng.gen_range(-10.0..10.0);

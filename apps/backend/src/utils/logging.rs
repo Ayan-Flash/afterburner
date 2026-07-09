@@ -35,7 +35,7 @@ pub fn init_logging() -> Option<WorkerGuard> {
         .with_line_number(true)
         .init();
 
-    std::panic::set_hook(Box::new(|panic_info| {
+    std::panic::set_hook(Box::new(move |panic_info| {
         let msg = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
             s.to_string()
         } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {

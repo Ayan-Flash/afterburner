@@ -1,4 +1,5 @@
 use std::net::TcpListener;
+use std::io::{BufRead, Read};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -11,6 +12,7 @@ use super::auth::AuthManager;
 
 const POLL_INTERVAL_MS: u64 = 50;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum HttpMethod {
     Get,
     Post,

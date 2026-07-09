@@ -198,9 +198,10 @@ impl BackupEngine {
 
         info!("Backup created: {} ({})", bundle.name, id);
 
+        let path_str = store.backup_path(&id).to_string_lossy().into();
         Ok(BackupResult {
             id,
-            path: store.backup_path(&id).to_string_lossy().into(),
+            path: path_str,
             metadata,
         })
     }
@@ -229,14 +230,12 @@ impl BackupEngine {
                         let _ = fs::create_dir_all(&profiles_dir);
                     }
                     for (name, val) in map {
-                        if let Some(v) = val {
-                            let path = profiles_dir.join(format!("{name}.json"));
-                            if let Ok(content) = serde_json::to_string_pretty(v) {
-                                if fs::write(&path, &content).is_ok() {
-                                    restored_profiles += 1;
-                                } else {
-                                    errors.push(format!("Failed to write profile {name}"));
-                                }
+                        let path = profiles_dir.join(format!("{name}.json"));
+                        if let Ok(content) = serde_json::to_string_pretty(val) {
+                            if fs::write(&path, &content).is_ok() {
+                                restored_profiles += 1;
+                            } else {
+                                errors.push(format!("Failed to write profile {name}"));
                             }
                         }
                     }

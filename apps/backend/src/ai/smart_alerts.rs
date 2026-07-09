@@ -121,6 +121,7 @@ impl BaselineLearner {
             Some(w) if w.len() >= 10 => w,
             _ => return,
         };
+        let value = *window.last().unwrap_or(&0.0);
 
         let n = window.len() as f64;
         let sum: f64 = window.iter().sum();

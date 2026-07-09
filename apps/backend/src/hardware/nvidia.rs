@@ -17,6 +17,9 @@ pub struct NvidiaProvider {
     devices: Mutex<Vec<(NvmlDevice, GpuIdentity)>>,
 }
 
+unsafe impl Send for NvidiaProvider {}
+unsafe impl Sync for NvidiaProvider {}
+
 impl NvidiaProvider {
     pub fn try_new() -> Result<Self, String> {
         let lib = unsafe {
@@ -124,20 +127,20 @@ impl NvidiaProvider {
     }
 
     fn read_clocks(&self, lib: &Library, device: NvmlDevice) -> (Option<f64>, Option<f64>) {
-        let func: Symbol<unsafe extern "C" fn(NvmlDevice, u32, *mut u32) -> NvmlReturn> = unsafe {
-            lib.get(b"nvmlDeviceGetClockInfo").ok()?
-        };
+        if let Ok(func) = unsafe { lib.get::<unsafe extern "C" fn(NvmlDevice, u32, *mut u32) -> NvmlReturn>(b"nvmlDeviceGetClockInfo") } {
+            let mut core: u32 = 0;
+            let core_result = unsafe { func(device, 0, &mut core) }; // NVML_CLOCK_GRAPHICS = 0
 
-        let mut core: u32 = 0;
-        let core_result = unsafe { func(device, 0, &mut core) }; // NVML_CLOCK_GRAPHICS = 0
+            let mut mem: u32 = 0;
+            let mem_result = unsafe { func(device, 1, &mut mem) }; // NVML_CLOCK_MEM = 1
 
-        let mut mem: u32 = 0;
-        let mem_result = unsafe { func(device, 1, &mut mem) }; // NVML_CLOCK_MEM = 1
-
-        (
-            if core_result == NVML_SUCCESS { Some(core as f64) } else { None },
-            if mem_result == NVML_SUCCESS { Some(mem as f64) } else { None },
-        )
+            (
+                if core_result == NVML_SUCCESS { Some(core as f64) } else { None },
+                if mem_result == NVML_SUCCESS { Some(mem as f64) } else { None },
+            )
+        } else {
+            (None, None)
+        }
     }
 
     fn read_power(&self, lib: &Library, device: NvmlDevice) -> Option<f64> {
@@ -165,28 +168,29 @@ impl NvidiaProvider {
             memory: u32,
         }
 
-        let func: Symbol<unsafe extern "C" fn(NvmlDevice, *mut NvmlUtilization) -> NvmlReturn> =
-            unsafe { lib.get(b"nvmlDeviceGetUtilizationRates").ok()? };
-
-        let mut util = NvmlUtilization { gpu: 0, memory: 0 };
-        let result = unsafe { func(device, &mut util) };
-        if result == NVML_SUCCESS {
-            (Some(util.gpu as f64), Some(util.memory as f64))
+        if let Ok(func) = unsafe { lib.get::<unsafe extern "C" fn(NvmlDevice, *mut NvmlUtilization) -> NvmlReturn>(b"nvmlDeviceGetUtilizationRates") } {
+            let mut util = NvmlUtilization { gpu: 0, memory: 0 };
+            let result = unsafe { func(device, &mut util) };
+            if result == NVML_SUCCESS {
+                (Some(util.gpu as f64), Some(util.memory as f64))
+            } else {
+                (None, None)
+            }
         } else {
             (None, None)
         }
     }
 
     fn read_pcie_info(&self, lib: &Library, device: NvmlDevice) -> (Option<f64>, Option<f64>) {
-        let func: Symbol<
-            unsafe extern "C" fn(NvmlDevice, *mut u32) -> NvmlReturn,
-        > = unsafe { lib.get(b"nvmlDeviceGetCurrPcieLinkWidth").ok()? };
+        if let Ok(func) = unsafe { lib.get::<unsafe extern "C" fn(NvmlDevice, *mut u32) -> NvmlReturn>(b"nvmlDeviceGetCurrPcieLinkWidth") } {
+            let mut width: u32 = 0;
+            let result = unsafe { func(device, &mut width) };
 
-        let mut width: u32 = 0;
-        let result = unsafe { func(device, &mut width) };
-
-        if result == NVML_SUCCESS {
-            (Some(width as f64), None)
+            if result == NVML_SUCCESS {
+                (Some(width as f64), None)
+            } else {
+                (None, None)
+            }
         } else {
             (None, None)
         }

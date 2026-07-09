@@ -17,7 +17,7 @@ pub struct AlertRule {
     pub enabled: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum AlertMetric {
     Temperature,
     FanSpeed,

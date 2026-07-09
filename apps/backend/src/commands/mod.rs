@@ -32,4 +32,4 @@ pub use sync_commands::*;
 pub use ai_commands::*;
 pub use backup_commands::*;
 pub use marketplace_commands::*;
-pub use state::SharedState;
+pub use state::{AppState, SharedState};

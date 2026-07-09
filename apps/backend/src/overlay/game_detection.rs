@@ -70,7 +70,7 @@ impl GameDetector {
 
     fn enumerate_processes(&self) -> Result<Vec<String>, String> {
         let mut system = sysinfo::System::new();
-        system.refresh_processes(sysinfo::ProcessesToUpdate::All, true);
+        system.refresh_processes(sysinfo::ProcessesToUpdate::All);
         let processes: Vec<String> = system
             .processes()
             .iter()

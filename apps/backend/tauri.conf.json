@@ -4,14 +4,15 @@
   "version": "0.2.0",
   "identifier": "pro.gpucontrol.app",
   "build": {
-    "beforeBuildCommand": "cd apps/frontend && npm run build",
-    "beforeDevCommand": "cd apps/frontend && npm run dev",
+    "beforeBuildCommand": "cd frontend && npm run build",
+    "beforeDevCommand": "cd frontend && npm run dev",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../frontend/dist"
   },
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "GPUControl Pro",
         "width": 1280,
         "height": 800,
@@ -50,7 +51,7 @@
       ]
     },
     "trayIcon": {
-      "iconPath": "assets/icons/png/32x32.png",
+      "iconPath": "assets/icons/32x32.png",
       "iconAsTemplate": true
     }
   },
@@ -58,9 +59,10 @@
     "active": true,
     "targets": "all",
     "icon": [
-      "assets/icons/png/32x32.png",
-      "assets/icons/png/128x128.png",
-      "assets/icons/png/128x128@2x.png"
+      "assets/icons/32x32.png",
+      "assets/icons/128x128.png",
+      "assets/icons/128x128@2x.png",
+      "assets/icons/icon.ico"
     ]
   },
   "plugins": {

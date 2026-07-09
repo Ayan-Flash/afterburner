@@ -15,12 +15,12 @@ impl Database {
     pub fn open() -> Result<Self, rusqlite::Error> {
         let data_dir = crate::utils::logging::log_dir()
             .parent()
+            .map(|p| p.to_path_buf())
             .unwrap_or_else(|| {
-                &dirs_next::config_dir()
+                dirs_next::config_dir()
                     .unwrap_or_else(|| PathBuf::from("."))
                     .join("gpucontrol-pro")
-            })
-            .to_path_buf();
+            });
 
         std::fs::create_dir_all(&data_dir).ok();
 
