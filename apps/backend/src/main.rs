@@ -27,10 +27,12 @@ mod remote;
 fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     use tauri::menu::{MenuBuilder, MenuItemBuilder};
 
+    tracing::info!("setup_tray: Creating menu items");
     let show_hide = MenuItemBuilder::with_id("show_hide", "Show/Hide").build(app)?;
     let separator = tauri::menu::PredefinedMenuItem::separator(app)?;
     let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
 
+    tracing::info!("setup_tray: Building menu");
     let menu = MenuBuilder::new(app)
         .item(&show_hide)
         .item(&separator)
@@ -38,7 +40,9 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
 
     let icon = app.default_window_icon().cloned();
+    tracing::info!("setup_tray: default_window_icon exists: {}", icon.is_some());
 
+    tracing::info!("setup_tray: Building tray icon");
     let mut tray = TrayIconBuilder::new();
     if let Some(icon) = icon {
         tray = tray.icon(icon);
@@ -80,6 +84,7 @@ fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         })
         .build(app)?;
 
+    tracing::info!("setup_tray: Tray icon built successfully");
     Ok(())
 }
 
@@ -87,7 +92,9 @@ fn main() {
     let _log_guard = utils::logging::init_logging();
 
     let app_state = Arc::new(commands::AppState::new());
+    tracing::info!("AppState initialized successfully");
 
+    tracing::info!("Starting tauri::Builder");
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
@@ -105,6 +112,12 @@ fn main() {
                 std::thread::sleep(std::time::Duration::from_secs(1));
                 tracing::info!("GPUControl Pro started (PID: {})", std::process::id());
             });
+
+            // Explicitly show and focus the main window
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
 
             // Minimize to tray on close
             if let Some(window) = app.get_webview_window("main") {

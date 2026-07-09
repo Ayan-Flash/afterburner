@@ -5,7 +5,7 @@
   "description": "Professional GPU Monitoring & Control for Windows",
   "scripts": {
     "dev": "pnpm --filter gpucontrol-pro-frontend dev",
-    "build": "pnpm --filter gpucontrol-pro-frontend build && cd apps/backend && cargo tauri build",
+    "build": "pnpm --filter gpucontrol-pro-frontend build && cd apps/backend && npx tauri build",
     "lint": "pnpm lint:frontend && pnpm lint:backend",
     "lint:frontend": "pnpm --filter gpucontrol-pro-frontend lint",
     "lint:backend": "cd apps/backend && cargo clippy",

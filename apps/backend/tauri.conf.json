@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "identifier": "pro.gpucontrol.app",
   "build": {
-    "beforeBuildCommand": "cd frontend && pnpm run build",
+    "beforeBuildCommand": "",
     "beforeDevCommand": "cd ..\\frontend && pnpm run dev",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../frontend/dist"
@@ -59,7 +59,13 @@
       "assets/icons/128x128.png",
       "assets/icons/128x128@2x.png",
       "assets/icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "hooks.nsh"
+      }
+    }
   },
   "plugins": {
     "updater": {
@@ -70,17 +76,6 @@
       "windows": {
         "installMode": "passive"
       }
-    },
-    "notification": {
-      "all": true
-    },
-    "global-shortcut": {
-      "shortcuts": [
-        {
-          "key": "Ctrl+Shift+O",
-          "description": "Toggle overlay visibility"
-        }
-      ]
     }
   }
 }

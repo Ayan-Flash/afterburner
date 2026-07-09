@@ -159,9 +159,11 @@ impl AlertEngine {
         ];
 
         let mut my_rules = self.rules.write().unwrap();
-        for rule in rules {
+        for rule in rules.iter() {
             my_rules.push(rule.clone());
         }
-        self.get_rules_for_gpu(gpu_id)
+        drop(my_rules);
+        
+        rules
     }
 }

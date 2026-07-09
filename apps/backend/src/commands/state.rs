@@ -25,11 +25,17 @@ impl AppState {
 
         let provider = crate::hardware::create_provider();
         let monitoring = Arc::new(MonitoringEngine::new(provider));
+        tracing::info!("AppState::new: MonitoringEngine created");
         let alerts = Arc::new(AlertEngine::new(1000));
+        tracing::info!("AppState::new: AlertEngine created");
 
-        for gpu in monitoring.gpus() {
+        tracing::info!("AppState::new: Retrieving GPUs");
+        let gpus = monitoring.gpus();
+        tracing::info!("AppState::new: GPUs retrieved: {}", gpus.len());
+        for gpu in gpus {
             alerts.create_default_rules(&gpu.id);
         }
+        tracing::info!("AppState::new: Default rules created");
 
         let overlay = OverlayController::new(monitoring.clone());
 
