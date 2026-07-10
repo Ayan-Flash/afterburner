@@ -26,6 +26,12 @@ struct SimulatedGpuState {
     mem_used: u64,
 }
 
+impl Default for SimulatedGpuProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SimulatedGpuProvider {
     pub fn new() -> Self {
         let gpus = vec![

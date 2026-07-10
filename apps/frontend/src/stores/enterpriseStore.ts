@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { EnterpriseConfig, GroupPolicy } from '../services/enterpriseService';
+import type { EnterpriseConfig, GroupPolicy, PolicyTarget } from '../services/enterpriseService';
 import * as enterpriseService from '../services/enterpriseService';
 
 interface EnterpriseState {
@@ -10,7 +10,7 @@ interface EnterpriseState {
   fetchConfig: () => Promise<void>;
   saveConfig: (config: EnterpriseConfig) => Promise<void>;
   fetchPolicies: () => Promise<void>;
-  createPolicy: (name: string, description: string, target: any) => Promise<void>;
+  createPolicy: (name: string, description: string, target: PolicyTarget) => Promise<void>;
   deletePolicy: (id: string) => Promise<void>;
   togglePolicy: (id: string, enabled: boolean) => Promise<void>;
   clearError: () => void;
@@ -27,7 +27,7 @@ export const useEnterpriseStore = create<EnterpriseState>((set) => ({
     try {
       const config = await enterpriseService.getEnterpriseConfig();
       set({ config, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -36,7 +36,7 @@ export const useEnterpriseStore = create<EnterpriseState>((set) => ({
     try {
       await enterpriseService.saveEnterpriseConfig(config);
       set({ config });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -45,17 +45,17 @@ export const useEnterpriseStore = create<EnterpriseState>((set) => ({
     try {
       const policies = await enterpriseService.listGroupPolicies();
       set({ policies });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
 
-  createPolicy: async (name: string, description: string, target: any) => {
+  createPolicy: async (name: string, description: string, target: PolicyTarget) => {
     try {
       await enterpriseService.createGroupPolicy(name, description, target);
       const policies = await enterpriseService.listGroupPolicies();
       set({ policies });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -65,7 +65,7 @@ export const useEnterpriseStore = create<EnterpriseState>((set) => ({
       await enterpriseService.deleteGroupPolicy(id);
       const policies = await enterpriseService.listGroupPolicies();
       set({ policies });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -75,7 +75,7 @@ export const useEnterpriseStore = create<EnterpriseState>((set) => ({
       await enterpriseService.toggleGroupPolicy(id, enabled);
       const policies = await enterpriseService.listGroupPolicies();
       set({ policies });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },

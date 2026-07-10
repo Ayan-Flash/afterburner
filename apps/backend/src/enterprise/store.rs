@@ -11,6 +11,12 @@ pub struct EnterpriseStore {
     policies_dir: PathBuf,
 }
 
+impl Default for EnterpriseStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EnterpriseStore {
     pub fn new() -> Self {
         let base = dirs_next::config_dir()

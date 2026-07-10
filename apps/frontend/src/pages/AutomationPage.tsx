@@ -49,24 +49,24 @@ function RuleCard({ rule, onToggle, onDelete }: { rule: Rule; onToggle: () => vo
   })();
 
   return (
-    <div className={`card p-4 flex flex-col gap-3 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}>
+    <div className={`card flex flex-col gap-3 p-4 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}>
       <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-semibold text-text-primary">{rule.name}</span>
-            <span className="text-[10px] text-text-dim font-mono">{triggerLabel}</span>
+        <div className="min-w-0 flex-1">
+          <div className="mb-0.5 flex items-center gap-2">
+            <span className="text-text-primary text-sm font-semibold">{rule.name}</span>
+            <span className="text-text-dim font-mono text-[10px]">{triggerLabel}</span>
           </div>
           {rule.description && (
-            <p className="text-xs text-text-muted truncate">{rule.description}</p>
+            <p className="text-text-muted truncate text-xs">{rule.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-[10px] text-text-dim font-mono">×{rule.execution_count}</span>
+        <div className="flex flex-shrink-0 items-center gap-2">
+          <span className="text-text-dim font-mono text-[10px]">×{rule.execution_count}</span>
           <button
             onClick={onToggle}
             className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors duration-200 ${rule.enabled ? 'bg-accent' : 'bg-gpu-600'}`}
           >
-            <span className={`inline-block w-3 h-3 transform rounded-full bg-white transition-transform duration-200 ${rule.enabled ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+            <span className={`inline-block size-3 transform rounded-full bg-white transition-transform duration-200 ${rule.enabled ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
           </button>
           <button onClick={onDelete} className="btn-ghost p-1 text-red-400 hover:text-red-300" title="Delete">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -80,9 +80,9 @@ function RuleCard({ rule, onToggle, onDelete }: { rule: Rule; onToggle: () => vo
         <div className="flex flex-col gap-1">
           {rule.conditions.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              <span className="text-[10px] text-text-dim uppercase tracking-wider mr-1">IF</span>
+              <span className="text-text-dim mr-1 text-[10px] uppercase tracking-wider">IF</span>
               {rule.conditions.map((c, i) => (
-                <span key={i} className="text-[10px] bg-gpu-700 rounded px-1.5 py-0.5">
+                <span key={i} className="bg-gpu-700 rounded px-1.5 py-0.5 text-[10px]">
                   <ConditionLabel condition={c} />
                 </span>
               ))}
@@ -90,9 +90,9 @@ function RuleCard({ rule, onToggle, onDelete }: { rule: Rule; onToggle: () => vo
           )}
           {rule.actions.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              <span className="text-[10px] text-text-dim uppercase tracking-wider mr-1">THEN</span>
+              <span className="text-text-dim mr-1 text-[10px] uppercase tracking-wider">THEN</span>
               {rule.actions.map((a, i) => (
-                <span key={i} className="text-[10px] bg-accent-subtle rounded px-1.5 py-0.5">
+                <span key={i} className="bg-accent-subtle rounded px-1.5 py-0.5 text-[10px]">
                   <ActionLabel action={a} />
                 </span>
               ))}
@@ -102,7 +102,7 @@ function RuleCard({ rule, onToggle, onDelete }: { rule: Rule; onToggle: () => vo
       )}
 
       {rule.last_triggered_at && (
-        <div className="text-[10px] text-text-dim font-mono">
+        <div className="text-text-dim font-mono text-[10px]">
           Last fired: {new Date(rule.last_triggered_at * 1000).toLocaleString()}
         </div>
       )}
@@ -121,7 +121,7 @@ export function AutomationPage() {
 
   useEffect(() => {
     fetchRules();
-  }, []);
+  }, [fetchRules]);
 
   const handleCreate = async () => {
     await createRule(name, description, triggerType, triggerValue, gpuId || undefined);
@@ -131,16 +131,16 @@ export function AutomationPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5 max-w-4xl">
-      <div className="card p-5 flex flex-col gap-4">
+    <div className="flex max-w-4xl flex-col gap-5">
+      <div className="card flex flex-col gap-4 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-sm font-semibold text-text-primary">Automation Engine</span>
-            <p className="text-xs text-text-muted mt-0.5">Create rules that trigger actions based on GPU metrics and schedules</p>
+            <span className="text-text-primary text-sm font-semibold">Automation Engine</span>
+            <p className="text-text-muted mt-0.5 text-xs">Create rules that trigger actions based on GPU metrics and schedules</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${engineRunning ? 'bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
+              <span className={`size-2 rounded-full ${engineRunning ? 'bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
               <span className={`text-xs font-semibold uppercase tracking-wider ${engineRunning ? 'text-emerald-400' : 'text-text-muted'}`}>
                 {engineRunning ? 'Running' : 'Stopped'}
               </span>
@@ -165,8 +165,8 @@ export function AutomationPage() {
       </div>
 
       {showBuilder && (
-        <div className="card p-5 flex flex-col gap-4 border-accent/30">
-          <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">New Automation Rule</span>
+        <div className="card border-accent/30 flex flex-col gap-4 p-5">
+          <span className="text-text-secondary text-xs font-semibold uppercase tracking-wider">New Automation Rule</span>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="label">Rule Name</label>
@@ -189,12 +189,12 @@ export function AutomationPage() {
               <input className="input" value={triggerValue} onChange={(e) => setTriggerValue(e.target.value)}
                 placeholder={triggerType === 'continuous' ? '10' : '*/5 * * * *'} />
             </div>
-            <div className="flex flex-col gap-1.5 col-span-2">
+            <div className="col-span-2 flex flex-col gap-1.5">
               <label className="label">Description</label>
               <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What this rule does" />
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="mt-2 flex items-center gap-2">
             <button onClick={handleCreate} disabled={!name.trim()} className="btn-primary text-xs disabled:opacity-50">
               Create Rule
             </button>
@@ -204,10 +204,10 @@ export function AutomationPage() {
       )}
 
       {loading ? (
-        <div className="card p-8 text-center"><span className="text-xs text-text-muted">Loading...</span></div>
+        <div className="card p-8 text-center"><span className="text-text-muted text-xs">Loading...</span></div>
       ) : rules.length === 0 ? (
         <div className="card p-8 text-center">
-          <span className="text-xs text-text-muted">No automation rules yet. Click "New Rule" to create one.</span>
+          <span className="text-text-muted text-xs">No automation rules yet. Click &quot;New Rule&quot; to create one.</span>
         </div>
       ) : (
         <div className="flex flex-col gap-2">

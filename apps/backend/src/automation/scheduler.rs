@@ -26,8 +26,8 @@ impl CronScheduler {
         if pattern == "*" {
             return true;
         }
-        if pattern.starts_with("*/") {
-            if let Ok(step) = pattern[2..].parse::<u32>() {
+        if let Some(step_str) = pattern.strip_prefix("*/") {
+            if let Ok(step) = step_str.parse::<u32>() {
                 if let Ok(v) = value.parse::<u32>() {
                     return step > 0 && v % step == 0;
                 }

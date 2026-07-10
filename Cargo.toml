@@ -17,3 +17,14 @@ thiserror = "1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
+
+# Optimized release profile: smaller, faster binaries for distribution.
+# lto + single codegen-unit maximize cross-crate inlining; strip removes
+# debug symbols. This meaningfully shrinks the shipped GPUControl Pro binary
+# and improves runtime throughput of the monitoring loop.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+incremental = false

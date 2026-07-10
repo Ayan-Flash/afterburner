@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 use libloading::{Library, Symbol};
-use tracing::{error, info, warn};
+use tracing::{info, warn};
 
 use super::provider::*;
 
@@ -260,7 +260,7 @@ impl GpuProvider for NvidiaProvider {
         })
     }
 
-    fn set_fan_speed(&self, gpu_id: &str, percent: f64) -> Result<(), GpuProviderError> {
+    fn set_fan_speed(&self, _gpu_id: &str, _percent: f64) -> Result<(), GpuProviderError> {
         Err(GpuProviderError::NotAvailable(
             "Fan control not implemented via NVML".into(),
         ))

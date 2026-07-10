@@ -9,6 +9,7 @@ use super::anomaly::Anomaly;
 use super::optimizer::OptimizationSuggestion;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct AiState {
     pub anomalies: Vec<Anomaly>,
     pub suggestions: Vec<OptimizationSuggestion>,
@@ -28,6 +29,12 @@ pub struct BaselineMetrics {
 pub struct AiStore {
     path: PathBuf,
     state: AiState,
+}
+
+impl Default for AiStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AiStore {
@@ -123,12 +130,3 @@ impl AiStore {
     }
 }
 
-impl Default for AiState {
-    fn default() -> Self {
-        Self {
-            anomalies: vec![],
-            suggestions: vec![],
-            baseline_stats: HashMap::new(),
-        }
-    }
-}

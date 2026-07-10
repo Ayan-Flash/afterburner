@@ -65,7 +65,7 @@ impl FanCurveTuner {
             return Self::default_curve();
         }
 
-        let min_temp = temps.iter().cloned().fold(f64::MAX, f64::min);
+        let _min_temp = temps.iter().cloned().fold(f64::MAX, f64::min);
         let max_temp = temps.iter().cloned().fold(f64::MIN, f64::max);
 
         let mut points = vec![
@@ -200,7 +200,7 @@ impl PowerTuner {
             };
         }
 
-        let avg_temp = temps.iter().sum::<f64>() / temps.len() as f64;
+        let _avg_temp = temps.iter().sum::<f64>() / temps.len() as f64;
         let max_temp = temps.iter().cloned().fold(f64::MIN, f64::max);
         let avg_power = powers.iter().sum::<f64>() / powers.len() as f64;
         let avg_util = utils.iter().sum::<f64>() / utils.len() as f64;
@@ -230,6 +230,12 @@ impl PowerTuner {
 
 pub struct TuningStore {
     path: PathBuf,
+}
+
+impl Default for TuningStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TuningStore {

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use tracing::{info, warn};
+use tracing::info;
 
 use super::config::OverlayConfig;
 use super::game_detection::GameDetector;

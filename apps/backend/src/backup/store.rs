@@ -1,13 +1,18 @@
 use std::fs;
 use std::path::PathBuf;
 
-use serde::{Deserialize, Serialize};
 use tracing::error;
 
 use super::engine::BackupMetadata;
 
 pub struct BackupStore {
     path: PathBuf,
+}
+
+impl Default for BackupStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BackupStore {

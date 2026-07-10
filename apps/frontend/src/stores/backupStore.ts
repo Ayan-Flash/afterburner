@@ -27,7 +27,7 @@ export const useBackupStore = create<BackupState>((set) => ({
     try {
       const backups = await backupService.list();
       set({ backups });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -38,7 +38,7 @@ export const useBackupStore = create<BackupState>((set) => ({
       const result = await backupService.create(name, scope);
       const backups = await backupService.list();
       set({ backups, lastResult: result, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -48,7 +48,7 @@ export const useBackupStore = create<BackupState>((set) => ({
     try {
       const result = await backupService.restore(id, scope);
       set({ lastRestore: result, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -58,7 +58,7 @@ export const useBackupStore = create<BackupState>((set) => ({
       await backupService.delete(id);
       const backups = await backupService.list();
       set({ backups });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -69,7 +69,7 @@ export const useBackupStore = create<BackupState>((set) => ({
       await backupService.import(filePath);
       const backups = await backupService.list();
       set({ backups, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },

@@ -39,6 +39,12 @@ pub struct SyncStore {
     path: PathBuf,
 }
 
+impl Default for SyncStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SyncStore {
     pub fn new() -> Self {
         let path = dirs_next::config_dir()

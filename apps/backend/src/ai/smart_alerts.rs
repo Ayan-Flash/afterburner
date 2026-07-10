@@ -210,6 +210,12 @@ pub struct ContextDetector {
     current: ContextInfo,
 }
 
+impl Default for ContextDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ContextDetector {
     pub fn new() -> Self {
         Self {
@@ -273,7 +279,7 @@ impl ContextDetector {
             confidence,
             avg_utilization: avg_util,
             avg_temperature: avg_temp,
-            avg_power: avg_power,
+            avg_power,
             duration_secs: duration,
         };
     }
@@ -357,6 +363,12 @@ pub struct SmartAlertEngine {
     pub suppressor: AlertSuppressor,
 }
 
+impl Default for SmartAlertEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SmartAlertEngine {
     pub fn new() -> Self {
         let config = SmartAlertConfig::default();
@@ -393,8 +405,8 @@ impl SmartAlertEngine {
 
         let context = self.context_detector.current_context();
 
-        if self.config.context_aware {
-            if context.context == SystemContext::Gaming || context.context == SystemContext::Benchmarking {
+        if self.config.context_aware
+            && (context.context == SystemContext::Gaming || context.context == SystemContext::Benchmarking) {
                 if let Some(threshold) = self.learner.adaptive_threshold(metric, &self.config, &context.context) {
                     if value < threshold.dynamic_threshold {
                         info!("Smart alert suppressed: {message} (context: {:?}, threshold: {:.1})", context.context, threshold.dynamic_threshold);
@@ -402,14 +414,12 @@ impl SmartAlertEngine {
                     }
                 }
             }
-        }
 
-        if self.config.suppress_duplicates {
-            if self.suppressor.should_suppress(rule_id, metric, message) {
+        if self.config.suppress_duplicates
+            && self.suppressor.should_suppress(rule_id, metric, message) {
                 warn!("Smart alert suppressed (duplicate): {message}");
                 return false;
             }
-        }
 
         if let Some(is_anom) = self.learner.is_anomalous(metric, value, &self.config, &context.context) {
             if !is_anom {
@@ -458,6 +468,12 @@ pub struct SmartAlertStore {
     path: PathBuf,
 }
 
+impl Default for SmartAlertStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SmartAlertStore {
     pub fn new() -> Self {
         let path = dirs_next::config_dir()
@@ -502,6 +518,12 @@ impl SmartAlertStore {
 pub struct SmartAlertManager {
     pub engine: std::sync::Mutex<SmartAlertEngine>,
     pub store: SmartAlertStore,
+}
+
+impl Default for SmartAlertManager {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl SmartAlertManager {

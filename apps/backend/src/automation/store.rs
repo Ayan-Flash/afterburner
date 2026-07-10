@@ -1,12 +1,18 @@
 use std::fs;
 use std::path::PathBuf;
 
-use tracing::{error, info};
+use tracing::error;
 
 use super::rule::Rule;
 
 pub struct RuleStore {
     path: PathBuf,
+}
+
+impl Default for RuleStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl RuleStore {

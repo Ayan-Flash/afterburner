@@ -163,7 +163,7 @@ impl BackupEngine {
         }
 
         if scope.tuning_profiles {
-            let tuner_store = crate::ai::tuner::TuningStore::new();
+            let _tuner_store = crate::ai::tuner::TuningStore::new();
             let path = dirs_next::config_dir()
                 .unwrap_or_else(|| std::path::PathBuf::from("."))
                 .join("gpucontrol-pro")

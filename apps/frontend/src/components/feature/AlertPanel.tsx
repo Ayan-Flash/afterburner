@@ -14,23 +14,23 @@ export function AlertPanel() {
   if (alerts.length === 0) {
     return (
       <div className="card p-4 text-center">
-        <span className="text-xs text-text-muted">No alerts</span>
+        <span className="text-text-muted text-xs">No alerts</span>
       </div>
     );
   }
 
   return (
-    <div className="card p-3 flex flex-col gap-2">
+    <div className="card flex flex-col gap-2 p-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-text-primary tracking-wide uppercase">Alerts</span>
+          <span className="text-text-primary text-xs font-semibold uppercase tracking-wide">Alerts</span>
           {unacknowledgedCount > 0 && (
-            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-accent/20 text-accent-bright text-[10px] font-bold px-1">
+            <span className="bg-accent/20 text-accent-bright inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold">
               {unacknowledgedCount}
             </span>
           )}
         </div>
-        <button onClick={clearAlerts} className="text-[10px] text-text-muted hover:text-text-secondary transition-colors uppercase tracking-wider">
+        <button onClick={clearAlerts} className="text-text-muted hover:text-text-secondary text-[10px] uppercase tracking-wider transition-colors">
           Clear
         </button>
       </div>
@@ -43,13 +43,13 @@ export function AlertPanel() {
               alert.acknowledged ? 'opacity-40' : ''
             }`}
           >
-            <span className="flex-1 text-text-secondary leading-relaxed">{alert.message}</span>
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <span className="text-[10px] text-text-dim">{new Date(alert.timestamp).toLocaleTimeString()}</span>
+            <span className="text-text-secondary flex-1 leading-relaxed">{alert.message}</span>
+            <div className="flex flex-shrink-0 items-center gap-1.5">
+              <span className="text-text-dim text-[10px]">{new Date(alert.timestamp).toLocaleTimeString()}</span>
               {!alert.acknowledged && (
                 <button
                   onClick={() => acknowledgeAlert(alert.id)}
-                  className="w-4 h-4 rounded bg-gpu-700 hover:bg-gpu-600 text-text-muted hover:text-text-secondary flex items-center justify-center transition-colors"
+                  className="bg-gpu-700 hover:bg-gpu-600 text-text-muted hover:text-text-secondary flex size-4 items-center justify-center rounded transition-colors"
                   title="Acknowledge"
                 >
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

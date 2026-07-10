@@ -4,4 +4,3 @@ pub mod obs;
 
 pub use config::{IntegrationConfig, IntegrationStore};
 pub use discord::DiscordWebhook;
-pub use obs::ObsSource;

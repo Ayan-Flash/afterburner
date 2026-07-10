@@ -6,7 +6,7 @@ export function GpuSelector() {
 
   if (gpus.length === 0) {
     return (
-      <div className="text-sm text-surface-500">No GPUs detected</div>
+      <div className="text-surface-500 text-sm">No GPUs detected</div>
     );
   }
 

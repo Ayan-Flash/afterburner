@@ -30,25 +30,25 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5 max-w-xl">
-      <div className="card p-5 flex flex-col gap-4">
-        <span className="text-sm font-semibold text-text-primary">Monitoring</span>
+    <div className="flex max-w-xl flex-col gap-5">
+      <div className="card flex flex-col gap-4 p-5">
+        <span className="text-text-primary text-sm font-semibold">Monitoring</span>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-secondary">Status</span>
+          <span className="text-text-secondary text-xs">Status</span>
           <div className="flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
-            <span className="text-xs font-medium text-text-secondary">{isRunning ? 'Running' : 'Stopped'}</span>
+            <span className={`size-2 rounded-full ${isRunning ? 'bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
+            <span className="text-text-secondary text-xs font-medium">{isRunning ? 'Running' : 'Stopped'}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-secondary">Sample Rate</span>
+          <span className="text-text-secondary text-xs">Sample Rate</span>
           <div className="flex items-center gap-2">
             <input type="number" min={100} max={5000} step={100} value={sampleRate}
               onChange={(e) => setSampleRate(Number(e.target.value))}
               className="input w-20 text-xs" />
-            <span className="text-xs text-text-muted">ms</span>
+            <span className="text-text-muted text-xs">ms</span>
           </div>
         </div>
 
@@ -65,13 +65,13 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <div className="card p-5 flex flex-col gap-4">
-        <span className="text-sm font-semibold text-text-primary">Appearance</span>
+      <div className="card flex flex-col gap-4 p-5">
+        <span className="text-text-primary text-sm font-semibold">Appearance</span>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-secondary">Theme</span>
-          <select value={theme} onChange={(e) => persistTheme(e.target.value as any)}
-            className="input text-xs w-28">
+          <span className="text-text-secondary text-xs">Theme</span>
+          <select value={theme} onChange={(e) => persistTheme(e.target.value as 'dark' | 'light' | 'system')}
+            className="input w-28 text-xs">
             <option value="dark">Dark</option>
             <option value="light">Light</option>
             <option value="system">System</option>
@@ -79,8 +79,8 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <div className="card p-5 flex flex-col gap-4">
-        <span className="text-sm font-semibold text-text-primary">About</span>
+      <div className="card flex flex-col gap-4 p-5">
+        <span className="text-text-primary text-sm font-semibold">About</span>
         <div className="flex items-center justify-between text-xs">
           <span className="text-text-muted">Version</span>
           <span className="text-text-primary font-mono">0.2.0</span>

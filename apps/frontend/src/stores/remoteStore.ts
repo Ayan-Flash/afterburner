@@ -54,8 +54,8 @@ export const useRemoteStore = create<RemoteStore>((set, get) => ({
       const status = await remoteService.getStatus();
       set({
         running: status.running,
-        url: (status as any).url ?? null,
-        port: (status as any).port ?? get().port,
+        url: status.url ?? null,
+        port: status.port ?? get().port,
       });
     } catch {
       // server not reachable

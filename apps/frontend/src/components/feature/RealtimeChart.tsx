@@ -21,15 +21,15 @@ export function RealtimeChart({ data, metric, color, label, unit, height = 120 }
   const displayValue = typeof currentValue === 'number' ? currentValue.toFixed(1) : '--';
 
   return (
-    <div className="card p-3.5 flex flex-col gap-2">
+    <div className="card flex flex-col gap-2 p-3.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}60` }} />
-          <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">{label}</span>
+          <span className="size-2 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}60` }} />
+          <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">{label}</span>
         </div>
-        <span className="metric-value text-sm text-text-primary">
+        <span className="metric-value text-text-primary text-sm">
           {displayValue}
-          <span className="ml-0.5 text-[10px] font-normal text-text-muted">{unit}</span>
+          <span className="text-text-muted ml-0.5 text-[10px] font-normal">{unit}</span>
         </span>
       </div>
 
@@ -57,7 +57,7 @@ export function RealtimeChart({ data, metric, color, label, unit, height = 120 }
           </ResponsiveContainer>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="text-[10px] text-text-dim">Waiting for data...</span>
+            <span className="text-text-dim text-[10px]">Waiting for data...</span>
           </div>
         )}
       </div>

@@ -24,19 +24,19 @@ export function Header() {
   const gpuCount = useGpuStore((s) => s.gpus.length);
 
   return (
-    <header className="flex h-12 items-center justify-between border-b border-gpu-700 bg-gpu-900/50 backdrop-blur-sm px-6 flex-shrink-0">
+    <header className="border-gpu-700 bg-gpu-900/50 flex h-12 flex-shrink-0 items-center justify-between border-b px-6 backdrop-blur-sm">
       <div className="flex items-center gap-3">
-        <h2 className="text-base font-semibold text-text-primary tracking-tight">
+        <h2 className="text-text-primary text-base font-semibold tracking-tight">
           {pageTitles[currentPage] ?? 'Dashboard'}
         </h2>
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5 rounded-md bg-gpu-700/50 border border-gpu-600 px-2.5 py-1">
+        <div className="bg-gpu-700/50 border-gpu-600 flex items-center gap-1.5 rounded-md border px-2.5 py-1">
           <IconMonitor size={14} className="text-text-muted" />
-          <span className="text-xs font-medium text-text-secondary">{gpuCount} GPU</span>
+          <span className="text-text-secondary text-xs font-medium">{gpuCount} GPU</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
+          <span className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
           <span className="text-xs font-medium text-emerald-400">MONITORING</span>
         </div>
       </div>

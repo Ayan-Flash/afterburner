@@ -8,7 +8,7 @@ use crate::ai::optimizer::{OptimizationSuggestion, Optimizer};
 use crate::ai::predictor::{Prediction, Predictor};
 use crate::ai::store::AiStore;
 use crate::ai::tuner::{ClockTuner, FanCurveTuner, FanCurveResult, ClockTuneResult, PowerTuneResult, PowerTuner, TuningProfile};
-use crate::ai::smart_alerts::{SmartAlertConfig, ContextInfo, MetricBaseline, SuppressedAlert};
+use crate::ai::smart_alerts::{SmartAlertConfig, MetricBaseline, SuppressedAlert};
 
 #[tauri::command]
 pub fn get_ai_anomalies(limit: usize) -> Vec<Anomaly> {
@@ -77,7 +77,7 @@ pub fn run_ai_analysis(
 
         let avg_temp = temps.iter().sum::<f64>() / temps.len() as f64;
         let max_temp = temps.iter().cloned().fold(f64::MIN, f64::max);
-        let avg_power = powers.iter().sum::<f64>() / powers.len() as f64;
+        let _avg_power = powers.iter().sum::<f64>() / powers.len() as f64;
         let max_power = powers.iter().cloned().fold(f64::MIN, f64::max);
 
         for s in Optimizer::suggest_fan_curve(&gpu.id, &temps, &fans, avg_temp, max_temp) {

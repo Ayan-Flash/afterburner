@@ -1,8 +1,7 @@
-use std::sync::Arc;
 use tracing::{error, info};
 
 use super::rule::Action;
-use crate::alerts::{AlertEngine, AlertEvent, AlertMetric, AlertSeverity, AlertCondition};
+use crate::alerts::{AlertEngine, AlertEvent, AlertMetric, AlertSeverity};
 use crate::monitoring::MonitoringEngine;
 
 pub struct ActionExecutor;

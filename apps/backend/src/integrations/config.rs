@@ -37,6 +37,12 @@ pub struct IntegrationStore {
     path: PathBuf,
 }
 
+impl Default for IntegrationStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl IntegrationStore {
     pub fn new() -> Self {
         let path = dirs_next::config_dir()

@@ -44,7 +44,7 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
     try {
       const result = await integrationService.testDiscordWebhook(url);
       set({ testResult: result, testError: null });
-    } catch (e: any) {
+    } catch (e) {
       set({ testResult: null, testError: String(e) });
     }
   },
@@ -53,7 +53,7 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
     try {
       await integrationService.sendDiscordReport(url);
       set({ testResult: 'Report sent successfully', testError: null });
-    } catch (e: any) {
+    } catch (e) {
       set({ testResult: null, testError: String(e) });
     }
   },
@@ -62,7 +62,7 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
     try {
       await integrationService.startObsSource(port);
       set({ obsRunning: true });
-    } catch (e: any) {
+    } catch (e) {
       set({ testError: String(e) });
     }
   },
@@ -71,7 +71,7 @@ export const useIntegrationStore = create<IntegrationState>((set) => ({
     try {
       await integrationService.stopObsSource();
       set({ obsRunning: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ testError: String(e) });
     }
   },

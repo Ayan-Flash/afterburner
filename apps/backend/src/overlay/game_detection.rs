@@ -35,6 +35,12 @@ pub struct GameDetector {
     known_games: HashSet<String>,
 }
 
+impl Default for GameDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GameDetector {
     pub fn new() -> Self {
         let known_games = KNOWN_GAME_EXECUTABLES

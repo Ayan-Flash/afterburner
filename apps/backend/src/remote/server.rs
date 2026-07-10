@@ -92,7 +92,7 @@ impl HttpResponse {
 }
 
 fn route_request(req: &HttpRequest, api: &RemoteApi, auth: &AuthManager, dashboard_html: &str) -> HttpResponse {
-    if !req.auth_header.is_some() && req.path != "/" && req.path != "/api/status" && auth.is_enabled() {
+    if req.auth_header.is_none() && req.path != "/" && req.path != "/api/status" && auth.is_enabled() {
         return HttpResponse::error(401, "Unauthorized - provide API key in Authorization header");
     }
 
@@ -232,7 +232,7 @@ fn handle_connection(
     if reader.read_line(&mut start_line).is_err() {
         return;
     }
-    let parts: Vec<&str> = start_line.trim().split_whitespace().collect();
+    let parts: Vec<&str> = start_line.split_whitespace().collect();
     if parts.len() < 2 {
         return;
     }

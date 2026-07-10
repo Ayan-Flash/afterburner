@@ -1,5 +1,4 @@
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
@@ -37,7 +36,7 @@ pub fn start_monitoring(state: State<'_, SharedState>) -> AppResult<()> {
 }
 
 #[tauri::command]
-pub fn stop_monitoring(state: State<'_, SharedState>) -> AppResult<()> {
+pub fn stop_monitoring(_state: State<'_, SharedState>) -> AppResult<()> {
     if !MONITORING_ACTIVE.load(Ordering::Relaxed) {
         return Ok(());
     }
@@ -47,7 +46,7 @@ pub fn stop_monitoring(state: State<'_, SharedState>) -> AppResult<()> {
 }
 
 #[tauri::command]
-pub fn is_monitoring_running(state: State<'_, SharedState>) -> AppResult<bool> {
+pub fn is_monitoring_running(_state: State<'_, SharedState>) -> AppResult<bool> {
     Ok(MONITORING_ACTIVE.load(Ordering::Relaxed))
 }
 

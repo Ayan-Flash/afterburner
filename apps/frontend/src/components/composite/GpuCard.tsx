@@ -18,7 +18,7 @@ function MiniGauge({ value, max, color, label }: { value: number; max: number; c
         <circle cx="20" cy="20" r="16" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset} />
       </svg>
-      <span className="text-[8px] font-medium text-text-muted uppercase tracking-wider">{label}</span>
+      <span className="text-text-muted text-[8px] font-medium uppercase tracking-wider">{label}</span>
     </div>
   );
 }
@@ -34,31 +34,31 @@ export function GpuCard({ gpu, data }: GpuCardProps) {
       onClick={() => setSelectedGpu(gpu.id)}
       className={`card p-4 text-left transition-all duration-200 ${
         isSelected
-          ? 'ring-1 ring-accent/50 border-accent/30 bg-accent-subtle shadow-gpu'
+          ? 'ring-accent/50 border-accent/30 bg-accent-subtle shadow-gpu ring-1'
           : 'card-hover'
       }`}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="mb-3 flex items-start justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">{gpu.vendor}</span>
-            <span className="text-[10px] text-text-dim font-mono">#{gpu.index}</span>
+          <div className="mb-0.5 flex items-center gap-2">
+            <span className="text-text-muted text-[10px] font-semibold uppercase tracking-widest">{gpu.vendor}</span>
+            <span className="text-text-dim font-mono text-[10px]">#{gpu.index}</span>
           </div>
-          <div className="text-sm font-semibold text-text-primary truncate">{gpu.name}</div>
+          <div className="text-text-primary truncate text-sm font-semibold">{gpu.name}</div>
         </div>
         {data && (
-          <div className="flex items-baseline gap-0.5 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-baseline gap-0.5">
             <span className={`text-2xl font-bold tabular-nums ${tempColor}`}>
               {data.temperature_celsius.toFixed(0)}
             </span>
-            <span className="text-xs text-text-muted">°C</span>
+            <span className="text-text-muted text-xs">°C</span>
           </div>
         )}
       </div>
 
       {data ? (
         <>
-          <div className="grid grid-cols-4 gap-1 mb-3">
+          <div className="mb-3 grid grid-cols-4 gap-1">
             <MiniGauge value={data.core_utilization_percent} max={100} color="#f04747" label="GPU" />
             <MiniGauge value={data.memory_used_mb} max={data.memory_total_mb} color="#22d3ee" label="VRAM" />
             <MiniGauge value={data.power_watts} max={450} color="#f59e0b" label="PWR" />
@@ -73,7 +73,7 @@ export function GpuCard({ gpu, data }: GpuCardProps) {
           </div>
         </>
       ) : (
-        <div className="py-4 text-center text-xs text-text-muted">Waiting for data...</div>
+        <div className="text-text-muted py-4 text-center text-xs">Waiting for data...</div>
       )}
     </button>
   );

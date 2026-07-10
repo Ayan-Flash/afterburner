@@ -29,7 +29,7 @@ export function App() {
   useEffect(() => {
     loadSettings();
     fetchGpus();
-  }, []);
+  }, [loadSettings, fetchGpus]);
 
   useEffect(() => {
     if (gpus.length > 0 && !selectedGpuId) {
@@ -47,12 +47,12 @@ export function App() {
     <MainLayout>
       {gpus.length === 0 ? (
         <div className="flex h-full items-center justify-center">
-          <div className="text-center flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-gpu-700 border border-gpu-600 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="bg-gpu-700 border-gpu-600 flex size-14 items-center justify-center rounded-2xl border">
               <IconMonitor size={28} className="text-text-muted" />
             </div>
-            <h2 className="text-base font-semibold text-text-secondary">Initializing GPU Monitoring</h2>
-            <p className="text-sm text-text-muted">
+            <h2 className="text-text-secondary text-base font-semibold">Initializing GPU Monitoring</h2>
+            <p className="text-text-muted text-sm">
               Detecting hardware and starting monitoring engine...
             </p>
           </div>

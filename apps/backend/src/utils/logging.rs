@@ -6,15 +6,24 @@ use tracing_subscriber::EnvFilter;
 
 static LOG_DIR: OnceLock<PathBuf> = OnceLock::new();
 
-pub fn log_dir() -> &'static PathBuf {
-    LOG_DIR.get().expect("logging not initialized")
+/// Default log directory, computed without requiring logging to be initialized.
+/// Used both by `init_logging` and as the fallback for `log_dir` so that code
+/// paths which resolve paths (e.g. the database) never depend on init order.
+fn default_log_dir() -> PathBuf {
+    dirs_next::config_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("gpucontrol-pro")
+        .join("logs")
+}
+
+/// Returns the active log directory. Falls back to the default location when
+/// logging has not been initialized (e.g. in unit tests) instead of panicking.
+pub fn log_dir() -> PathBuf {
+    LOG_DIR.get().cloned().unwrap_or_else(default_log_dir)
 }
 
 pub fn init_logging() -> Option<WorkerGuard> {
-    let data_dir = dirs_next::config_dir()
-        .unwrap_or_else(|| PathBuf::from("."))
-        .join("gpucontrol-pro")
-        .join("logs");
+    let data_dir = default_log_dir();
 
     let _ = LOG_DIR.set(data_dir.clone());
     fs::create_dir_all(&data_dir).ok()?;

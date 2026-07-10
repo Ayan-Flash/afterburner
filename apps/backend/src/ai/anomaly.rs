@@ -37,6 +37,12 @@ pub struct AnomalyDetector {
     threshold: f64,
 }
 
+impl Default for AnomalyDetector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AnomalyDetector {
     pub fn new() -> Self {
         Self {
@@ -75,7 +81,7 @@ impl AnomalyDetector {
     pub fn detect_temperature_spike(&self, temps: &[f64]) -> Vec<Anomaly> {
         self.detect(temps)
             .into_iter()
-            .map(|(idx, val, expected)| Anomaly {
+            .map(|(_idx, val, expected)| Anomaly {
                 id: uuid::Uuid::new_v4().to_string(),
                 gpu_id: String::new(),
                 anomaly_type: AnomalyType::TemperatureSpike,
@@ -100,7 +106,7 @@ impl AnomalyDetector {
         self.detect(fans)
             .into_iter()
             .filter(|(_, val, _)| *val < 10.0)
-            .map(|(idx, val, expected)| Anomaly {
+            .map(|(_idx, val, expected)| Anomaly {
                 id: uuid::Uuid::new_v4().to_string(),
                 gpu_id: String::new(),
                 anomaly_type: AnomalyType::FanDrop,
@@ -123,7 +129,7 @@ impl AnomalyDetector {
         self.detect(powers)
             .into_iter()
             .filter(|(_, val, expected)| (val - expected).abs() > 20.0)
-            .map(|(idx, val, expected)| Anomaly {
+            .map(|(_idx, val, expected)| Anomaly {
                 id: uuid::Uuid::new_v4().to_string(),
                 gpu_id: String::new(),
                 anomaly_type: AnomalyType::PowerSurge,

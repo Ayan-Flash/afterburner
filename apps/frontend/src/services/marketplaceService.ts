@@ -9,7 +9,7 @@ export interface MarketplaceProfile {
   gpu_model: string;
   gpu_vendor: string;
   driver_version: string;
-  profile_data: any;
+  profile_data: unknown;
   tags: string[];
   rating_avg: number;
   rating_count: number;

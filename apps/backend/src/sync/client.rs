@@ -5,12 +5,18 @@ use std::time::Duration;
 
 use tracing::{error, info};
 
-use super::protocol::{DeviceInfo, SyncDirection, SyncManifest, SyncPayload, SyncResult};
+use super::protocol::{DeviceInfo, SyncPayload, SyncResult};
 use super::store::{SyncState, SyncStore};
 
 pub struct SyncClient {
     running: Arc<AtomicBool>,
     state: Arc<std::sync::Mutex<SyncState>>,
+}
+
+impl Default for SyncClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl SyncClient {

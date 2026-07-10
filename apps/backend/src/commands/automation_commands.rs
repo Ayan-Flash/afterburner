@@ -1,7 +1,7 @@
 use tauri::State;
 
 use super::state::SharedState;
-use crate::automation::rule::{Action, Condition, ConditionOperator, Rule, ScheduleTrigger, Trigger, EventTrigger, Comparison};
+use crate::automation::rule::{Action, Condition, Rule, ScheduleTrigger, Trigger, Comparison};
 use crate::automation::engine::AutomationEngine;
 
 fn engine() -> AutomationEngine {

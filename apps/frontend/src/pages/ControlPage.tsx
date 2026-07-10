@@ -19,7 +19,7 @@ export function ControlPage() {
     if (selectedGpuId) {
       fetchControlState(selectedGpuId);
     }
-  }, [selectedGpuId]);
+  }, [selectedGpuId, fetchControlState]);
 
   useEffect(() => {
     if (control) {
@@ -45,12 +45,12 @@ export function ControlPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5 max-w-4xl">
+    <div className="flex max-w-4xl flex-col gap-5">
       {selectedGpuId && data && (
         <div className="card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Current Status</span>
-            <span className="text-[10px] font-mono text-text-dim">{selectedGpuId}</span>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-text-secondary text-xs font-semibold uppercase tracking-wider">Current Status</span>
+            <span className="text-text-dim font-mono text-[10px]">{selectedGpuId}</span>
           </div>
           <div className="grid grid-cols-4 gap-4">
             {[
@@ -60,7 +60,7 @@ export function ControlPage() {
               { label: 'Voltage', value: `${data.core_voltage_mv.toFixed(0)} mV`, color: 'text-purple-400' },
             ].map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{s.label}</div>
+                <div className="text-text-muted mb-1 text-[10px] uppercase tracking-wider">{s.label}</div>
                 <div className={`metric-value text-base ${s.color}`}>{s.value}</div>
               </div>
             ))}
@@ -73,9 +73,9 @@ export function ControlPage() {
       )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div className="card p-4 flex flex-col gap-3">
+        <div className="card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Core Clock Offset</span>
+            <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">Core Clock Offset</span>
             <span className={`metric-value text-base ${coreOffset >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {coreOffset >= 0 ? '+' : ''}{coreOffset} MHz
             </span>
@@ -83,14 +83,14 @@ export function ControlPage() {
           <input type="range" min={-500} max={500} step={5} value={coreOffset}
             onChange={(e) => handleCoreOffset(Number(e.target.value))}
             className="slider-gpu" />
-          <div className="flex justify-between text-[10px] text-text-dim">
+          <div className="text-text-dim flex justify-between text-[10px]">
             <span>-500</span><span>0</span><span>+500</span>
           </div>
         </div>
 
-        <div className="card p-4 flex flex-col gap-3">
+        <div className="card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Memory Clock Offset</span>
+            <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">Memory Clock Offset</span>
             <span className={`metric-value text-base ${memOffset >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {memOffset >= 0 ? '+' : ''}{memOffset} MHz
             </span>
@@ -98,14 +98,14 @@ export function ControlPage() {
           <input type="range" min={-2000} max={2000} step={10} value={memOffset}
             onChange={(e) => handleMemOffset(Number(e.target.value))}
             className="slider-gpu" />
-          <div className="flex justify-between text-[10px] text-text-dim">
+          <div className="text-text-dim flex justify-between text-[10px]">
             <span>-2000</span><span>0</span><span>+2000</span>
           </div>
         </div>
 
-        <div className="card p-4 flex flex-col gap-3">
+        <div className="card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Power Limit</span>
+            <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">Power Limit</span>
             <span className="metric-value text-base text-amber-400">{powerLimit}%</span>
           </div>
           <input type="range" min={50} max={150} step={1} value={powerLimit}
@@ -114,14 +114,14 @@ export function ControlPage() {
               if (selectedGpuId) controlService.setPowerLimit(selectedGpuId, Number(e.target.value));
             }}
             className="slider-gpu [&::-webkit-slider-thumb]:bg-amber-500" />
-          <div className="flex justify-between text-[10px] text-text-dim">
+          <div className="text-text-dim flex justify-between text-[10px]">
             <span>50%</span><span>100%</span><span>150%</span>
           </div>
         </div>
 
-        <div className="card p-4 flex flex-col gap-3">
+        <div className="card flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">Voltage Offset</span>
+            <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">Voltage Offset</span>
             <span className={`metric-value text-base ${voltageOffset >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {voltageOffset >= 0 ? '+' : ''}{voltageOffset} mV
             </span>
@@ -132,7 +132,7 @@ export function ControlPage() {
               if (selectedGpuId) controlService.setVoltageOffset(selectedGpuId, Number(e.target.value));
             }}
             className="slider-gpu [&::-webkit-slider-thumb]:bg-purple-500" />
-          <div className="flex justify-between text-[10px] text-text-dim">
+          <div className="text-text-dim flex justify-between text-[10px]">
             <span>-200</span><span>0</span><span>+200</span>
           </div>
         </div>

@@ -27,7 +27,7 @@ export const useReportingStore = create<ReportingState>((set) => ({
     try {
       const reports = await reportingService.listReports();
       set({ reports, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -38,7 +38,7 @@ export const useReportingStore = create<ReportingState>((set) => ({
       await reportingService.generateReport(name, config);
       const reports = await reportingService.listReports();
       set({ reports, generating: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), generating: false });
     }
   },
@@ -48,7 +48,7 @@ export const useReportingStore = create<ReportingState>((set) => ({
     try {
       const report = await reportingService.getReport(id);
       set({ currentReport: report, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -58,7 +58,7 @@ export const useReportingStore = create<ReportingState>((set) => ({
       await reportingService.deleteReport(id);
       const reports = await reportingService.listReports();
       set({ reports, currentReport: null });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },

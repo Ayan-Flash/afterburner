@@ -9,6 +9,12 @@ pub struct MarketplaceStore {
     path: PathBuf,
 }
 
+impl Default for MarketplaceStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MarketplaceStore {
     pub fn new() -> Self {
         let path = dirs_next::config_dir()

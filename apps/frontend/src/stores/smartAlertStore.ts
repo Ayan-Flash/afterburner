@@ -37,7 +37,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
         smartAlertService.getSuppressed(),
       ]);
       set({ config, baselines, context, suppressed, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -46,7 +46,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
     try {
       const config = await smartAlertService.getStatus();
       set({ config });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -55,7 +55,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
     try {
       const baselines = await smartAlertService.getBaselines();
       set({ baselines });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -64,7 +64,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
     try {
       const context = await smartAlertService.getContext();
       set({ context });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -73,7 +73,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
     try {
       const suppressed = await smartAlertService.getSuppressed();
       set({ suppressed });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -82,7 +82,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
     try {
       await smartAlertService.updateConfig(config);
       set({ config });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -92,7 +92,7 @@ export const useSmartAlertStore = create<SmartAlertState>((set) => ({
       await smartAlertService.resetBaselines();
       const baselines = await smartAlertService.getBaselines();
       set({ baselines });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },

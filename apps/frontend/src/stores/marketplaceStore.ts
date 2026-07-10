@@ -35,7 +35,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
       const { filter, search } = get();
       const profiles = await marketplaceService.list(filter, search);
       set({ profiles, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -58,7 +58,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
     try {
       const profile = await marketplaceService.get(id);
       set({ selected: profile });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -68,7 +68,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
     try {
       await marketplaceService.publish(profile);
       await get().fetchProfiles();
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -78,7 +78,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
       await marketplaceService.delete(id);
       if (get().selected?.id === id) set({ selected: null });
       await get().fetchProfiles();
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -94,7 +94,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
       });
       set({ selected: profile });
       await get().fetchProfiles();
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -105,7 +105,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
       await marketplaceService.import(json);
       await get().fetchProfiles();
       set({ loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -113,7 +113,7 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
   exportProfile: async (id: string) => {
     try {
       return await marketplaceService.export(id);
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
       return '';
     }

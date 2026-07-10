@@ -4,6 +4,5 @@ pub mod server;
 pub mod store;
 
 pub use client::SyncClient;
-pub use protocol::{DeviceInfo, SyncDirection, SyncManifest, SyncPayload, SyncStatus, SyncResult};
+pub use protocol::{SyncStatus, SyncResult};
 pub use server::SyncServer;
-pub use store::SyncStore;

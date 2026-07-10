@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tracing::error;
 use super::MarketplaceStore;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,7 +48,7 @@ impl MarketplaceEngine {
                 } else if filter == "mine" {
                     p.author_id == "local"
                 } else {
-                    p.tags.iter().any(|t| t == &filter)
+                    p.tags.iter().any(|t| t == filter)
                 };
                 let matches_search = if search.is_empty() {
                     true

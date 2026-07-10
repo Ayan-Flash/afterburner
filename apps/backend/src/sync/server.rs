@@ -1,4 +1,3 @@
-use std::io::Read;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -70,7 +69,7 @@ impl SyncServer {
 
     fn read_body(request: &mut tiny_http::Request) -> String {
         let mut body = String::new();
-        let mut reader = request.as_reader();
+        let reader = request.as_reader();
         let _ = reader.read_to_string(&mut body);
         body
     }

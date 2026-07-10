@@ -6,6 +6,12 @@ pub struct AuthManager {
     api_key: RwLock<Option<String>>,
 }
 
+impl Default for AuthManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AuthManager {
     pub fn new() -> Self {
         Self {

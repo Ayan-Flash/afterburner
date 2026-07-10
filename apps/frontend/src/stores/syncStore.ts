@@ -34,7 +34,7 @@ export const useSyncStore = create<SyncState>((set) => ({
     try {
       const status = await syncService.getSyncStatus();
       set({ status });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -45,7 +45,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       await syncService.registerDevice(serverUrl, apiKey);
       const status = await syncService.getSyncStatus();
       set({ status, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -55,7 +55,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       await syncService.unregisterDevice();
       const status = await syncService.getSyncStatus();
       set({ status });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -66,7 +66,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       const result = await syncService.syncNow();
       const status = await syncService.getSyncStatus();
       set({ lastResult: result, status, loading: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), loading: false });
     }
   },
@@ -76,7 +76,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       await syncService.startSyncClient();
       const status = await syncService.getSyncStatus();
       set({ status });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -86,7 +86,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       await syncService.stopSyncClient();
       const status = await syncService.getSyncStatus();
       set({ status });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -96,7 +96,7 @@ export const useSyncStore = create<SyncState>((set) => ({
       await syncService.updateSyncSettings(serverUrl, apiKey, interval, syncProfiles, syncReports, syncPolicies);
       const status = await syncService.getSyncStatus();
       set({ status });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },

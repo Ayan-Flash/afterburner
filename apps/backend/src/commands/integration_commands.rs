@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tauri::State;
 
-use super::state::{AppState, SharedState};
+use super::state::AppState;
 use crate::integrations::{DiscordWebhook, IntegrationConfig, IntegrationStore};
 
 #[tauri::command]
@@ -70,7 +70,7 @@ pub async fn send_discord_report(
 
 #[tauri::command]
 pub async fn start_obs_source(
-    port: u16,
+    _port: u16,
     state: State<'_, Arc<AppState>>,
 ) -> Result<(), String> {
     let engine = state.monitoring.clone();

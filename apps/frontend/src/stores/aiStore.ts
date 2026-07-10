@@ -33,7 +33,7 @@ export const useAiStore = create<AiState>((set) => ({
     try {
       const anomalies = await aiService.getAiAnomalies(limit);
       set({ anomalies });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -42,7 +42,7 @@ export const useAiStore = create<AiState>((set) => ({
     try {
       const suggestions = await aiService.getAiSuggestions();
       set({ suggestions });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -51,7 +51,7 @@ export const useAiStore = create<AiState>((set) => ({
     try {
       await aiService.clearAiAnomalies();
       set({ anomalies: [] });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -61,7 +61,7 @@ export const useAiStore = create<AiState>((set) => ({
       await aiService.dismissAiSuggestion(id);
       const suggestions = await aiService.getAiSuggestions();
       set({ suggestions });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -72,7 +72,7 @@ export const useAiStore = create<AiState>((set) => ({
       const [, suggestions] = await aiService.runAiAnalysis();
       const anomalies = await aiService.getAiAnomalies(50);
       set({ anomalies, suggestions, analyzing: false });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e), analyzing: false });
     }
   },
@@ -81,7 +81,7 @@ export const useAiStore = create<AiState>((set) => ({
     try {
       const prediction = await aiService.predictGpuTemperature(gpuId);
       set({ tempPrediction: prediction });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },
@@ -90,7 +90,7 @@ export const useAiStore = create<AiState>((set) => ({
     try {
       const prediction = await aiService.predictGpuUtilization(gpuId);
       set({ utilPrediction: prediction });
-    } catch (e: any) {
+    } catch (e) {
       set({ error: String(e) });
     }
   },

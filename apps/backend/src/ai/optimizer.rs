@@ -29,7 +29,7 @@ impl Optimizer {
         gpu_id: &str,
         temps: &[f64],
         fans: &[f64],
-        avg_temp: f64,
+        _avg_temp: f64,
         max_temp: f64,
     ) -> Vec<OptimizationSuggestion> {
         let mut suggestions = vec![];
@@ -52,7 +52,7 @@ impl Optimizer {
                         "GPU reaches {:.0}°C but fans average only {:.0}%. Increase fan curve for better cooling.",
                         max_temp, avg_fan_at_high_temp
                     ),
-                    potential_benefit: format!("Reduce peak temperature by 5-10°C"),
+                    potential_benefit: "Reduce peak temperature by 5-10°C".to_string(),
                     confidence: 0.75,
                     applied: false,
                     timestamp: chrono::Utc::now().timestamp(),
@@ -98,7 +98,7 @@ impl Optimizer {
 
     pub fn suggest_underclock(
         gpu_id: &str,
-        temps: &[f64],
+        _temps: &[f64],
         clocks: &[f64],
         max_temp: f64,
     ) -> Vec<OptimizationSuggestion> {

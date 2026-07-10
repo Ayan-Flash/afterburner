@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use tracing::{error, info};
+use tracing::info;
 
 use super::action::ActionExecutor;
 use super::condition::ConditionEvaluator;
@@ -16,6 +16,12 @@ pub struct AutomationEngine {
     store: RuleStore,
     running: Arc<AtomicBool>,
     thread_handle: Arc<std::sync::Mutex<Option<thread::JoinHandle<()>>>>,
+}
+
+impl Default for AutomationEngine {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AutomationEngine {
@@ -58,7 +64,7 @@ impl AutomationEngine {
                     let should_fire = match &rule.trigger {
                         Trigger::Continuous { interval_secs } => {
                             if *interval_secs == 0 { continue; }
-                            tick % interval_secs == 0
+                            tick.is_multiple_of(*interval_secs)
                         }
                         Trigger::Schedule(schedule) => {
                             super::scheduler::CronScheduler::matches(schedule, &now)

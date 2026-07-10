@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -8,6 +7,12 @@ use super::Report;
 
 pub struct ReportStore {
     path: PathBuf,
+}
+
+impl Default for ReportStore {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ReportStore {

@@ -24,22 +24,22 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`flex flex-col border-r border-gpu-700 bg-gpu-900/90 backdrop-blur-sm transition-all duration-200 flex-shrink-0 ${
+      className={`border-gpu-700 bg-gpu-900/90 flex flex-shrink-0 flex-col border-r backdrop-blur-sm transition-all duration-200 ${
         sidebarOpen ? 'w-56' : 'w-14'
       }`}
     >
-      <div className="flex h-14 items-center border-b border-gpu-700 px-3 gap-2.5 flex-shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-red-600 flex items-center justify-center flex-shrink-0 shadow-glow">
-          <span className="text-white font-bold text-sm">A</span>
+      <div className="border-gpu-700 flex h-14 flex-shrink-0 items-center gap-2.5 border-b px-3">
+        <div className="from-accent shadow-glow flex size-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br to-red-600">
+          <span className="text-sm font-bold text-white">A</span>
         </div>
         {sidebarOpen && (
-          <span className="text-sm font-bold tracking-wider text-text-primary">
+          <span className="text-text-primary text-sm font-bold tracking-wider">
             AFTERBURNER
           </span>
         )}
       </div>
 
-      <nav className="flex flex-col gap-0.5 p-1.5 flex-1 mt-1">
+      <nav className="mt-1 flex flex-1 flex-col gap-0.5 p-1.5">
         {navItems.map((item) => {
           const isActive = currentPage === item.id;
           const Icon = item.icon;
@@ -57,17 +57,17 @@ export function Sidebar() {
               <Icon size={18} className={isActive ? 'text-accent-bright' : ''} />
               {sidebarOpen && <span>{item.label}</span>}
               {isActive && sidebarOpen && (
-                <span className="ml-auto w-1 h-4 rounded-full bg-accent" />
+                <span className="bg-accent ml-auto h-4 w-1 rounded-full" />
               )}
             </button>
           );
         })}
       </nav>
 
-      <div className="border-t border-gpu-700 p-1.5">
+      <div className="border-gpu-700 border-t p-1.5">
         <button
           onClick={toggleSidebar}
-          className="flex items-center justify-center w-full rounded-lg p-2 text-text-muted hover:bg-gpu-700 hover:text-text-secondary transition-colors duration-150"
+          className="text-text-muted hover:bg-gpu-700 hover:text-text-secondary flex w-full items-center justify-center rounded-lg p-2 transition-colors duration-150"
           title={sidebarOpen ? 'Collapse' : 'Expand'}
         >
           {sidebarOpen ? <IconChevronLeft size={16} /> : <IconChevronRight size={16} />}

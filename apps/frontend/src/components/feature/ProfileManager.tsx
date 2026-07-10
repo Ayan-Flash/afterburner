@@ -49,7 +49,7 @@ export function ProfileManager() {
   };
 
   return (
-    <div className="card p-5 flex flex-col gap-4">
+    <div className="card flex flex-col gap-4 p-5">
       <div className="section-header">
         <span className="section-title">Profile Manager</span>
       </div>
@@ -66,7 +66,7 @@ export function ProfileManager() {
       <div className="divider" />
 
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">Saved Profiles</span>
+        <span className="text-text-muted text-xs font-medium uppercase tracking-wider">Saved Profiles</span>
         <button onClick={handleLoad} className="btn-ghost p-1" title="Refresh">
           <IconRefresh size={14} />
         </button>
@@ -74,14 +74,14 @@ export function ProfileManager() {
 
       <div className="flex flex-col gap-1.5">
         {profiles.length === 0 && (
-          <div className="py-4 text-center text-xs text-text-dim">No saved profiles</div>
+          <div className="text-text-dim py-4 text-center text-xs">No saved profiles</div>
         )}
         {profiles.map((profile, i) => (
           <div key={i}
-            className="flex items-center justify-between rounded-lg bg-gpu-700/50 border border-gpu-700 px-3 py-2.5 hover:bg-gpu-700 transition-colors">
+            className="bg-gpu-700/50 border-gpu-700 hover:bg-gpu-700 flex items-center justify-between rounded-lg border px-3 py-2.5 transition-colors">
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-text-primary">{profile.name}</span>
-              <span className="text-[10px] text-text-muted font-mono">
+              <span className="text-text-primary text-sm font-medium">{profile.name}</span>
+              <span className="text-text-muted font-mono text-[10px]">
                 Core: {profile.core_offset}MHz | Mem: {profile.mem_offset}MHz
               </span>
             </div>

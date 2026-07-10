@@ -4,6 +4,18 @@ import { GpuCard } from '../components/composite/GpuCard';
 import { MetricsGrid, METRICS, METRIC_KEYS } from '../components/feature/MetricsGrid';
 import { RealtimeChart } from '../components/feature/RealtimeChart';
 import { AlertPanel } from '../components/feature/AlertPanel';
+import type { ExportedSample, MetricStats } from '../services';
+
+// Maps aggregated-metric keys (MetricsGrid/METRICS) to their corresponding
+// per-sample field name in ExportedSample, since the two use different keys.
+const SAMPLE_KEY: Record<string, keyof ExportedSample> = {
+  temperature: 'temp',
+  core_clock: 'core',
+  memory_clock: 'mem',
+  fan_speed: 'fan',
+  power: 'power',
+  core_util: 'core_util',
+};
 export function DashboardPage() {
   const { gpus, currentData, history, aggregated, fetchGpus, fetchData, fetchHistory } = useGpuStore();
   const { selectedGpuId } = useUiStore();
@@ -12,7 +24,7 @@ export function DashboardPage() {
 
   useEffect(() => {
     fetchGpus();
-  }, []);
+  }, [fetchGpus]);
 
   useEffect(() => {
     if (selectedGpuId) {
@@ -27,15 +39,16 @@ export function DashboardPage() {
         if (intervalRef.current) clearInterval(intervalRef.current);
       };
     }
-  }, [selectedGpuId]);
+  }, [selectedGpuId, fetchData, fetchHistory]);
 
   const samples = selectedGpuId ? history.get(selectedGpuId) ?? [] : [];
   const aggr = selectedGpuId ? aggregated.get(selectedGpuId) : null;
 
-  const aggrMap: Record<string, { current: number; min: number; max: number; avg: number } | undefined> = {};
+  const aggrMap: Record<string, MetricStats | undefined> = {};
   if (aggr) {
     METRIC_KEYS.forEach((key) => {
-      aggrMap[key] = aggr[key as keyof typeof aggr] as any;
+      const value = aggr[key as keyof typeof aggr];
+      aggrMap[key] = typeof value === 'object' ? value : undefined;
     });
   }
 
@@ -58,7 +71,7 @@ export function DashboardPage() {
         <div className="section-header">
           <span className="section-title">Real-Time Charts</span>
           {samples.length > 0 && (
-            <span className="text-[10px] text-text-muted font-mono">{samples.length} samples</span>
+            <span className="text-text-muted font-mono text-[10px]">{samples.length} samples</span>
           )}
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -66,7 +79,7 @@ export function DashboardPage() {
             <RealtimeChart
               key={metric.key}
               data={samples}
-              metric={metric.key as any}
+              metric={SAMPLE_KEY[metric.key]}
               color={metric.color}
               label={metric.label}
               unit={metric.unit}
@@ -80,7 +93,7 @@ export function DashboardPage() {
         <div className="section-header">
           <span className="section-title">Alert Feed</span>
           {alerts.length > 0 && (
-            <span className="text-[10px] text-text-muted">{alerts.length} total</span>
+            <span className="text-text-muted text-[10px]">{alerts.length} total</span>
           )}
         </div>
         <AlertPanel />

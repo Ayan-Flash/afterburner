@@ -59,43 +59,43 @@ export function MarketplacePage() {
   return (
     <div className="space-y-6">
       <div className="section-header">
-        <h2 className="text-lg font-semibold text-text-primary">Profile Marketplace</h2>
-        <p className="text-sm text-text-secondary mt-1">Browse, share, and download community GPU tuning profiles</p>
+        <h2 className="text-text-primary text-lg font-semibold">Profile Marketplace</h2>
+        <p className="text-text-secondary mt-1 text-sm">Browse, share, and download community GPU tuning profiles</p>
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
           <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
         </div>
       )}
 
       <div className="card p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <IconStore className="w-5 h-5 text-emerald-400" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/20">
+              <IconStore className="size-5 text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-text-primary">Browse Profiles</h3>
-              <p className="text-xs text-text-secondary">{profiles.length} profile{profiles.length !== 1 ? 's' : ''}</p>
+              <h3 className="text-text-primary text-sm font-semibold">Browse Profiles</h3>
+              <p className="text-text-secondary text-xs">{profiles.length} profile{profiles.length !== 1 ? 's' : ''}</p>
             </div>
           </div>
           <div className="flex gap-1">
             <button onClick={() => setShowImport(!showImport)} className="btn-ghost p-1.5" title="Import profile">
-              <IconUpload className="w-4 h-4" />
+              <IconUpload className="size-4" />
             </button>
             <button onClick={fetchProfiles} className="btn-ghost p-1.5" title="Refresh">
-              <IconRefresh className="w-4 h-4" />
+              <IconRefresh className="size-4" />
             </button>
           </div>
         </div>
 
-        <div className="flex gap-3 mb-4">
+        <div className="mb-4 flex gap-3">
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg bg-gpu-800 border border-gpu-700 text-text-primary text-sm"
+            className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-3 py-1.5 text-sm"
           >
             <option value="all">All</option>
             <option value="mine">My Profiles</option>
@@ -107,7 +107,7 @@ export function MarketplacePage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search profiles..."
-            className="flex-1 px-3 py-1.5 rounded-lg bg-gpu-800 border border-gpu-700 text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+            className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary flex-1 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
           />
         </div>
 
@@ -118,49 +118,49 @@ export function MarketplacePage() {
               onChange={(e) => setImportJson(e.target.value)}
               placeholder="Paste profile JSON here..."
               rows={4}
-              className="w-full px-3 py-2 rounded-lg bg-gpu-800 border border-gpu-700 text-text-primary text-sm focus:outline-none focus:border-accent-primary font-mono"
+              className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 font-mono text-sm focus:outline-none"
             />
             <div className="flex gap-2">
-              <button onClick={handleImport} className="btn-primary text-xs px-4 py-1.5">Import</button>
-              <button onClick={() => setShowImport(false)} className="btn-ghost text-xs px-4 py-1.5">Cancel</button>
+              <button onClick={handleImport} className="btn-primary px-4 py-1.5 text-xs">Import</button>
+              <button onClick={() => setShowImport(false)} className="btn-ghost px-4 py-1.5 text-xs">Cancel</button>
             </div>
           </div>
         )}
 
         {profiles.length === 0 ? (
-          <p className="text-xs text-text-muted text-center py-6">No profiles found. Import one or check back later.</p>
+          <p className="text-text-muted py-6 text-center text-xs">No profiles found. Import one or check back later.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {profiles.map((p) => (
               <div
                 key={p.id}
-                className={`px-4 py-3 rounded-lg border cursor-pointer transition-colors ${
+                className={`cursor-pointer rounded-lg border px-4 py-3 transition-colors ${
                   selected?.id === p.id
                     ? 'bg-accent-primary/10 border-accent-primary/40'
                     : 'bg-gpu-800 border-gpu-700 hover:border-gpu-600'
                 }`}
                 onClick={() => selectProfile(p.id)}
               >
-                <div className="flex items-start justify-between mb-1">
-                  <h4 className="text-sm font-semibold text-text-primary">{p.name}</h4>
+                <div className="mb-1 flex items-start justify-between">
+                  <h4 className="text-text-primary text-sm font-semibold">{p.name}</h4>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteProfile(p.id); }}
-                    className="btn-ghost p-0.5 text-text-muted hover:text-red-400"
+                    className="btn-ghost text-text-muted p-0.5 hover:text-red-400"
                   >
-                    <IconTrash2 className="w-3 h-3" />
+                    <IconTrash2 className="size-3" />
                   </button>
                 </div>
-                <p className="text-xs text-text-secondary mb-1 line-clamp-2">{p.description}</p>
-                <div className="flex items-center gap-2 text-xs text-text-muted">
+                <p className="text-text-secondary mb-1 line-clamp-2 text-xs">{p.description}</p>
+                <div className="text-text-muted flex items-center gap-2 text-xs">
                   <span className="text-yellow-400">{stars(p.rating_avg)}</span>
                   <span>({formatCount(p.rating_count)})</span>
                   <span>&middot;</span>
                   <span>{formatCount(p.download_count)} dl</span>
                 </div>
-                <div className="flex items-center gap-1 mt-1 flex-wrap">
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-gpu-700 text-text-muted">{p.gpu_model}</span>
+                <div className="mt-1 flex flex-wrap items-center gap-1">
+                  <span className="bg-gpu-700 text-text-muted rounded px-1.5 py-0.5 text-xs">{p.gpu_model}</span>
                   {p.tags.slice(0, 2).map((t) => (
-                    <span key={t} className="text-xs px-1.5 py-0.5 rounded bg-gpu-700 text-text-muted">{t}</span>
+                    <span key={t} className="bg-gpu-700 text-text-muted rounded px-1.5 py-0.5 text-xs">{t}</span>
                   ))}
                 </div>
               </div>
@@ -171,52 +171,52 @@ export function MarketplacePage() {
 
       {selected && (
         <div className="card p-5">
-          <div className="flex items-start justify-between mb-4">
+          <div className="mb-4 flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-text-primary">{selected.name}</h3>
-              <p className="text-xs text-text-secondary">by {selected.author} &middot; {formatDate(selected.created_at)}</p>
+              <h3 className="text-text-primary text-sm font-semibold">{selected.name}</h3>
+              <p className="text-text-secondary text-xs">by {selected.author} &middot; {formatDate(selected.created_at)}</p>
             </div>
             <div className="flex gap-1">
               <button onClick={handleExport} className="btn-ghost p-1.5" title="Export profile">
-                <IconDownload className="w-4 h-4" />
+                <IconDownload className="size-4" />
               </button>
             </div>
           </div>
 
-          <p className="text-sm text-text-secondary mb-3">{selected.description}</p>
+          <p className="text-text-secondary mb-3 text-sm">{selected.description}</p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="px-3 py-2 rounded-lg bg-gpu-800">
-              <p className="text-xs text-text-secondary">GPU Model</p>
-              <p className="text-sm text-text-primary">{selected.gpu_model}</p>
+          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="bg-gpu-800 rounded-lg px-3 py-2">
+              <p className="text-text-secondary text-xs">GPU Model</p>
+              <p className="text-text-primary text-sm">{selected.gpu_model}</p>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-gpu-800">
-              <p className="text-xs text-text-secondary">Vendor</p>
-              <p className="text-sm text-text-primary">{selected.gpu_vendor}</p>
+            <div className="bg-gpu-800 rounded-lg px-3 py-2">
+              <p className="text-text-secondary text-xs">Vendor</p>
+              <p className="text-text-primary text-sm">{selected.gpu_vendor}</p>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-gpu-800">
-              <p className="text-xs text-text-secondary">Driver</p>
-              <p className="text-sm text-text-primary">{selected.driver_version}</p>
+            <div className="bg-gpu-800 rounded-lg px-3 py-2">
+              <p className="text-text-secondary text-xs">Driver</p>
+              <p className="text-text-primary text-sm">{selected.driver_version}</p>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-gpu-800">
-              <p className="text-xs text-text-secondary">Downloads</p>
-              <p className="text-sm text-text-primary">{formatCount(selected.download_count)}</p>
+            <div className="bg-gpu-800 rounded-lg px-3 py-2">
+              <p className="text-text-secondary text-xs">Downloads</p>
+              <p className="text-text-primary text-sm">{formatCount(selected.download_count)}</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className="mb-4 flex flex-wrap gap-1">
             {selected.tags.map((t) => (
-              <span key={t} className="text-xs px-2 py-0.5 rounded bg-accent-primary/10 text-accent-primary">{t}</span>
+              <span key={t} className="bg-accent-primary/10 text-accent-primary rounded px-2 py-0.5 text-xs">{t}</span>
             ))}
           </div>
 
-          <div className="border-t border-gpu-700 pt-4 mt-4">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Rate this profile</h4>
+          <div className="border-gpu-700 mt-4 border-t pt-4">
+            <h4 className="text-text-secondary mb-3 text-xs font-semibold uppercase tracking-wider">Rate this profile</h4>
             <div className="flex items-center gap-3">
               <select
                 value={ratingScore}
                 onChange={(e) => setRatingScore(Number(e.target.value))}
-                className="px-2 py-1 rounded bg-gpu-800 border border-gpu-700 text-text-primary text-sm"
+                className="bg-gpu-800 border-gpu-700 text-text-primary rounded border px-2 py-1 text-sm"
               >
                 {[5, 4, 3, 2, 1].map((n) => (
                   <option key={n} value={n}>{'★'.repeat(n)}{'☆'.repeat(5 - n)}</option>
@@ -227,9 +227,9 @@ export function MarketplacePage() {
                 value={ratingComment}
                 onChange={(e) => setRatingComment(e.target.value)}
                 placeholder="Optional comment..."
-                className="flex-1 px-3 py-1.5 rounded-lg bg-gpu-800 border border-gpu-700 text-text-primary text-sm focus:outline-none focus:border-accent-primary"
+                className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary flex-1 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
               />
-              <button onClick={handleRate} className="btn-primary text-xs px-3 py-1.5">Rate</button>
+              <button onClick={handleRate} className="btn-primary px-3 py-1.5 text-xs">Rate</button>
             </div>
           </div>
         </div>

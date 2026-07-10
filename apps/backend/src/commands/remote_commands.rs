@@ -1,4 +1,3 @@
-use std::sync::RwLock;
 
 use tauri::State;
 use tracing::info;

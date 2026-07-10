@@ -30,6 +30,7 @@ function trendIcon(trend: string) {
 export function AiPage() {
   const { anomalies, suggestions, tempPrediction, utilPrediction, analyzing, error, fetchAnomalies, fetchSuggestions, clearAnomalies, dismissSuggestion, runAnalysis, predictTemp, predictUtil, clearError } = useAiStore();
   const smartAlertStore = useSmartAlertStore();
+  const { fetchAll: fetchSmartAlerts } = smartAlertStore;
   const [selectedGpu, setSelectedGpu] = useState('gpu_0');
   const [activeTab, setActiveTab] = useState<'anomalies' | 'predictions' | 'suggestions' | 'tuning' | 'smart_alerts'>('anomalies');
 
@@ -42,8 +43,8 @@ export function AiPage() {
   useEffect(() => {
     fetchAnomalies();
     fetchSuggestions();
-    smartAlertStore.fetchAll();
-  }, [fetchAnomalies, fetchSuggestions]);
+    fetchSmartAlerts();
+  }, [fetchAnomalies, fetchSuggestions, fetchSmartAlerts]);
 
   const handlePredict = () => {
     predictTemp(selectedGpu);
@@ -54,39 +55,39 @@ export function AiPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="section-header">
-          <h2 className="text-lg font-semibold text-text-primary">AI Insights</h2>
-          <p className="text-sm text-text-secondary mt-1">Anomaly detection, predictions, and optimization suggestions</p>
+          <h2 className="text-text-primary text-lg font-semibold">AI Insights</h2>
+          <p className="text-text-secondary mt-1 text-sm">Anomaly detection, predictions, and optimization suggestions</p>
         </div>
         <button
           onClick={runAnalysis}
           disabled={analyzing}
-          className="btn-primary text-xs px-4 py-1.5"
+          className="btn-primary px-4 py-1.5 text-xs"
         >
           {analyzing ? 'Analyzing...' : 'Run Analysis'}
         </button>
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
           <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
         </div>
       )}
 
-      <div className="flex gap-1 border-b border-gpu-800">
-        <button onClick={() => setActiveTab('anomalies')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'anomalies' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+      <div className="border-gpu-800 flex gap-1 border-b">
+        <button onClick={() => setActiveTab('anomalies')} className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'anomalies' ? 'border-accent-primary text-text-primary' : 'text-text-secondary border-transparent'}`}>
           Anomalies ({anomalies.length})
         </button>
-        <button onClick={() => setActiveTab('predictions')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'predictions' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+        <button onClick={() => setActiveTab('predictions')} className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'predictions' ? 'border-accent-primary text-text-primary' : 'text-text-secondary border-transparent'}`}>
           Predictions
         </button>
-        <button onClick={() => setActiveTab('suggestions')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'suggestions' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+        <button onClick={() => setActiveTab('suggestions')} className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'suggestions' ? 'border-accent-primary text-text-primary' : 'text-text-secondary border-transparent'}`}>
           Suggestions ({suggestions.filter(s => !s.applied).length})
         </button>
-        <button onClick={() => setActiveTab('tuning')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'tuning' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+        <button onClick={() => setActiveTab('tuning')} className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'tuning' ? 'border-accent-primary text-text-primary' : 'text-text-secondary border-transparent'}`}>
           Auto-Tuning
         </button>
-        <button onClick={() => setActiveTab('smart_alerts')} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === 'smart_alerts' ? 'border-accent-primary text-text-primary' : 'border-transparent text-text-secondary'}`}>
+        <button onClick={() => setActiveTab('smart_alerts')} className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === 'smart_alerts' ? 'border-accent-primary text-text-primary' : 'text-text-secondary border-transparent'}`}>
           Smart Alerts
         </button>
       </div>
@@ -94,31 +95,31 @@ export function AiPage() {
       {activeTab === 'anomalies' && (
         <div className="space-y-4">
           <div className="flex justify-end">
-            <button onClick={() => clearAnomalies()} className="btn-ghost text-xs px-3 py-1.5 text-red-400/60 hover:text-red-400">
-              <IconTrash2 className="w-3.5 h-3.5 mr-1 inline" />
+            <button onClick={() => clearAnomalies()} className="btn-ghost px-3 py-1.5 text-xs text-red-400/60 hover:text-red-400">
+              <IconTrash2 className="mr-1 inline size-3.5" />
               Clear All
             </button>
           </div>
           {anomalies.length === 0 ? (
             <div className="card p-8 text-center">
-              <IconZap className="w-12 h-12 mx-auto text-text-muted mb-3" />
+              <IconZap className="text-text-muted mx-auto mb-3 size-12" />
               <p className="text-text-secondary text-sm">No anomalies detected. Run an analysis to check your GPUs.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {[...anomalies].reverse().map((a) => (
-                <div key={a.id} className={`card p-4 border-l-4 ${a.severity === 'Critical' ? 'border-l-red-500' : a.severity === 'High' ? 'border-l-orange-500' : a.severity === 'Medium' ? 'border-l-yellow-500' : 'border-l-blue-500'}`}>
+                <div key={a.id} className={`card border-l-4 p-4 ${a.severity === 'Critical' ? 'border-l-red-500' : a.severity === 'High' ? 'border-l-orange-500' : a.severity === 'Medium' ? 'border-l-yellow-500' : 'border-l-blue-500'}`}>
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs px-2 py-0.5 rounded ${severityColor(a.severity)}`}>
+                      <div className="mb-1 flex items-center gap-2">
+                        <span className={`rounded px-2 py-0.5 text-xs ${severityColor(a.severity)}`}>
                           {a.severity}
                         </span>
-                        <span className="text-xs text-text-secondary">{a.anomaly_type.replace(/([A-Z])/g, ' $1').trim()}</span>
-                        <span className="text-xs text-text-muted">{a.gpu_id}</span>
+                        <span className="text-text-secondary text-xs">{a.anomaly_type.replace(/([A-Z])/g, ' $1').trim()}</span>
+                        <span className="text-text-muted text-xs">{a.gpu_id}</span>
                       </div>
-                      <p className="text-sm text-text-primary">{a.message}</p>
-                      <p className="text-xs text-text-muted mt-1">{formatDate(a.timestamp)}</p>
+                      <p className="text-text-primary text-sm">{a.message}</p>
+                      <p className="text-text-muted mt-1 text-xs">{formatDate(a.timestamp)}</p>
                     </div>
                   </div>
                 </div>
@@ -131,25 +132,25 @@ export function AiPage() {
       {activeTab === 'predictions' && (
         <div className="space-y-4">
           <div className="card p-5">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="mb-4 flex items-center gap-3">
               <select
                 value={selectedGpu}
                 onChange={(e) => setSelectedGpu(e.target.value)}
-                className="px-3 py-2 rounded-lg bg-gpu-800 border border-gpu-700 text-text-primary text-sm"
+                className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-3 py-2 text-sm"
               >
                 <option value="gpu_0">GPU 0</option>
                 <option value="gpu_1">GPU 1</option>
               </select>
-              <button onClick={handlePredict} className="btn-primary text-xs px-4 py-2">
-                <IconRefresh className="w-3.5 h-3.5 mr-1 inline" />
+              <button onClick={handlePredict} className="btn-primary px-4 py-2 text-xs">
+                <IconRefresh className="mr-1 inline size-3.5" />
                 Predict
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {tempPrediction ? (
-                <div className="px-4 py-3 rounded-lg bg-gpu-800">
-                  <h4 className="text-xs font-medium text-text-secondary mb-2">Temperature Forecast</h4>
+                <div className="bg-gpu-800 rounded-lg px-4 py-3">
+                  <h4 className="text-text-secondary mb-2 text-xs font-medium">Temperature Forecast</h4>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Current</span>
@@ -184,14 +185,14 @@ export function AiPage() {
                   </div>
                 </div>
               ) : (
-                <div className="px-4 py-3 rounded-lg bg-gpu-800 text-text-secondary text-sm flex items-center justify-center">
+                <div className="bg-gpu-800 text-text-secondary flex items-center justify-center rounded-lg px-4 py-3 text-sm">
                   Run a prediction to see temperature forecast
                 </div>
               )}
 
               {utilPrediction ? (
-                <div className="px-4 py-3 rounded-lg bg-gpu-800">
-                  <h4 className="text-xs font-medium text-text-secondary mb-2">Utilization Forecast</h4>
+                <div className="bg-gpu-800 rounded-lg px-4 py-3">
+                  <h4 className="text-text-secondary mb-2 text-xs font-medium">Utilization Forecast</h4>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Current</span>
@@ -199,11 +200,11 @@ export function AiPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">5 min</span>
-                      <span className="font-mono text-text-primary">{utilPrediction.predicted_in_5m.toFixed(1)}%</span>
+                      <span className="text-text-primary font-mono">{utilPrediction.predicted_in_5m.toFixed(1)}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">15 min</span>
-                      <span className="font-mono text-text-primary">{utilPrediction.predicted_in_15m.toFixed(1)}%</span>
+                      <span className="text-text-primary font-mono">{utilPrediction.predicted_in_15m.toFixed(1)}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Trend</span>
@@ -216,7 +217,7 @@ export function AiPage() {
                   </div>
                 </div>
               ) : (
-                <div className="px-4 py-3 rounded-lg bg-gpu-800 text-text-secondary text-sm flex items-center justify-center">
+                <div className="bg-gpu-800 text-text-secondary flex items-center justify-center rounded-lg px-4 py-3 text-sm">
                   Run a prediction to see utilization forecast
                 </div>
               )}
@@ -229,7 +230,7 @@ export function AiPage() {
         <div className="space-y-2">
           {suggestions.length === 0 ? (
             <div className="card p-8 text-center">
-              <IconSettings className="w-12 h-12 mx-auto text-text-muted mb-3" />
+              <IconSettings className="text-text-muted mx-auto mb-3 size-12" />
               <p className="text-text-secondary text-sm">No optimization suggestions yet. Run an analysis first.</p>
             </div>
           ) : (
@@ -238,23 +239,23 @@ export function AiPage() {
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-0.5 rounded bg-accent-primary/10 text-accent-primary">
+                      <span className="bg-accent-primary/10 text-accent-primary rounded px-2 py-0.5 text-xs">
                         {s.category.replace(/([A-Z])/g, ' $1').trim()}
                       </span>
                       {s.applied && (
-                        <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">Applied</span>
+                        <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">Applied</span>
                       )}
                     </div>
-                    <p className="text-sm font-medium text-text-primary">{s.title}</p>
-                    <p className="text-xs text-text-secondary">{s.description}</p>
+                    <p className="text-text-primary text-sm font-medium">{s.title}</p>
+                    <p className="text-text-secondary text-xs">{s.description}</p>
                     <p className="text-xs text-emerald-400">{s.potential_benefit}</p>
-                    <p className="text-xs text-text-muted">
+                    <p className="text-text-muted text-xs">
                       Confidence: {(s.confidence * 100).toFixed(0)}% &middot; {formatDate(s.timestamp)}
                     </p>
                   </div>
                   {!s.applied && (
-                    <button onClick={() => dismissSuggestion(s.id)} className="btn-ghost text-xs p-1.5 text-emerald-400/60 hover:text-emerald-400">
-                      <IconCheck className="w-4 h-4" />
+                    <button onClick={() => dismissSuggestion(s.id)} className="btn-ghost p-1.5 text-xs text-emerald-400/60 hover:text-emerald-400">
+                      <IconCheck className="size-4" />
                     </button>
                   )}
                 </div>
@@ -267,22 +268,22 @@ export function AiPage() {
       {activeTab === 'tuning' && (
         <div className="space-y-4">
           <div className="card p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <IconSliders className="w-5 h-5 text-accent-primary" />
-              <h3 className="text-sm font-semibold text-text-primary">Auto-Tuner</h3>
+            <div className="mb-4 flex items-center gap-3">
+              <IconSliders className="text-accent-primary size-5" />
+              <h3 className="text-text-primary text-sm font-semibold">Auto-Tuner</h3>
               <select
                 value={selectedGpu}
                 onChange={(e) => setSelectedGpu(e.target.value)}
-                className="ml-auto px-2 py-1.5 rounded bg-gpu-800 border border-gpu-700 text-text-primary text-sm"
+                className="bg-gpu-800 border-gpu-700 text-text-primary ml-auto rounded border px-2 py-1.5 text-sm"
               >
                 <option value="gpu_0">GPU 0</option>
               </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="px-4 py-3 rounded-lg bg-gpu-800">
-                <h4 className="text-xs font-medium text-text-secondary mb-2">Fan Curve</h4>
-                <p className="text-xs text-text-secondary mb-2">Analyze your GPU's thermal behavior and generate an optimal fan curve</p>
+            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="bg-gpu-800 rounded-lg px-4 py-3">
+                <h4 className="text-text-secondary mb-2 text-xs font-medium">Fan Curve</h4>
+                <p className="text-text-secondary mb-2 text-xs">Analyze your GPU&apos;s thermal behavior and generate an optimal fan curve</p>
                 <button
                   onClick={async () => {
                     setTuningLoading(true);
@@ -291,7 +292,7 @@ export function AiPage() {
                     setTuningLoading(false);
                   }}
                   disabled={tuningLoading}
-                  className="btn-primary text-xs px-3 py-1.5"
+                  className="btn-primary px-3 py-1.5 text-xs"
                 >
                   Tune Fan Curve
                 </button>
@@ -301,7 +302,7 @@ export function AiPage() {
                     <p className="text-text-secondary">Noise: <span className="text-text-primary">{fanCurveResult.estimated_noise_level}</span></p>
                     <div className="mt-1 space-y-0.5">
                       {fanCurveResult.points.filter(p => p.temperature >= 40).map((p, i) => (
-                        <div key={i} className="flex justify-between text-text-muted">
+                        <div key={i} className="text-text-muted flex justify-between">
                           <span>{p.temperature.toFixed(0)}°C</span>
                           <span className="text-text-primary">{p.fan_speed.toFixed(0)}%</span>
                         </div>
@@ -311,9 +312,9 @@ export function AiPage() {
                 )}
               </div>
 
-              <div className="px-4 py-3 rounded-lg bg-gpu-800">
-                <h4 className="text-xs font-medium text-text-secondary mb-2">Clock Offsets</h4>
-                <p className="text-xs text-text-secondary mb-2">Find safe core and memory clock offsets based on your GPU's thermal headroom</p>
+              <div className="bg-gpu-800 rounded-lg px-4 py-3">
+                <h4 className="text-text-secondary mb-2 text-xs font-medium">Clock Offsets</h4>
+                <p className="text-text-secondary mb-2 text-xs">Find safe core and memory clock offsets based on your GPU&apos;s thermal headroom</p>
                 <button
                   onClick={async () => {
                     setTuningLoading(true);
@@ -322,7 +323,7 @@ export function AiPage() {
                     setTuningLoading(false);
                   }}
                   disabled={tuningLoading}
-                  className="btn-primary text-xs px-3 py-1.5"
+                  className="btn-primary px-3 py-1.5 text-xs"
                 >
                   Tune Clocks
                 </button>
@@ -336,17 +337,17 @@ export function AiPage() {
                 )}
               </div>
 
-              <div className="px-4 py-3 rounded-lg bg-gpu-800">
-                <h4 className="text-xs font-medium text-text-secondary mb-2">Power Limit</h4>
-                <p className="text-xs text-text-secondary mb-2">Optimize power limit for best efficiency or performance</p>
-                <div className="flex items-center gap-2 mb-2">
+              <div className="bg-gpu-800 rounded-lg px-4 py-3">
+                <h4 className="text-text-secondary mb-2 text-xs font-medium">Power Limit</h4>
+                <p className="text-text-secondary mb-2 text-xs">Optimize power limit for best efficiency or performance</p>
+                <div className="mb-2 flex items-center gap-2">
                   <input
                     type="number"
                     value={maxPower}
                     onChange={(e) => setMaxPower(Number(e.target.value))}
-                    className="w-20 px-2 py-1 rounded bg-gpu-700 border border-gpu-600 text-text-primary text-xs"
+                    className="bg-gpu-700 border-gpu-600 text-text-primary w-20 rounded border px-2 py-1 text-xs"
                   />
-                  <span className="text-xs text-text-secondary">W max</span>
+                  <span className="text-text-secondary text-xs">W max</span>
                 </div>
                 <button
                   onClick={async () => {
@@ -356,7 +357,7 @@ export function AiPage() {
                     setTuningLoading(false);
                   }}
                   disabled={tuningLoading}
-                  className="btn-primary text-xs px-3 py-1.5"
+                  className="btn-primary px-3 py-1.5 text-xs"
                 >
                   Tune Power
                 </button>
@@ -372,8 +373,8 @@ export function AiPage() {
             </div>
 
             {tuningLoading && (
-              <div className="flex items-center gap-2 text-sm text-text-secondary">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent-primary" />
+              <div className="text-text-secondary flex items-center gap-2 text-sm">
+                <div className="border-accent-primary size-4 animate-spin rounded-full border-b-2" />
                 Tuning in progress...
               </div>
             )}
@@ -384,19 +385,19 @@ export function AiPage() {
       {activeTab === 'smart_alerts' && (
         <div className="space-y-4">
           <div className="card p-5">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <IconBell className="w-5 h-5 text-purple-400" />
+                <div className="flex size-10 items-center justify-center rounded-lg bg-purple-500/20">
+                  <IconBell className="size-5 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-text-primary">Smart Alert Engine</h3>
-                  <p className="text-xs text-text-secondary">AI-powered noise reduction and adaptive thresholds</p>
+                  <h3 className="text-text-primary text-sm font-semibold">Smart Alert Engine</h3>
+                  <p className="text-text-secondary text-xs">AI-powered noise reduction and adaptive thresholds</p>
                 </div>
               </div>
               <div className="flex gap-1">
                 <button onClick={() => smartAlertStore.fetchAll()} className="btn-ghost p-1.5" title="Refresh">
-                  <IconRefresh className="w-4 h-4" />
+                  <IconRefresh className="size-4" />
                 </button>
                 <button onClick={() => smartAlertStore.resetBaselines()} className="btn-ghost p-1.5 text-xs text-red-400/60 hover:text-red-400" title="Reset baselines">
                   Reset Baselines
@@ -404,36 +405,36 @@ export function AiPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <div className="px-3 py-2 rounded-lg bg-gpu-800">
-                <p className="text-xs text-text-secondary">Context</p>
-                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.context ?? 'Unknown'}</p>
-                <p className="text-xs text-text-muted">{(smartAlertStore.context?.confidence ?? 0) >= 0.5 ? 'High confidence' : 'Low confidence'}</p>
+            <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div className="bg-gpu-800 rounded-lg px-3 py-2">
+                <p className="text-text-secondary text-xs">Context</p>
+                <p className="text-text-primary text-sm font-medium">{smartAlertStore.context?.context ?? 'Unknown'}</p>
+                <p className="text-text-muted text-xs">{(smartAlertStore.context?.confidence ?? 0) >= 0.5 ? 'High confidence' : 'Low confidence'}</p>
               </div>
-              <div className="px-3 py-2 rounded-lg bg-gpu-800">
-                <p className="text-xs text-text-secondary">Avg Utilization</p>
-                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.avg_utilization.toFixed(0) ?? '-'}%</p>
+              <div className="bg-gpu-800 rounded-lg px-3 py-2">
+                <p className="text-text-secondary text-xs">Avg Utilization</p>
+                <p className="text-text-primary text-sm font-medium">{smartAlertStore.context?.avg_utilization.toFixed(0) ?? '-'}%</p>
               </div>
-              <div className="px-3 py-2 rounded-lg bg-gpu-800">
-                <p className="text-xs text-text-secondary">Avg Temperature</p>
-                <p className="text-sm font-medium text-text-primary">{smartAlertStore.context?.avg_temperature.toFixed(0) ?? '-'}°C</p>
+              <div className="bg-gpu-800 rounded-lg px-3 py-2">
+                <p className="text-text-secondary text-xs">Avg Temperature</p>
+                <p className="text-text-primary text-sm font-medium">{smartAlertStore.context?.avg_temperature.toFixed(0) ?? '-'}°C</p>
               </div>
-              <div className="px-3 py-2 rounded-lg bg-gpu-800">
-                <p className="text-xs text-text-secondary">Suppressed Alerts</p>
-                <p className="text-sm font-medium text-text-primary">{smartAlertStore.suppressed.reduce((s, a) => s + a.suppress_count, 0)}</p>
+              <div className="bg-gpu-800 rounded-lg px-3 py-2">
+                <p className="text-text-secondary text-xs">Suppressed Alerts</p>
+                <p className="text-text-primary text-sm font-medium">{smartAlertStore.suppressed.reduce((s, a) => s + a.suppress_count, 0)}</p>
               </div>
             </div>
           </div>
 
           <div className="card p-5">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Learned Baselines</h4>
+            <h4 className="text-text-secondary mb-3 text-xs font-semibold uppercase tracking-wider">Learned Baselines</h4>
             {smartAlertStore.baselines.length === 0 ? (
-              <p className="text-xs text-text-muted">No baselines learned yet. The engine needs more samples.</p>
+              <p className="text-text-muted text-xs">No baselines learned yet. The engine needs more samples.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {smartAlertStore.baselines.map((b) => (
-                  <div key={b.metric} className="px-3 py-2 rounded-lg bg-gpu-800">
-                    <p className="text-xs font-medium text-accent-primary mb-1 capitalize">{b.metric.replace(/_/g, ' ')}</p>
+                  <div key={b.metric} className="bg-gpu-800 rounded-lg px-3 py-2">
+                    <p className="text-accent-primary mb-1 text-xs font-medium capitalize">{b.metric.replace(/_/g, ' ')}</p>
                     <div className="space-y-0.5 text-xs">
                       <div className="flex justify-between">
                         <span className="text-text-secondary">Mean</span>
@@ -459,9 +460,9 @@ export function AiPage() {
           </div>
 
           <div className="card p-5">
-            <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Configuration</h4>
-            <div className="space-y-3 max-w-md">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <h4 className="text-text-secondary mb-3 text-xs font-semibold uppercase tracking-wider">Configuration</h4>
+            <div className="max-w-md space-y-3">
+              <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
                   checked={smartAlertStore.config?.enabled ?? true}
@@ -470,11 +471,11 @@ export function AiPage() {
                       smartAlertStore.updateConfig({ ...smartAlertStore.config, enabled: e.target.checked });
                     }
                   }}
-                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                  className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
                 />
-                <span className="text-sm text-text-primary">Enable Smart Alerts</span>
+                <span className="text-text-primary text-sm">Enable Smart Alerts</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
                   checked={smartAlertStore.config?.context_aware ?? true}
@@ -483,11 +484,11 @@ export function AiPage() {
                       smartAlertStore.updateConfig({ ...smartAlertStore.config, context_aware: e.target.checked });
                     }
                   }}
-                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                  className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
                 />
-                <span className="text-sm text-text-primary">Context-aware filtering</span>
+                <span className="text-text-primary text-sm">Context-aware filtering</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
                   checked={smartAlertStore.config?.suppress_duplicates ?? true}
@@ -496,12 +497,12 @@ export function AiPage() {
                       smartAlertStore.updateConfig({ ...smartAlertStore.config, suppress_duplicates: e.target.checked });
                     }
                   }}
-                  className="rounded border-gpu-600 bg-gpu-800 accent-accent-primary"
+                  className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
                 />
-                <span className="text-sm text-text-primary">Suppress duplicate alerts</span>
+                <span className="text-text-primary text-sm">Suppress duplicate alerts</span>
               </label>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-1">Adaptive Sensitivity ({smartAlertStore.config?.adaptive_sensitivity.toFixed(1) ?? '1.0'})</label>
+                <label className="text-text-secondary mb-1 block text-xs font-medium">Adaptive Sensitivity ({smartAlertStore.config?.adaptive_sensitivity.toFixed(1) ?? '1.0'})</label>
                 <input
                   type="range"
                   min="0.1"
@@ -515,7 +516,7 @@ export function AiPage() {
                   }}
                   className="slider-gpu w-full"
                 />
-                <div className="flex justify-between text-xs text-text-muted">
+                <div className="text-text-muted flex justify-between text-xs">
                   <span>Strict</span>
                   <span>Relaxed</span>
                 </div>
@@ -525,13 +526,13 @@ export function AiPage() {
 
           {smartAlertStore.suppressed.length > 0 && (
             <div className="card p-5">
-              <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Suppressed Alerts</h4>
+              <h4 className="text-text-secondary mb-3 text-xs font-semibold uppercase tracking-wider">Suppressed Alerts</h4>
               <div className="space-y-1">
                 {smartAlertStore.suppressed.filter(s => s.suppress_count > 0).map((s, i) => (
-                  <div key={`${s.rule_id}-${i}`} className="px-3 py-2 rounded-lg bg-gpu-800 flex items-center justify-between">
+                  <div key={`${s.rule_id}-${i}`} className="bg-gpu-800 flex items-center justify-between rounded-lg px-3 py-2">
                     <div>
-                      <p className="text-xs text-text-primary">{s.message}</p>
-                      <p className="text-xs text-text-muted">Suppressed {s.suppress_count} times</p>
+                      <p className="text-text-primary text-xs">{s.message}</p>
+                      <p className="text-text-muted text-xs">Suppressed {s.suppress_count} times</p>
                     </div>
                     <span className="text-xs text-emerald-400">-{s.suppress_count}</span>
                   </div>
