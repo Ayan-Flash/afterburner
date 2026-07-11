@@ -1,103 +1,94 @@
-import { useEffect, useRef } from 'react';
-import { useGpuStore, useUiStore, useAlertStore } from '../stores';
-import { GpuCard } from '../components/composite/GpuCard';
-import { MetricsGrid, METRICS, METRIC_KEYS } from '../components/feature/MetricsGrid';
-import { RealtimeChart } from '../components/feature/RealtimeChart';
-import { AlertPanel } from '../components/feature/AlertPanel';
-import type { ExportedSample, MetricStats } from '../services';
+import { useEffect, useRef, useState } from 'react';
+import { useGpuStore, useUiStore } from '../stores';
+import {
+  CpuGauge,
+  CpuCoreCards,
+  CpuPanel,
+  GpuPanel,
+  FanPanel,
+  GameLauncher,
+  ProfilePanel,
+  BottomTabs,
+} from '../components/armoury';
+import { useCpuData } from '../components/armoury/useCpuData';
 
-// Maps aggregated-metric keys (MetricsGrid/METRICS) to their corresponding
-// per-sample field name in ExportedSample, since the two use different keys.
-const SAMPLE_KEY: Record<string, keyof ExportedSample> = {
-  temperature: 'temp',
-  core_clock: 'core',
-  memory_clock: 'mem',
-  fan_speed: 'fan',
-  power: 'power',
-  core_util: 'core_util',
-};
+/* ================================================================
+   DashboardPage — Armoury Crate reconstruction.
+
+   Left column : CPU gauge (centerpiece) + 2x2 CPU core cards.
+   Right column: CPU panel + GPU panel (top), Fan + Game/Profile.
+   Bottom      : metric category tabs.
+
+   CPU metrics are simulated (see useCpuData); GPU metrics come
+   from the live gpuStore backed by the Rust monitoring engine.
+   ================================================================ */
+
 export function DashboardPage() {
-  const { gpus, currentData, history, aggregated, fetchGpus, fetchData, fetchHistory } = useGpuStore();
+  const { gpus, currentData, fetchData } = useGpuStore();
   const { selectedGpuId } = useUiStore();
-  const { alerts } = useAlertStore();
+  const [activeTab, setActiveTab] = useState('frequency');
+  const [fanMode, setFanMode] = useState<'silence' | 'standard' | 'turbo' | 'full'>('standard');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const cpu = useCpuData();
+
+  // Poll the selected GPU once per second for live telemetry.
   useEffect(() => {
-    fetchGpus();
-  }, [fetchGpus]);
+    if (!selectedGpuId) return;
+    fetchData(selectedGpuId);
+    intervalRef.current = setInterval(() => fetchData(selectedGpuId), 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [selectedGpuId, fetchData]);
 
-  useEffect(() => {
-    if (selectedGpuId) {
-      fetchHistory(selectedGpuId, 60);
-      fetchData(selectedGpuId);
-
-      intervalRef.current = setInterval(() => {
-        fetchData(selectedGpuId);
-      }, 1000);
-
-      return () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-      };
-    }
-  }, [selectedGpuId, fetchData, fetchHistory]);
-
-  const samples = selectedGpuId ? history.get(selectedGpuId) ?? [] : [];
-  const aggr = selectedGpuId ? aggregated.get(selectedGpuId) : null;
-
-  const aggrMap: Record<string, MetricStats | undefined> = {};
-  if (aggr) {
-    METRIC_KEYS.forEach((key) => {
-      const value = aggr[key as keyof typeof aggr];
-      aggrMap[key] = typeof value === 'object' ? value : undefined;
-    });
-  }
+  const gpu = selectedGpuId ? currentData.get(selectedGpuId) : undefined;
+  const gpuInfo = gpus.find((g) => g.id === selectedGpuId) ?? gpus[0];
+  const gpuLabel = (gpuInfo?.name ?? 'RTX 3060').replace(/^NVIDIA\s+/i, '').replace(/^GeForce\s+/i, '');
+  const vramTotal = gpuInfo?.memory_total_mb ? Math.round(gpuInfo.memory_total_mb / 1024) : 12;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {gpus.map((gpu) => (
-          <GpuCard key={gpu.id} gpu={gpu} data={currentData.get(gpu.id)} />
-        ))}
-      </div>
-
-      <div>
-        <div className="section-header">
-          <span className="section-title">Aggregated Metrics</span>
+    <div className="ac-dashboard">
+      <div className="ac-content">
+        {/* ---- Left column: gauge + core cards ---- */}
+        <div className="ac-left">
+          <CpuGauge value={cpu.frequency} maxValue={cpu.maxFrequency} size={340} />
+          <CpuCoreCards cores={cpu.cores} />
         </div>
-        <MetricsGrid aggregated={aggrMap} />
-      </div>
 
-      <div>
-        <div className="section-header">
-          <span className="section-title">Real-Time Charts</span>
-          {samples.length > 0 && (
-            <span className="text-text-muted font-mono text-[10px]">{samples.length} samples</span>
-          )}
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {METRICS.map((metric) => (
-            <RealtimeChart
-              key={metric.key}
-              data={samples}
-              metric={SAMPLE_KEY[metric.key]}
-              color={metric.color}
-              label={metric.label}
-              unit={metric.unit}
-              height={80}
+        {/* ---- Right column: info + utility panels ---- */}
+        <div className="ac-right">
+          <div className="ac-right__top">
+            <CpuPanel
+              coreIndex={0}
+              frequency={cpu.cores[0]?.frequency ?? 4139}
+              voltage={cpu.voltage}
+              temperature={cpu.temperature}
+              maxFrequency={cpu.maxFrequency}
             />
-          ))}
+            <GpuPanel
+              gpuName={gpuLabel}
+              frequency={gpu ? Math.round(gpu.core_clock_mhz) : 219}
+              voltage={gpu ? gpu.core_voltage_mv / 1000 : 0.625}
+              temperature={gpu ? Math.round(gpu.temperature_celsius) : 33}
+              usage={gpu ? Math.round(gpu.core_utilization_percent) : 8}
+              vramUsed={gpu ? gpu.memory_used_mb / 1024 : 1.3}
+              vramTotal={vramTotal}
+              memoryClock={gpu ? Math.round(gpu.memory_clock_mhz) : undefined}
+            />
+          </div>
+
+          <div className="ac-right__bottom">
+            <div className="ac-right__col">
+              <FanPanel activeMode={fanMode} onModeChange={(m) => setFanMode(m as typeof fanMode)} />
+              <GameLauncher />
+            </div>
+            <ProfilePanel />
+          </div>
         </div>
       </div>
 
-      <div>
-        <div className="section-header">
-          <span className="section-title">Alert Feed</span>
-          {alerts.length > 0 && (
-            <span className="text-text-muted text-[10px]">{alerts.length} total</span>
-          )}
-        </div>
-        <AlertPanel />
-      </div>
+      <BottomTabs activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }

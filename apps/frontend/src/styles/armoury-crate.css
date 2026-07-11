@@ -1,0 +1,926 @@
+/* ============================================================
+   ARMOURY CRATE — Design System
+   Pixel-accurate reconstruction from reference image.
+   ============================================================ */
+
+/* --- CSS Custom Properties (Design Tokens) --- */
+:root {
+  /* Background hierarchy */
+  --ac-bg-deep: #0c0c14;
+  --ac-bg-base: #111119;
+  --ac-bg-sidebar: #0a0a12;
+  --ac-bg-header: #12121c;
+  --ac-bg-panel: #181822;
+  --ac-bg-panel-header: #1c1c28;
+  --ac-bg-card: #1a1a26;
+  --ac-bg-card-accent: #1e1e2c;
+  --ac-bg-footer: #0e0e18;
+  --ac-bg-input: #14141e;
+
+  /* Borders */
+  --ac-border-subtle: #22222e;
+  --ac-border-panel: #2a2a38;
+  --ac-border-bright: #3a3a4a;
+  --ac-border-corner: #3a9fbf;
+
+  /* Text */
+  --ac-text-primary: #e8e8f0;
+  --ac-text-secondary: #8888a0;
+  --ac-text-muted: #555568;
+  --ac-text-dim: #3a3a4e;
+  --ac-text-white: #ffffff;
+
+  /* Accents */
+  --ac-accent-red: #cc2020;
+  --ac-accent-red-bright: #ff3333;
+  --ac-accent-blue: #2277cc;
+  --ac-accent-blue-bright: #3399ff;
+  --ac-accent-cyan: #00aadd;
+  --ac-accent-cyan-bright: #00ccff;
+  --ac-accent-teal: #00bbcc;
+
+  /* Gauge colors */
+  --ac-gauge-blue: #1155aa;
+  --ac-gauge-blue-mid: #2266bb;
+  --ac-gauge-red: #aa2222;
+  --ac-gauge-red-bright: #dd3333;
+  --ac-gauge-ring-outer: #1a2a3a;
+  --ac-gauge-ring-mid: #162030;
+  --ac-gauge-ring-inner: #121828;
+  --ac-gauge-tick: #334455;
+  --ac-gauge-tick-active: #5588aa;
+  --ac-gauge-glow-blue: rgba(30, 100, 200, 0.4);
+  --ac-gauge-glow-red: rgba(200, 40, 40, 0.3);
+
+  /* Core card accents */
+  --ac-core0-accent: #2277cc;
+  --ac-core1-accent: #cc3333;
+  --ac-core2-accent: #2277cc;
+  --ac-core3-accent: #cc3333;
+
+  /* Panel corner decoration color */
+  --ac-corner-color: #3a8aaa;
+
+  /* Frequency bar */
+  --ac-freq-bar-bg: #1a2a3a;
+  --ac-freq-bar-fill: linear-gradient(90deg, #1155aa, #2277cc, #3399dd);
+
+  /* Button colors */
+  --ac-btn-border: #3a3a4e;
+  --ac-btn-bg: #1a1a26;
+  --ac-btn-text: #8888a0;
+
+  /* Shadows */
+  --ac-shadow-panel: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --ac-shadow-glow-blue: 0 0 12px rgba(30, 100, 200, 0.15);
+  --ac-shadow-glow-red: 0 0 12px rgba(200, 40, 40, 0.15);
+  --ac-shadow-glow-cyan: 0 0 8px rgba(0, 170, 220, 0.2);
+
+  /* Typography */
+  --ac-font-ui: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+  --ac-font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  --ac-font-heading: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+
+  /* Spacing */
+  --ac-sidebar-width: 48px;
+  --ac-header-height: 64px;
+  --ac-footer-height: 44px;
+  --ac-panel-padding: 14px;
+  --ac-panel-gap: 10px;
+  --ac-corner-size: 8px;
+  --ac-corner-thickness: 1.5px;
+
+  /* Border radius */
+  --ac-radius-panel: 2px;
+  --ac-radius-card: 2px;
+  --ac-radius-button: 2px;
+}
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--ac-font-ui);
+  background: var(--ac-bg-deep);
+  color: var(--ac-text-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ac-border-subtle);
+  border-radius: 2px;
+}
+
+/* --- App Shell --- */
+.ac-app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--ac-bg-deep);
+}
+
+/* --- Title Bar --- */
+.ac-titlebar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  background: #0a0a10;
+  padding: 0 8px;
+  gap: 8px;
+  -webkit-app-region: drag;
+}
+
+.ac-titlebar__logo {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.ac-titlebar__text {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ac-text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.ac-titlebar__controls {
+  margin-left: auto;
+  display: flex;
+  gap: 0;
+  -webkit-app-region: no-drag;
+}
+
+.ac-titlebar__btn {
+  width: 46px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--ac-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ac-titlebar__btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ac-titlebar__btn--close:hover {
+  background: #c42b1c;
+  color: white;
+}
+
+/* --- Sidebar --- */
+.ac-sidebar {
+  width: var(--ac-sidebar-width);
+  min-width: var(--ac-sidebar-width);
+  background: var(--ac-bg-sidebar);
+  border-right: 1px solid var(--ac-border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+}
+
+.ac-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+
+.ac-sidebar__item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  background: transparent;
+  border: none;
+  color: var(--ac-text-muted);
+  padding: 0;
+}
+
+.ac-sidebar__item:hover {
+  color: var(--ac-text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ac-sidebar__item--active {
+  color: var(--ac-text-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ac-sidebar__item--active::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  background: var(--ac-accent-cyan);
+  border-radius: 0 2px 2px 0;
+}
+
+.ac-sidebar__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ac-sidebar__bottom {
+  padding-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ac-sidebar__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #cc2020;
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* --- Main Area --- */
+.ac-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* --- Header --- */
+.ac-header {
+  height: var(--ac-header-height);
+  min-height: var(--ac-header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: transparent;
+  gap: 16px;
+}
+
+.ac-header__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ac-text-white);
+  letter-spacing: 0.3px;
+}
+
+.ac-header__specs {
+  font-size: 11px;
+  color: var(--ac-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+  margin-left: 24px;
+}
+
+.ac-header__spec-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ac-header__spec-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.ac-header__specs-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ac-accent-cyan);
+  flex-shrink: 0;
+}
+
+.ac-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.ac-header__icon-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--ac-border-subtle);
+  border-radius: 2px;
+  color: var(--ac-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.ac-header__icon-btn:hover {
+  border-color: var(--ac-border-bright);
+  color: var(--ac-text-primary);
+}
+
+.ac-header__icon-btn--active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--ac-border-bright);
+  color: var(--ac-text-white);
+}
+
+/* --- Dashboard wrapper (content + bottom tabs) --- */
+.ac-dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- Content Area --- */
+.ac-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  padding: 4px 24px 16px;
+  gap: 20px;
+  min-height: 0;
+}
+
+/* --- Left Column (Gauge + Core Cards) --- */
+.ac-left {
+  display: flex;
+  flex-direction: column;
+  width: 46%;
+  min-width: 380px;
+  gap: 14px;
+}
+
+/* --- Right Column (Panels) --- */
+.ac-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ac-right__top {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+}
+
+.ac-right__middle {
+  display: flex;
+  gap: 10px;
+}
+
+.ac-right__bottom {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.ac-right__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* --- Panel Frame --- */
+.ac-panel {
+  background: var(--ac-bg-panel);
+  border: 1px solid var(--ac-border-panel);
+  border-radius: var(--ac-radius-panel);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--ac-shadow-panel);
+  overflow: hidden;
+}
+
+.ac-panel--flex1 {
+  flex: 1;
+}
+
+/* Panel header bar */
+.ac-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--ac-bg-panel-header);
+  border-bottom: 1px solid var(--ac-border-subtle);
+  min-height: 30px;
+}
+
+.ac-panel__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ac-text-primary);
+  letter-spacing: 0.3px;
+}
+
+.ac-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ac-panel__action-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--ac-text-muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 2px;
+}
+
+.ac-panel__action-btn:hover {
+  color: var(--ac-text-secondary);
+}
+
+.ac-panel__body {
+  padding: var(--ac-panel-padding);
+  flex: 1;
+}
+
+/* Corner decorations */
+.ac-panel::before,
+.ac-panel::after {
+  content: '';
+  position: absolute;
+  width: var(--ac-corner-size);
+  height: var(--ac-corner-size);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ac-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top: var(--ac-corner-thickness) solid var(--ac-corner-color);
+  border-left: var(--ac-corner-thickness) solid var(--ac-corner-color);
+}
+
+.ac-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: var(--ac-corner-thickness) solid var(--ac-corner-color);
+  border-right: var(--ac-corner-thickness) solid var(--ac-corner-color);
+}
+
+/* Additional corners via inner pseudo-elements on header */
+.ac-panel__header::before,
+.ac-panel__header::after {
+  content: '';
+  position: absolute;
+  width: var(--ac-corner-size);
+  height: var(--ac-corner-size);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ac-panel__header::before {
+  top: -1px;
+  right: -1px;
+  border-top: var(--ac-corner-thickness) solid var(--ac-corner-color);
+  border-right: var(--ac-corner-thickness) solid var(--ac-corner-color);
+}
+
+.ac-panel__header::after {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: var(--ac-corner-thickness) solid var(--ac-corner-color);
+  border-left: var(--ac-corner-thickness) solid var(--ac-corner-color);
+  display: none; /* Only show on specific panels */
+}
+
+/* --- Info Panel (CPU / GPU style) --- */
+.ac-info-panel {
+  flex: 1;
+}
+
+.ac-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.ac-info-row__label {
+  font-size: 11px;
+  color: var(--ac-text-secondary);
+  font-weight: 400;
+}
+
+.ac-info-row__value {
+  font-size: 12px;
+  color: var(--ac-text-white);
+  font-weight: 600;
+  font-family: var(--ac-font-ui);
+  letter-spacing: 0.3px;
+}
+
+/* Frequency bar */
+.ac-freq-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--ac-freq-bar-bg);
+  border-radius: 1px;
+  margin: 4px 0 8px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.ac-freq-bar__fill {
+  height: 100%;
+  background: var(--ac-freq-bar-fill);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+/* Segmented frequency bar (like reference) */
+.ac-freq-bar--segmented {
+  display: flex;
+  gap: 1px;
+  background: transparent;
+  overflow: visible;
+}
+
+.ac-freq-bar__segment {
+  flex: 1;
+  height: 6px;
+  background: var(--ac-freq-bar-bg);
+  border-radius: 0;
+}
+
+.ac-freq-bar__segment--active {
+  background: var(--ac-accent-blue);
+  box-shadow: 0 0 4px rgba(30, 100, 200, 0.3);
+}
+
+/* --- CPU Core Cards --- */
+.ac-core-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.ac-core-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ac-bg-card);
+  border: 1px solid var(--ac-border-subtle);
+  border-radius: var(--ac-radius-card);
+  padding: 8px 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ac-core-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+.ac-core-card--blue::before {
+  background: var(--ac-accent-blue);
+  box-shadow: 0 0 6px rgba(30, 100, 200, 0.4);
+}
+
+.ac-core-card--red::before {
+  background: var(--ac-accent-red);
+  box-shadow: 0 0 6px rgba(200, 40, 40, 0.4);
+}
+
+.ac-core-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ac-core-card__icon--blue {
+  background: rgba(30, 100, 200, 0.15);
+  border: 1px solid rgba(30, 100, 200, 0.3);
+}
+
+.ac-core-card__icon--red {
+  background: rgba(200, 40, 40, 0.15);
+  border: 1px solid rgba(200, 40, 40, 0.3);
+}
+
+.ac-core-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ac-core-card__label {
+  font-size: 9px;
+  color: var(--ac-text-muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.ac-core-card__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ac-text-white);
+  font-family: var(--ac-font-ui);
+  letter-spacing: 0.5px;
+}
+
+.ac-core-card__unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ac-text-secondary);
+  margin-left: 3px;
+}
+
+/* --- Fan Panel --- */
+.ac-fan-modes {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0;
+}
+
+.ac-fan-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  background: transparent;
+  border: none;
+  color: var(--ac-text-secondary);
+}
+
+.ac-fan-mode:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ac-fan-mode--active {
+  color: var(--ac-text-white);
+}
+
+.ac-fan-mode__icon {
+  width: 36px;
+  height: 36px;
+  color: inherit;
+}
+
+.ac-fan-mode__label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* --- Game Launcher --- */
+.ac-games {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.ac-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ac-game:hover {
+  transform: scale(1.05);
+}
+
+.ac-game__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--ac-bg-card-accent);
+  border: 1px solid var(--ac-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-game__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ac-game__name {
+  font-size: 9px;
+  color: var(--ac-text-secondary);
+  text-align: center;
+  max-width: 60px;
+  line-height: 1.2;
+}
+
+/* --- Profile Panel --- */
+.ac-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  text-align: center;
+}
+
+.ac-profile__icon {
+  width: 56px;
+  height: 56px;
+  color: var(--ac-text-muted);
+}
+
+.ac-profile__welcome {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ac-text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.ac-profile__btn {
+  width: 100%;
+  max-width: 160px;
+  padding: 6px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--ac-font-ui);
+  border: 1px solid var(--ac-btn-border);
+  border-radius: var(--ac-radius-button);
+  background: var(--ac-btn-bg);
+  color: var(--ac-btn-text);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.ac-profile__btn:hover {
+  border-color: var(--ac-border-bright);
+  color: var(--ac-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* --- Bottom Tabs --- */
+.ac-footer {
+  height: var(--ac-footer-height);
+  min-height: var(--ac-footer-height);
+  display: flex;
+  align-items: stretch;
+  background: var(--ac-bg-footer);
+  border-top: 1px solid var(--ac-border-subtle);
+  padding: 0 24px;
+}
+
+.ac-footer__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ac-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: transparent;
+  position: relative;
+  font-family: var(--ac-font-ui);
+  letter-spacing: 0.3px;
+}
+
+.ac-footer__tab:hover {
+  color: var(--ac-text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ac-footer__tab--active {
+  color: var(--ac-text-white);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ac-footer__tab--active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--ac-accent-cyan);
+  box-shadow: 0 0 6px rgba(0, 170, 220, 0.3);
+}
+
+/* --- Gauge Container --- */
+.ac-gauge-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 280px;
+}
+
+/* --- Utility --- */
+.ac-mono {
+  font-family: var(--ac-font-mono);
+}
+
+.ac-text-white {
+  color: var(--ac-text-white);
+}
+
+.ac-text-muted {
+  color: var(--ac-text-muted);
+}
+
+/* Glow keyframes */
+@keyframes ac-pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes ac-gauge-sweep {
+  from { stroke-dashoffset: var(--sweep-start); }
+  to { stroke-dashoffset: var(--sweep-end); }
+}
+
+@keyframes ac-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Value update animation */
+@keyframes ac-value-flash {
+  0% { color: var(--ac-text-white); }
+  50% { color: var(--ac-accent-cyan-bright); }
+  100% { color: var(--ac-text-white); }
+}

@@ -13,14 +13,15 @@
     "windows": [
       {
         "label": "main",
-        "title": "GPUControl Pro",
-        "width": 1280,
-        "height": 800,
+        "title": "Armoury Crate",
+        "width": 1024,
+        "height": 600,
         "minWidth": 960,
-        "minHeight": 600,
+        "minHeight": 560,
         "resizable": true,
         "fullscreen": false,
-        "center": true
+        "center": true,
+        "decorations": false
       }
     ],
     "security": {
