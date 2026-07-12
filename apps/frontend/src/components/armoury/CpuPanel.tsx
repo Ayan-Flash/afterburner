@@ -1,17 +1,29 @@
+import { useEffect } from 'react';
 
+import { motion, useSpring, useTransform } from 'framer-motion';
 import { PanelFrame } from './PanelFrame';
 
 /* ================================================================
    CpuPanel — "CPU Core 0" info panel with frequency bar,
-   voltage, and temperature metrics.
+   voltage, and temperature metrics. Enhanced with Framer Motion.
    ================================================================ */
 
 interface CpuPanelProps {
   coreIndex?: number;
-  frequency: number;    // MHz
-  voltage: number;      // Volts
-  temperature: number;  // Celsius
+  frequency: number;             // MHz
+  voltage: number | null;        // Volts (null when unavailable)
+  temperature: number | null;    // Celsius (null when unavailable)
   maxFrequency?: number;
+}
+
+function SpringValue({ value, unit = '', decimals = 0 }: { value: number; unit?: string; decimals?: number }) {
+  const spring = useSpring(value, { stiffness: 80, damping: 17, mass: 0.5 });
+  useEffect(() => {
+    spring.set(value);
+  }, [value, spring]);
+
+  const display = useTransform(spring, (v) => `${v.toFixed(decimals)}${unit}`);
+  return <motion.span>{display}</motion.span>;
 }
 
 export function CpuPanel({
@@ -30,29 +42,52 @@ export function CpuPanel({
       {/* Frequency row */}
       <div className="ac-info-row">
         <span className="ac-info-row__label">Frequency</span>
-        <span className="ac-info-row__value">{frequency}MHz</span>
+        <span className="ac-info-row__value">
+          <SpringValue value={frequency} unit="MHz" />
+        </span>
       </div>
 
-      {/* Segmented frequency bar */}
+      {/* Segmented frequency bar with Framer Motion stagger/smooth layout */}
       <div className="ac-freq-bar ac-freq-bar--segmented">
-        {Array.from({ length: segmentCount }, (_, i) => (
-          <div
-            key={i}
-            className={`ac-freq-bar__segment ${i < activeSegments ? 'ac-freq-bar__segment--active' : ''}`}
-          />
-        ))}
+        {Array.from({ length: segmentCount }, (_, i) => {
+          const isActive = i < activeSegments;
+          return (
+            <motion.div
+              key={i}
+              className={`ac-freq-bar__segment ${isActive ? 'ac-freq-bar__segment--active' : ''}`}
+              animate={{
+                opacity: isActive ? 1 : 0.15,
+                scaleY: isActive ? 1 : 0.85,
+                backgroundColor: isActive ? 'rgba(59, 152, 232, 1)' : 'rgba(59, 152, 232, 0.1)'
+              }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            />
+          );
+        })}
       </div>
 
       {/* Voltage */}
       <div className="ac-info-row">
         <span className="ac-info-row__label">CPU Core Voltage</span>
-        <span className="ac-info-row__value">{voltage.toFixed(3)}V</span>
+        <span className="ac-info-row__value">
+          {voltage != null ? (
+            <SpringValue value={voltage} unit="V" decimals={3} />
+          ) : (
+            'N/A'
+          )}
+        </span>
       </div>
 
       {/* Temperature */}
       <div className="ac-info-row">
         <span className="ac-info-row__label">Temperature</span>
-        <span className="ac-info-row__value">{temperature}°C</span>
+        <span className="ac-info-row__value">
+          {temperature != null ? (
+            <SpringValue value={temperature} unit="°C" />
+          ) : (
+            'N/A'
+          )}
+        </span>
       </div>
     </PanelFrame>
   );

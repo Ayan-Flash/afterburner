@@ -1,6 +1,6 @@
 /* ================================================================
    TitleBar — Custom frameless window title bar with ROG logo,
-   "Armoury Crate" text, and window controls (min / max / close).
+   "Overdrive" text, and window controls (min / max / close).
    Uses the Tauri window API; degrades gracefully in the browser.
    ================================================================ */
 
@@ -25,7 +25,7 @@ export function TitleBar() {
         <path d="M32 15L45 22.5V37.5L32 45L19 37.5V22.5L32 15Z" fill="#1e1e2c" stroke="#4a4a5e" strokeWidth="1.5" />
         <path d="M32 23L39 27V35L32 39L25 35V27L32 23Z" fill="none" stroke="#7aa8c8" strokeWidth="1.2" />
       </svg>
-      <span className="ac-titlebar__text">Armoury Crate</span>
+      <span className="ac-titlebar__text">Overdrive</span>
 
       <div className="ac-titlebar__controls">
         <button className="ac-titlebar__btn" onClick={minimize} title="Minimize" aria-label="Minimize">

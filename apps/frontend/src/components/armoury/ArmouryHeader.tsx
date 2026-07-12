@@ -1,9 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useGpuStore } from '../../stores';
-
-/* ================================================================
-   ArmouryHeader — "Dashboard" title, system spec strip, and the
-   two right-side view-toggle icon buttons from the reference.
-   ================================================================ */
+import { cpuService, type CpuInfo } from '../../services/cpuService';
+import { appService } from '../../services/gpuService';
 
 interface SpecGroup {
   lines: string[];
@@ -12,12 +10,17 @@ interface SpecGroup {
 export function ArmouryHeader() {
   const gpus = useGpuStore((s) => s.gpus);
   const gpuName = gpus[0]?.name ?? 'GPU';
+  const [cpuInfo, setCpuInfo] = useState<CpuInfo | null>(null);
+  const [appInfo, setAppInfo] = useState<{ name: string; version: string; platform: string } | null>(null);
 
-  // System spec groups (two-line clusters separated by bullet markers,
-  // matching the reference layout). GPU name is pulled from live data.
+  useEffect(() => {
+    cpuService.getInfo().then(setCpuInfo).catch(() => {});
+    appService.getInfo().then(setAppInfo).catch(() => {});
+  }, []);
+
   const specGroups: SpecGroup[] = [
-    { lines: ['ROG STRIX B550-E GAMING', `AMD Ryzen 7 2700X Eight-Core Processor`] },
-    { lines: ['DRAM (32GB & 2133)', 'BIOS ver.8003'] },
+    { lines: [gpuName, cpuInfo ? `${cpuInfo.model}` : 'CPU'] },
+    { lines: appInfo ? [`v${appInfo.version}`, appInfo.platform] : ['Loading...'] },
   ];
 
   return (
@@ -30,7 +33,7 @@ export function ArmouryHeader() {
             {group.lines.map((line, li) => (
               <div key={li} className="ac-header__spec-line">
                 <span className="ac-header__specs-dot" />
-                <span>{line.replace('GPU', gpuName)}</span>
+                <span>{line}</span>
               </div>
             ))}
           </div>

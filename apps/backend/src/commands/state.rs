@@ -14,6 +14,7 @@ pub struct AppState {
     pub obs_source: crate::integrations::obs::ObsSource,
     pub sync_server: crate::sync::SyncServer,
     pub smart_alerts: Arc<crate::ai::SmartAlertManager>,
+    pub cpu: crate::hardware::cpu::CpuMonitor,
     pub db: Arc<Database>,
 }
 
@@ -63,6 +64,7 @@ impl AppState {
             obs_source: crate::integrations::obs::ObsSource::new(9877),
             sync_server: crate::sync::SyncServer::new(9878),
             smart_alerts,
+            cpu: crate::hardware::cpu::CpuMonitor::new(),
             db,
         }
     }

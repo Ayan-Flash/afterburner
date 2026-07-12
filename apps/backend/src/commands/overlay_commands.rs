@@ -1,23 +1,31 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 use tracing::info;
 
 use super::state::SharedState;
-use crate::overlay::OverlayConfig;
+use crate::overlay::{window as overlay_window, OverlayConfig};
 
 #[tauri::command]
-pub fn start_overlay(state: State<'_, SharedState>) -> Result<(), String> {
+pub fn start_overlay(app: AppHandle, state: State<'_, SharedState>) -> Result<(), String> {
     info!("Starting overlay");
     let mut overlay = state.overlay.write().map_err(|e| e.to_string())?;
     let controller = overlay.as_mut().ok_or_else(|| "Overlay not initialized".to_string())?;
-    controller.start()
+    controller.start()?;
+    // Spawn the real transparent, always-on-top overlay window. If window
+    // creation fails, roll back the running flag so state stays consistent.
+    if let Err(e) = overlay_window::show_overlay(&app, controller.config()) {
+        let _ = controller.stop();
+        return Err(e);
+    }
+    Ok(())
 }
 
 #[tauri::command]
-pub fn stop_overlay(state: State<'_, SharedState>) -> Result<(), String> {
+pub fn stop_overlay(app: AppHandle, state: State<'_, SharedState>) -> Result<(), String> {
     info!("Stopping overlay");
     let mut overlay = state.overlay.write().map_err(|e| e.to_string())?;
     let controller = overlay.as_mut().ok_or_else(|| "Overlay not initialized".to_string())?;
-    controller.stop()
+    controller.stop()?;
+    overlay_window::hide_overlay(&app)
 }
 
 #[tauri::command]
@@ -37,6 +45,7 @@ pub fn get_overlay_config(state: State<'_, SharedState>) -> Result<OverlayConfig
 
 #[tauri::command]
 pub fn update_overlay_config(
+    app: AppHandle,
     state: State<'_, SharedState>,
     config: OverlayConfig,
 ) -> Result<(), String> {
@@ -45,7 +54,8 @@ pub fn update_overlay_config(
     match overlay.as_mut() {
         Some(controller) => {
             controller.update_config(config);
-            Ok(())
+            // Live-reposition the overlay if it is currently open.
+            overlay_window::reposition(&app, controller.config())
         }
         None => Err("Overlay not initialized".to_string()),
     }

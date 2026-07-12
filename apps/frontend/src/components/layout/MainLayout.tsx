@@ -3,7 +3,7 @@ import { ArmourySidebar } from '../armoury/ArmourySidebar';
 import { ArmouryHeader } from '../armoury/ArmouryHeader';
 
 /* ================================================================
-   MainLayout — Armoury Crate shell.
+   MainLayout — Overdrive shell.
 
    Structure (top→bottom):
      TitleBar        (custom frameless, 32px)

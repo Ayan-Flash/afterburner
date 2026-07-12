@@ -101,7 +101,14 @@ impl NvidiaProvider {
         })
     }
 
+    /// Query total memory (bytes) for the given device. Used once at
+    /// enumeration to fill `memory_total_mb`.
     fn get_memory_info(lib: &Library, device: NvmlDevice) -> Option<u64> {
+        Self::read_memory(lib, device).map(|(total, _used)| total)
+    }
+
+    /// Read `(total, used)` device memory in bytes via `nvmlDeviceGetMemoryInfo`.
+    fn read_memory(lib: &Library, device: NvmlDevice) -> Option<(u64, u64)> {
         #[repr(C)]
         struct NvmlMemory {
             total: u64,
@@ -114,7 +121,7 @@ impl NvidiaProvider {
         };
         let mut mem = NvmlMemory { total: 0, free: 0, used: 0 };
         let result = unsafe { func(device, &mut mem) };
-        if result == NVML_SUCCESS { Some(mem.total) } else { None }
+        if result == NVML_SUCCESS { Some((mem.total, mem.used)) } else { None }
     }
 
     fn read_temp(&self, lib: &Library, device: NvmlDevice) -> Option<f64> {
@@ -231,6 +238,11 @@ impl GpuProvider for NvidiaProvider {
         let power = self.read_power(lib_ref, *device).unwrap_or(0.0);
         let fan = self.read_fan_speed(lib_ref, *device).unwrap_or(0.0);
         let (gpu_util, mem_util) = self.read_utilization(lib_ref, *device);
+        // Real used VRAM from NVML (bytes → MB). Falls back to the cached total
+        // if the query fails, so `memory_used_mb` is never a bogus 0.
+        let (mem_total, mem_used) = Self::read_memory(lib_ref, *device)
+            .map(|(t, u)| (t / (1024 * 1024), u / (1024 * 1024)))
+            .unwrap_or((identity.memory_total_mb, 0));
 
         Ok(GpuSample {
             gpu_id: identity.id.clone(),
@@ -238,11 +250,13 @@ impl GpuProvider for NvidiaProvider {
             temperature_celsius: temp,
             core_clock_mhz: core_clock.unwrap_or(0.0),
             memory_clock_mhz: mem_clock.unwrap_or(0.0),
-            memory_used_mb: 0,
-            memory_total_mb: identity.memory_total_mb,
+            memory_used_mb: mem_used,
+            memory_total_mb: if mem_total > 0 { mem_total } else { identity.memory_total_mb },
             fan_speed_percent: fan,
             fan_rpm: (fan * 30.0) as u32,
             power_watts: power,
+            // NVML does not expose real per-core voltage on consumer GPUs, so we
+            // report 0.0 here; the UI renders "N/A" rather than a fabricated value.
             core_voltage_mv: 0.0,
             core_utilization_percent: gpu_util.unwrap_or(0.0),
             memory_utilization_percent: mem_util.unwrap_or(0.0),

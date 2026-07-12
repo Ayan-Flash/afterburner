@@ -22,6 +22,7 @@ pub mod stores;
 pub mod utils;
 pub mod backup;
 pub mod marketplace;
+pub mod updater;
 
 use std::sync::Arc;
 
@@ -133,7 +134,11 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(app_state)
+        .manage(updater::UpdaterState::new())
         .setup(|app| {
+            let handle = app.handle().clone();
+            updater::commands::spawn_auto_check(handle);
+
             setup_tray(app)?;
 
             std::thread::spawn(move || {
@@ -165,6 +170,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_app_info,
+            commands::get_cpu_info,
+            commands::get_cpu_sample,
             commands::list_gpus,
             commands::get_gpu_data,
             commands::get_gpu_history,
@@ -277,6 +284,11 @@ pub fn run() {
             commands::get_setting,
             commands::set_setting,
             commands::get_all_settings,
+            updater::commands::check_update,
+            updater::commands::start_update,
+            updater::commands::get_update_status,
+            updater::commands::set_auto_check,
+            updater::commands::set_check_interval,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GPUControl Pro");

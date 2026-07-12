@@ -1,5 +1,5 @@
-/* Import Armoury Crate design system for dashboard */
-@import './styles/armoury-crate.css';
+/* Import Overdrive design system for dashboard */
+@import './styles/overdrive.css';
 
 @tailwind base;
 @tailwind components;

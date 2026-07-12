@@ -1,8 +1,8 @@
 import { useUiStore } from '../../stores';
 
 /* ================================================================
-   ArmourySidebar — 48px icon-only navigation rail matching the
-   Armoury Crate reference. Icons map to real app pages.
+   ArmourySidebar — 48px icon-only navigation rail.
+   Icons map to real app pages.
    ================================================================ */
 
 type PageId = Parameters<ReturnType<typeof useUiStore.getState>['navigateTo']>[0];
@@ -33,6 +33,50 @@ const navItems: NavIcon[] = [
         <rect x="3" y="4" width="18" height="12" rx="1" />
         <line x1="7" y1="20" x2="17" y2="20" />
         <line x1="12" y1="16" x2="12" y2="20" />
+      </>
+    ),
+  },
+  {
+    id: 'profiles',
+    label: 'Profiles',
+    path: (
+      <>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </>
+    ),
+  },
+  {
+    id: 'alerts',
+    label: 'Alerts',
+    path: (
+      <>
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </>
+    ),
+  },
+  {
+    id: 'remote',
+    label: 'Remote',
+    path: (
+      <>
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+        <circle cx="12" cy="10" r="1" fill="currentColor" />
+      </>
+    ),
+  },
+  {
+    id: 'overlay',
+    label: 'Overlay',
+    path: (
+      <>
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+        <path d="M7 8h4v4H7z" />
       </>
     ),
   },
@@ -69,6 +113,17 @@ const navItems: NavIcon[] = [
     ),
   },
   {
+    id: 'integrations',
+    label: 'Integrations',
+    path: (
+      <>
+        <path d="M15 7h3a5 5 0 0 1 0 10h-3" />
+        <path d="M9 17H6a5 5 0 0 1 0-10h3" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </>
+    ),
+  },
+  {
     id: 'ai',
     label: 'AI Insights',
     path: (
@@ -83,8 +138,10 @@ const navItems: NavIcon[] = [
     label: 'Reports',
     path: (
       <>
-        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-        <line x1="7" y1="7" x2="7.01" y2="7" />
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
       </>
     ),
   },
@@ -100,6 +157,17 @@ const navItems: NavIcon[] = [
         <line x1="8" y1="13" x2="8" y2="13.01" />
         <line x1="12" y1="13" x2="12" y2="13.01" />
         <line x1="16" y1="13" x2="16" y2="13.01" />
+      </>
+    ),
+  },
+  {
+    id: 'backup',
+    label: 'Backup',
+    path: (
+      <>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
       </>
     ),
   },

@@ -1,0 +1,119 @@
+# GPUControl Pro Release Pipeline
+# Builds, signs, and publishes installer + update metadata
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build frontend
+        run: cd apps/frontend && npx vite build
+
+      - name: Build Tauri app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PASSPHRASE: ${{ secrets.TAURI_SIGNING_PASSPHRASE }}
+        run: |
+          cd apps/backend
+          npx tauri build --bundles nsis
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag -replace '^v', ''
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Generate update metadata
+        id: update_meta
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $arch = "x86_64"
+          $target = "windows-$arch"
+          $installerPath = Get-ChildItem -Path "target/release/bundle/nsis" -Filter "*.exe" | Select-Object -First 1
+          $installerName = $installerPath.Name
+          $installerSize = (Get-Item $installerPath.FullName).Length
+          $signature = ""
+
+          # Build signature if TAURI_SIGNING_PRIVATE_KEY is available
+          if ("${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}" -ne "") {
+            $signature = & "C:\Users\ghosh\.cargo\bin\tauri" signer sign "$installerPath.FullName" 2>$null
+            if (-not $?) { $signature = "" }
+          }
+
+          $json = @{
+            version = $version
+            notes = "See https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"
+            pub_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+            platforms = @{
+              $target = @{
+                signature = $signature
+                url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$installerName"
+              }
+            }
+          } | ConvertTo-Json -Compress
+
+          echo "json=$json" >> $env:GITHUB_OUTPUT
+          echo "installerName=$installerName" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: GPUControl Pro ${{ steps.version.outputs.version }}
+          body: |
+            ## GPUControl Pro ${{ steps.version.outputs.version }}
+
+            ### Changelog
+            - See commits for details
+
+            ### Installation
+            Download the NSIS installer below and run it.
+
+            ### Updating
+            The app will check for updates automatically. You can also download manually.
+          files: |
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/wix/*.msi
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+      - name: Upload update metadata
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            ${{ steps.update_meta.outputs.json }}
+          fail_on_unmatched_files: false

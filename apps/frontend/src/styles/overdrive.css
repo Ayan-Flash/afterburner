@@ -1,6 +1,5 @@
 /* ============================================================
-   ARMOURY CRATE — Design System
-   Pixel-accurate reconstruction from reference image.
+   OVERDRIVE — Design System
    ============================================================ */
 
 /* --- CSS Custom Properties (Design Tokens) --- */
@@ -379,7 +378,8 @@ body {
 /* --- Content Area --- */
 .ac-content {
   flex: 1;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   padding: 4px 24px 16px;
   gap: 20px;
@@ -390,9 +390,11 @@ body {
 .ac-left {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 46%;
-  min-width: 380px;
-  gap: 14px;
+  min-width: 340px;
+  gap: 10px;
+  overflow: visible;
 }
 
 /* --- Right Column (Panels) --- */
@@ -610,6 +612,31 @@ body {
 }
 
 /* --- CPU Core Cards --- */
+/* --- CPU identity (model + core count under the gauge) --- */
+.ac-cpu-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: -4px;
+  padding: 0 4px;
+}
+
+.ac-cpu-identity__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ac-text-primary, #e8e8f0);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.ac-cpu-identity__cores {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ac-text-muted, #8888a0);
+  letter-spacing: 0.5px;
+}
+
 .ac-core-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -697,11 +724,43 @@ body {
 }
 
 /* --- Fan Panel --- */
+.ac-fan-rpm {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 4px 6px;
+}
+
+.ac-fan-rpm__value {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.ac-fan-rpm__unit {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--ac-text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.ac-fan-rpm__pct {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ac-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 .ac-fan-modes {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 0;
+  gap: 4px;
+  padding: 4px 0;
 }
 
 .ac-fan-mode {
@@ -710,33 +769,32 @@ body {
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 4px;
-  transition: all 0.15s;
+  padding: 8px 8px 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--ac-text-secondary);
 }
 
 .ac-fan-mode:hover {
   background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .ac-fan-mode--active {
   color: var(--ac-text-white);
-}
-
-.ac-fan-mode__icon {
-  width: 36px;
-  height: 36px;
-  color: inherit;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .ac-fan-mode__label {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  transition: color 0.2s;
 }
+
 
 /* --- Game Launcher --- */
 .ac-games {
@@ -881,12 +939,13 @@ body {
 
 /* --- Gauge Container --- */
 .ac-gauge-container {
-  flex: 1;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  min-height: 280px;
+  min-height: 0;
+  overflow: visible;
 }
 
 /* --- Utility --- */

@@ -55,6 +55,8 @@ pub enum AppError {
     NotImplemented(String),
     #[error("Invalid argument: {0}")]
     InvalidArgument(String),
+    #[error("Update error: {0}")]
+    UpdateError(String),
     #[error("Internal error: {0}")]
     Internal(String),
     #[error("IO error: {0}")]

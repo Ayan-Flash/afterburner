@@ -30,9 +30,21 @@
         {
           "identifier": "default",
           "description": "Default capability set for GPUControl Pro",
-          "windows": ["main"],
+          "windows": ["main", "overlay"],
           "permissions": [
             "core:default",
+            "core:window:allow-minimize",
+            "core:window:allow-unminimize",
+            "core:window:allow-maximize",
+            "core:window:allow-unmaximize",
+            "core:window:allow-toggle-maximize",
+            "core:window:allow-is-maximized",
+            "core:window:allow-close",
+            "core:window:allow-destroy",
+            "core:window:allow-show",
+            "core:window:allow-hide",
+            "core:window:allow-set-focus",
+            "core:window:allow-start-dragging",
             "shell:allow-open",
             "notification:default",
             "notification:allow-notify",
@@ -46,7 +58,10 @@
             "process:allow-exit",
             "fs:default",
             "fs:allow-read",
-            "fs:allow-write"
+            "fs:allow-write",
+            "updater:default",
+            "updater:allow-check",
+            "updater:allow-install"
           ]
         }
       ]
@@ -70,9 +85,10 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "",
+      "pubkey": "YOUR_UPDATER_SIGNATURE_PUBKEY_HERE",
       "endpoints": [
-        "https://releases.gpucontrol.pro/{{target}}/{{current_version}}"
+        "https://releases.gpucontrol.pro/{{target}}/{{current_version}}",
+        "https://github.com/gpucontrol-pro/gpucontrol-pro/releases/latest/download/update-{{target}}-{{current_version}}.json"
       ],
       "windows": {
         "installMode": "passive"

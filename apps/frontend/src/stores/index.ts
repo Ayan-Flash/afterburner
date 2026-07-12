@@ -14,3 +14,4 @@ export { useAiStore } from './aiStore';
 export { useBackupStore } from './backupStore';
 export { useSmartAlertStore } from './smartAlertStore';
 export { useMarketplaceStore } from './marketplaceStore';
+export { useUpdateStore } from './updateStore';

@@ -57,7 +57,7 @@ export function ControlPage() {
               { label: 'Core Clock', value: formatClockSpeed(data.core_clock_mhz), color: 'text-blue-400' },
               { label: 'Memory Clock', value: formatClockSpeed(data.memory_clock_mhz), color: 'text-cyan-400' },
               { label: 'Temperature', value: `${data.temperature_celsius.toFixed(1)}°C`, color: data.temperature_celsius > 80 ? 'text-red-400' : 'text-amber-400' },
-              { label: 'Voltage', value: `${data.core_voltage_mv.toFixed(0)} mV`, color: 'text-purple-400' },
+              { label: 'Voltage', value: data.core_voltage_mv > 0 ? `${data.core_voltage_mv.toFixed(0)} mV` : 'N/A', color: 'text-purple-400' },
             ].map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-text-muted mb-1 text-[10px] uppercase tracking-wider">{s.label}</div>

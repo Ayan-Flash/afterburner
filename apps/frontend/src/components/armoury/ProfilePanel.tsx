@@ -34,7 +34,7 @@ export function ProfilePanel() {
           <circle cx="32" cy="30" r="4" fill="#555568" opacity="0.5" />
         </svg>
 
-        <span className="ac-profile__welcome">Welcome to ARMOURY CRATE</span>
+        <span className="ac-profile__welcome">Welcome to Overdrive</span>
 
         <button className="ac-profile__btn">Log In</button>
         <button className="ac-profile__btn">Register Your Product</button>
