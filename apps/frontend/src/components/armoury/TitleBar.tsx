@@ -1,8 +1,4 @@
-/* ================================================================
-   TitleBar — Custom frameless window title bar with ROG logo,
-   "Overdrive" text, and window controls (min / max / close).
-   Uses the Tauri window API; degrades gracefully in the browser.
-   ================================================================ */
+import { useCallback, useRef } from 'react';
 
 async function getWindow() {
   try {
@@ -14,12 +10,48 @@ async function getWindow() {
 }
 
 export function TitleBar() {
-  const minimize = async () => (await getWindow())?.minimize();
-  const toggleMaximize = async () => (await getWindow())?.toggleMaximize();
-  const close = async () => (await getWindow())?.close();
+  const winRef = useRef<Awaited<ReturnType<typeof getWindow>>>(null);
+  const dragging = useRef(false);
+
+  const getWin = useCallback(async () => {
+    if (!winRef.current) {
+      winRef.current = await getWindow();
+    }
+    return winRef.current;
+  }, []);
+
+  const minimize = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    (await getWin())?.minimize();
+  };
+  const toggleMaximize = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    (await getWin())?.toggleMaximize();
+  };
+  const close = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    (await getWin())?.close();
+  };
+
+  const handleMouseDown = useCallback(async (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('.ac-titlebar__controls')) return;
+    if (dragging.current) return;
+    dragging.current = true;
+    try {
+      const win = await getWin();
+      if (win) {
+        win.startDragging();
+      }
+    } catch {
+      // fallback: let native drag-region handle it
+    } finally {
+      dragging.current = false;
+    }
+  }, [getWin]);
 
   return (
-    <div className="ac-titlebar" data-tauri-drag-region>
+    <div className="ac-titlebar" data-tauri-drag-region onMouseDown={handleMouseDown}>
       <svg className="ac-titlebar__logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
         <path d="M32 4L56 18V46L32 60L8 46V18L32 4Z" fill="#161620" stroke="#3a3a4a" strokeWidth="2" />
         <path d="M32 15L45 22.5V37.5L32 45L19 37.5V22.5L32 15Z" fill="#1e1e2c" stroke="#4a4a5e" strokeWidth="1.5" />

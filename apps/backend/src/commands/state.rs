@@ -27,7 +27,16 @@ impl Default for AppState {
 impl AppState {
     pub fn new() -> Self {
         let db = Arc::new(
-            Database::open().expect("Failed to open database"),
+            match Database::open() {
+                Ok(db) => db,
+                Err(e) => {
+                    tracing::error!(error = %e, "Failed to open database, using in-memory fallback");
+                    Database::in_memory().unwrap_or_else(|e| {
+                        tracing::error!(error = %e, "Failed to create in-memory database, exiting");
+                        std::process::exit(1);
+                    })
+                }
+            },
         );
 
         let provider = crate::hardware::create_provider();

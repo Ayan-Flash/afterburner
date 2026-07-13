@@ -45,10 +45,11 @@ impl NvidiaProvider {
         let mut count: u32 = 0;
         let result = unsafe { nvml_device_get_count(&mut count) };
         if result != NVML_SUCCESS || count == 0 {
-            let nvml_shutdown: Symbol<unsafe extern "C" fn() -> NvmlReturn> = unsafe {
-                lib.get(b"nvmlShutdown").unwrap()
-            };
-            unsafe { nvml_shutdown(); }
+            if let Ok(nvml_shutdown) = unsafe {
+                lib.get::<unsafe extern "C" fn() -> NvmlReturn>(b"nvmlShutdown")
+            } {
+                unsafe { nvml_shutdown(); }
+            }
             return Err("No NVIDIA GPUs found".into());
         }
 
@@ -312,9 +313,9 @@ impl Drop for NvidiaProvider {
         if let Ok(mut lib) = self.lib.lock() {
             if let Some(library) = lib.take() {
                 unsafe {
-                    let shutdown: Symbol<unsafe extern "C" fn() -> NvmlReturn> =
-                        library.get(b"nvmlShutdown").unwrap();
-                    shutdown();
+                    if let Ok(shutdown) = library.get::<unsafe extern "C" fn() -> NvmlReturn>(b"nvmlShutdown") {
+                        shutdown();
+                    }
                 }
                 info!("NVML shutdown complete");
             }

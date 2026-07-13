@@ -38,8 +38,23 @@ impl Database {
         })
     }
 
+    pub fn in_memory() -> Result<Self, rusqlite::Error> {
+        let conn = Connection::open_in_memory()?;
+        conn.execute_batch("PRAGMA journal_mode=WAL;")?;
+        conn.execute_batch("PRAGMA foreign_keys=ON;")?;
+        schema::initialize(&conn)?;
+        tracing::warn!("Using in-memory database (disk persistence unavailable)");
+        Ok(Self {
+            conn: Mutex::new(conn),
+            data_dir: PathBuf::from("."),
+        })
+    }
+
     pub fn conn(&self) -> std::sync::MutexGuard<'_, Connection> {
-        self.conn.lock().expect("database lock poisoned")
+        self.conn.lock().unwrap_or_else(|e| {
+            tracing::error!("Database mutex poisoned, recovering");
+            e.into_inner()
+        })
     }
 
     pub fn data_dir(&self) -> &PathBuf {

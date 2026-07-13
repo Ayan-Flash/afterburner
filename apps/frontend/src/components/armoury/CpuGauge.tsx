@@ -28,10 +28,8 @@ function arcPath(r: number, a1: number, a2: number) {
 
 const FULL_ARC = arcPath(90, START, START + SWEEP);
 
-function Needle({ angle, color }: { angle: number; color: string }) {
-  const springAngle = useSpring(angle, { stiffness: 60, damping: 18, mass: 0.6 });
-  useEffect(() => { springAngle.set(angle); }, [angle, springAngle]);
-  const rotation = useTransform(springAngle, (a) => a);
+function Needle({ frac, color }: { frac: any; color: string }) {
+  const rotation = useTransform(frac, [0, 1], [START, START + SWEEP]);
 
   return (
     <motion.g
@@ -50,6 +48,49 @@ function Needle({ angle, color }: { angle: number; color: string }) {
   );
 }
 
+function Tick({ i, frac }: { i: number; frac: any }) {
+  const isMajor = i % 12 === 0;
+  const isMid = i % 6 === 0 && !isMajor;
+  const len = isMajor ? 10 : isMid ? 6 : 3.5;
+  const a = START + (i / TICKS) * SWEEP;
+  const p1 = polar(98, a);
+  const p2 = polar(98 - len, a);
+  const opacity = useTransform(frac, [i / TICKS - 0.03, i / TICKS], [0.3, 1]);
+
+  return (
+    <motion.line
+      x1={p1.x}
+      y1={p1.y}
+      x2={p2.x}
+      y2={p2.y}
+      stroke={isMajor ? 'rgba(60,160,240,0.9)' : 'rgba(40,50,70,0.5)'}
+      strokeWidth={isMajor ? 2 : isMid ? 1.2 : 0.7}
+      strokeLinecap="round"
+      style={{ opacity }}
+    />
+  );
+}
+
+function Dot({ i, frac }: { i: number; frac: any }) {
+  const a = START + (i / 48) * SWEEP;
+  const p = polar(102, a);
+  const fill = useTransform(
+    frac,
+    [i / 48 - 0.03, i / 48],
+    ['rgba(40,50,70,0.3)', 'rgba(60,160,240,0.9)']
+  );
+  const opacity = useTransform(frac, [i / 48 - 0.03, i / 48], [0.3, 0.9]);
+
+  return (
+    <motion.circle
+      cx={p.x}
+      cy={p.y}
+      r={1.2}
+      style={{ fill, opacity }}
+    />
+  );
+}
+
 export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) {
   const rawFrac = Math.min(Math.max(value / maxValue, 0), 1);
   const frac = useSpring(rawFrac, { stiffness: 70, damping: 18, mass: 0.5 });
@@ -58,7 +99,6 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
   const hue = 200;
   const color = `hsl(${hue}, 85%, 55%)`;
   const colorBright = `hsl(${hue}, 95%, 70%)`;
-  useTransform(frac, [0, 1], [START, START + SWEEP]);
 
   const labelCount = 6;
   const scaleLabels = useMemo(() => {
@@ -81,20 +121,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
   const ticks = useMemo(() => {
     const nodes: React.ReactNode[] = [];
     for (let i = 0; i <= TICKS; i++) {
-      const a = START + (i / TICKS) * SWEEP;
-      const isMajor = i % 12 === 0;
-      const isMid = i % 6 === 0 && !isMajor;
-      const len = isMajor ? 10 : isMid ? 6 : 3.5;
-      const p1 = polar(98, a);
-      const p2 = polar(98 - len, a);
-      nodes.push(
-        <motion.line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-          stroke={isMajor ? 'rgba(60,160,240,0.9)' : 'rgba(40,50,70,0.5)'}
-          strokeWidth={isMajor ? 2 : isMid ? 1.2 : 0.7}
-          strokeLinecap="round"
-          style={{ opacity: useTransform(frac, [i / TICKS - 0.03, i / TICKS], [0.3, 1]) }}
-        />
-      );
+      nodes.push(<Tick key={i} i={i} frac={frac} />);
     }
     return nodes;
   }, [frac]);
@@ -102,19 +129,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
   const dots = useMemo(() => {
     const nodes: React.ReactNode[] = [];
     for (let i = 0; i < 48; i++) {
-      const a = START + (i / 48) * SWEEP;
-      const p = polar(102, a);
-      nodes.push(
-        <motion.circle key={i} cx={p.x} cy={p.y} r={1.2}
-          style={{
-            fill: useTransform(frac,
-              [i / 48 - 0.03, i / 48],
-              ['rgba(40,50,70,0.3)', 'rgba(60,160,240,0.9)']
-            ),
-            opacity: useTransform(frac, [i / 48 - 0.03, i / 48], [0.3, 0.9]),
-          }}
-        />
-      );
+      nodes.push(<Dot key={i} i={i} frac={frac} />);
     }
     return nodes;
   }, [frac]);
@@ -138,6 +153,8 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
     );
     return nodes;
   }, []);
+
+  const animatedValue = useTransform(frac, (v) => Math.round(v * maxValue));
 
   return (
     <motion.div
@@ -198,7 +215,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
         {dots}
 
         {/* Needle */}
-        <Needle angle={useTransform(frac, [0, 1], [START, START + SWEEP]) as unknown as number} color={color} />
+        <Needle frac={frac} color={color} />
 
         {/* Center cap */}
         <motion.circle cx={CX} cy={CY} r="6" fill="#1a1e2e"
@@ -213,7 +230,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
           fill="#f0f2f8" fontSize="36" fontWeight="800"
           fontFamily="'Segoe UI', system-ui, sans-serif"
           style={{ filter: `drop-shadow(0 0 8px ${color})` }}>
-          {useTransform(frac, (v) => Math.round(v * maxValue))}
+          {animatedValue}
         </motion.text>
 
         <text x={CX} y={CY + 16} textAnchor="middle" fill="rgba(140,160,190,0.8)"

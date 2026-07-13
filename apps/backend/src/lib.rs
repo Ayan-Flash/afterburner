@@ -291,5 +291,7 @@ pub fn run() {
             updater::commands::set_check_interval,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running GPUControl Pro");
+        .unwrap_or_else(|e| {
+            tracing::error!(error = %e, "Tauri application exited with error");
+        });
 }
