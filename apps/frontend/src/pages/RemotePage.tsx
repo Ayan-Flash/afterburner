@@ -21,122 +21,131 @@ export function RemotePage() {
   };
 
   return (
-    <div className="flex max-w-2xl flex-col gap-5">
-      <div className="card flex flex-col gap-4 p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-text-primary text-sm font-semibold">Remote Monitoring Server</span>
-            <p className="text-text-muted mt-1 text-xs">Monitor GPUs from any device on your network</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`size-2 rounded-full ${running ? 'bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-text-dim'}`} />
-            <span className={`text-xs font-semibold uppercase tracking-wider ${running ? 'text-emerald-400' : 'text-text-muted'}`}>
-              {running ? 'Running' : 'Stopped'}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="label">Port</label>
-            <div className="flex gap-2">
-              <input type="number" min={1024} max={65535} value={port}
-                onChange={(e) => setPort(Number(e.target.value))}
-                disabled={running}
-                className="input w-24" />
+    <div className="ac-page ac-page--compact">
+      <div className="ac-page-card">
+        <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+          <div className="ac-page-header">
+            <div className="ac-page-header__left">
+              <div className="ac-page-header__title">Remote Monitoring Server</div>
+              <div className="ac-page-header__desc">Monitor GPUs from any device on your network</div>
             </div>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="label">API Key</label>
-            <div className="flex gap-2">
-              <div className="input text-text-secondary flex-1 truncate font-mono text-[11px]">
-                {apiKey || 'No auth configured'}
+            <div className="ac-page-header__right">
+              <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                <span className={`ac-status-dot ${running ? 'ac-status-dot--on' : 'ac-status-dot--off'}`} />
+                <span style={{fontSize: 12, fontWeight: 600, letterSpacing: '0.5px', textTransform: 'uppercase', color: running ? '#34d399' : 'var(--ac-text-muted)'}}>
+                  {running ? 'Running' : 'Stopped'}
+                </span>
               </div>
-              <button onClick={generateKey} disabled={running} className="btn-secondary px-2.5 text-[10px]">
-                <IconRefresh size={14} />
-              </button>
             </div>
           </div>
-        </div>
 
-        {error && (
-          <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
-            {error}
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16}}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: 6}}>
+              <label className="ac-label">Port</label>
+              <div style={{display: 'flex', gap: 8}}>
+                <input type="number" min={1024} max={65535} value={port}
+                  onChange={(e) => setPort(Number(e.target.value))}
+                  disabled={running}
+                  className="ac-input ac-input--sm"
+                  style={{width: 96}} />
+              </div>
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', gap: 6}}>
+              <label className="ac-label">API Key</label>
+              <div style={{display: 'flex', gap: 8}}>
+                <div style={{flex: 1, background: 'var(--ac-bg-input)', border: '1px solid var(--ac-border-subtle)', borderRadius: 4, padding: '4px 10px', color: 'var(--ac-text-secondary)', fontFamily: 'var(--ac-font-mono)', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                  {apiKey || 'No auth configured'}
+                </div>
+                <button onClick={generateKey} disabled={running} className="ac-btn ac-btn--secondary ac-btn--sm" style={{fontSize: 10, padding: '3px 10px'}}>
+                  <IconRefresh style={{width: 14, height: 14}} />
+                </button>
+              </div>
+            </div>
           </div>
-        )}
 
-        <div className="flex items-center gap-3">
-          {!running ? (
-            <button onClick={start} disabled={loading} className="btn-primary text-xs">
-              <IconPlay size={14} />
-              {loading ? 'Starting...' : 'Start Server'}
-            </button>
-          ) : (
-            <button onClick={stop} disabled={loading} className="btn-danger text-xs">
-              <IconStop size={14} />
-              {loading ? 'Stopping...' : 'Stop Server'}
-            </button>
+          {error && (
+            <div className="ac-banner ac-banner--error" style={{fontSize: 12}}>
+              {error}
+            </div>
           )}
-        </div>
 
-        {running && url && (
-          <div className="flex flex-col gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-gpu-900 border-gpu-700 flex flex-1 items-center gap-2 rounded-lg border px-3 py-2">
-                <span className="size-1.5 rounded-full bg-emerald-500" />
-                <code className="truncate font-mono text-xs text-emerald-400">{url}</code>
-              </div>
-              <button onClick={handleCopyUrl} className="btn-ghost p-2" title="Copy URL">
-                <IconCopy size={16} />
+          <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+            {!running ? (
+              <button onClick={start} disabled={loading} className="ac-btn ac-btn--primary ac-btn--sm">
+                <IconPlay style={{width: 14, height: 14}} />
+                {loading ? 'Starting...' : 'Start Server'}
               </button>
-              <a href={url} target="_blank" rel="noopener noreferrer" className="btn-ghost p-2" title="Open in browser">
-                <IconExternalLink size={16} />
-              </a>
-            </div>
-            {copied && <span className="text-[10px] text-emerald-400">URL copied to clipboard</span>}
-            {apiKey && (
-              <div className="text-text-muted flex items-center gap-2 text-xs">
-                <span>Auth:</span>
-                <code className="text-text-dim font-mono">{apiKey}</code>
-              </div>
+            ) : (
+              <button onClick={stop} disabled={loading} className="ac-btn ac-btn--danger ac-btn--sm">
+                <IconStop style={{width: 14, height: 14}} />
+                {loading ? 'Stopping...' : 'Stop Server'}
+              </button>
             )}
           </div>
-        )}
-      </div>
 
-      <div className="card flex flex-col gap-3 p-5">
-        <span className="text-text-secondary text-xs font-semibold uppercase tracking-wider">How to Use</span>
-        <ol className="text-text-muted flex list-inside list-decimal flex-col gap-2 text-xs">
-          <li>Set a port number (default: 9876)</li>
-          <li>Optionally generate an API key for security</li>
-          <li>Click &quot;Start Server&quot; to begin</li>
-          <li>Open the URL in any browser on your network</li>
-          <li>The dashboard shows real-time GPU metrics, charts, and alerts</li>
-        </ol>
-      </div>
-
-      <div className="card flex flex-col gap-3 p-5">
-        <span className="text-text-secondary text-xs font-semibold uppercase tracking-wider">API Endpoints</span>
-        <div className="grid grid-cols-1 gap-1.5 font-mono text-xs">
-          {[
-            { method: 'GET', path: '/', desc: 'Dashboard HTML', color: 'text-emerald-400' },
-            { method: 'GET', path: '/api/status', desc: 'Server info & GPU count', color: 'text-emerald-400' },
-            { method: 'GET', path: '/api/gpus', desc: 'List GPUs with live data', color: 'text-emerald-400' },
-            { method: 'GET', path: '/api/gpus/:id/data', desc: 'Latest sample for a GPU', color: 'text-emerald-400' },
-            { method: 'GET', path: '/api/gpus/:id/history', desc: 'Historical samples', color: 'text-blue-400' },
-            { method: 'GET', path: '/api/alerts', desc: 'Recent alert events', color: 'text-amber-400' },
-            { method: 'GET', path: '/api/health', desc: 'Health check (no auth required)', color: 'text-text-muted' },
-          ].map((ep) => (
-            <div key={ep.path} className="hover:bg-gpu-700/50 flex items-center gap-3 rounded px-2 py-1">
-              <span className={`text-[10px] font-bold ${ep.color}`}>{ep.method}</span>
-              <span className="text-text-primary">{ep.path}</span>
-              <span className="text-text-dim ml-auto text-[10px]">{ep.desc}</span>
+          {running && url && (
+            <div style={{display: 'flex', flexDirection: 'column', gap: 8, borderRadius: 8, border: '1px solid rgba(52,211,153,0.2)', background: 'rgba(52,211,153,0.05)', padding: 12}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                <div style={{flex: 1, display: 'flex', alignItems: 'center', gap: 8, background: 'var(--ac-bg-input)', border: '1px solid var(--ac-border-subtle)', borderRadius: 8, padding: '8px 12px'}}>
+                  <span className="ac-status-dot ac-status-dot--on" style={{width: 6, height: 6}} />
+                  <code style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--ac-font-mono)', fontSize: 12, color: '#34d399'}}>{url}</code>
+                </div>
+                <button onClick={handleCopyUrl} className="ac-btn ac-btn--ghost ac-btn--icon" title="Copy URL">
+                  <IconCopy style={{width: 16, height: 16}} />
+                </button>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="ac-btn ac-btn--ghost ac-btn--icon" title="Open in browser">
+                  <IconExternalLink style={{width: 16, height: 16}} />
+                </a>
+              </div>
+              {copied && <span style={{fontSize: 10, color: '#34d399'}}>URL copied to clipboard</span>}
+              {apiKey && (
+                <div style={{display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ac-text-muted)', fontSize: 12}}>
+                  <span>Auth:</span>
+                  <code style={{color: 'var(--ac-text-dim)', fontFamily: 'var(--ac-font-mono)'}}>{apiKey}</code>
+                </div>
+              )}
             </div>
-          ))}
+          )}
         </div>
-        <p className="text-text-dim mt-1 text-[10px]">
-          Set the <code className="text-text-secondary font-mono">Authorization</code> header to your API key if auth is enabled.
-        </p>
+      </div>
+
+      <div className="ac-page-card">
+        <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+          <span className="ac-subtitle">How to Use</span>
+          <ol style={{color: 'var(--ac-text-muted)', listStylePosition: 'inside', listStyleType: 'decimal', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, margin: 0, padding: 0}}>
+            <li>Set a port number (default: 9876)</li>
+            <li>Optionally generate an API key for security</li>
+            <li>Click &quot;Start Server&quot; to begin</li>
+            <li>Open the URL in any browser on your network</li>
+            <li>The dashboard shows real-time GPU metrics, charts, and alerts</li>
+          </ol>
+        </div>
+      </div>
+
+      <div className="ac-page-card">
+        <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+          <span className="ac-subtitle">API Endpoints</span>
+          <div style={{display: 'flex', flexDirection: 'column', gap: 6, fontFamily: 'var(--ac-font-mono)', fontSize: 12}}>
+            {[
+              { method: 'GET', path: '/', desc: 'Dashboard HTML', color: '#34d399' },
+              { method: 'GET', path: '/api/status', desc: 'Server info & GPU count', color: '#34d399' },
+              { method: 'GET', path: '/api/gpus', desc: 'List GPUs with live data', color: '#34d399' },
+              { method: 'GET', path: '/api/gpus/:id/data', desc: 'Latest sample for a GPU', color: '#34d399' },
+              { method: 'GET', path: '/api/gpus/:id/history', desc: 'Historical samples', color: '#60a5fa' },
+              { method: 'GET', path: '/api/alerts', desc: 'Recent alert events', color: '#fbbf24' },
+              { method: 'GET', path: '/api/health', desc: 'Health check (no auth required)', color: 'var(--ac-text-muted)' },
+            ].map((ep) => (
+              <div key={ep.path} style={{display: 'flex', alignItems: 'center', gap: 12, borderRadius: 4, padding: '4px 8px'}}>
+                <span style={{fontSize: 10, fontWeight: 700, color: ep.color}}>{ep.method}</span>
+                <span style={{color: 'var(--ac-text-primary)'}}>{ep.path}</span>
+                <span style={{color: 'var(--ac-text-dim)', fontSize: 10, marginLeft: 'auto'}}>{ep.desc}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{color: 'var(--ac-text-dim)', fontSize: 10, marginTop: 4}}>
+            Set the <code style={{color: 'var(--ac-text-secondary)', fontFamily: 'var(--ac-font-mono)'}}>Authorization</code> header to your API key if auth is enabled.
+          </p>
+        </div>
       </div>
     </div>
   );

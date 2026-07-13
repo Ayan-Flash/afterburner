@@ -50,180 +50,189 @@ export function SyncPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="section-header">
-        <h2 className="text-text-primary text-lg font-semibold">Cloud Sync</h2>
-        <p className="text-text-secondary mt-1 text-sm">Synchronize profiles, reports, and settings with a cloud server</p>
+    <div className="ac-page">
+      <div className="ac-page-header">
+        <div className="ac-page-header__left">
+          <div className="ac-page-header__title">Cloud Sync</div>
+          <div className="ac-page-header__desc">Synchronize profiles, reports, and settings with a cloud server</div>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="ac-banner ac-banner--error">
           {error}
-          <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
+          <button onClick={clearError} className="ac-banner__close">&times;</button>
         </div>
       )}
 
       {lastResult && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <div className="ac-banner ac-banner--success">
           Sync complete: {lastResult.profiles_synced} profiles, {lastResult.reports_synced} reports
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="card space-y-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="bg-accent-primary/20 flex size-10 items-center justify-center rounded-lg">
-              <IconGlobe className="text-accent-primary size-5" />
-            </div>
-            <div>
-              <h3 className="text-text-primary text-sm font-semibold">Cloud Server</h3>
-              <p className="text-text-secondary text-xs">Connect to your sync server</p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="text-text-secondary mb-1 block text-xs font-medium">Server URL</label>
-              <input
-                type="text"
-                value={serverUrl}
-                onChange={(e) => setServerUrl(e.target.value)}
-                placeholder="https://sync.example.com"
-                className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
-              />
-            </div>
-
-            {!status?.device_registered && (
+      <div className="ac-grid-2" style={{gap: 24}}>
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+              <div style={{display: 'flex', width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: 'rgba(0,170,220,0.2)'}}>
+                <IconGlobe style={{width: 20, height: 20, color: 'var(--ac-accent-cyan-bright)'}} />
+              </div>
               <div>
-                <label className="text-text-secondary mb-1 block text-xs font-medium">API Key</label>
+                <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Cloud Server</h3>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Connect to your sync server</p>
+              </div>
+            </div>
+
+            <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+              <div>
+                <label className="ac-label">Server URL</label>
                 <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
+                  type="text"
+                  value={serverUrl}
+                  onChange={(e) => setServerUrl(e.target.value)}
+                  placeholder="https://sync.example.com"
+                  className="ac-input ac-input--wide"
                 />
               </div>
-            )}
 
-            <div className="flex gap-2">
-              {!status?.device_registered ? (
-                <button onClick={handleRegister} className="btn-primary px-4 py-2 text-xs">
-                  Register Device
-                </button>
-              ) : (
-                <button onClick={handleUnregister} className="btn-danger px-4 py-2 text-xs">
-                  Unregister
-                </button>
+              {!status?.device_registered && (
+                <div>
+                  <label className="ac-label">API Key</label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="ac-input ac-input--wide"
+                  />
+                </div>
               )}
-              <button onClick={handleSaveSettings} className="btn-secondary px-4 py-2 text-xs">
-                Save Settings
-              </button>
-            </div>
 
-            {status?.device_registered && (
-              <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400">
-                <IconCheck className="size-3.5" />
-                Device registered
+              <div style={{display: 'flex', gap: 8}}>
+                {!status?.device_registered ? (
+                  <button onClick={handleRegister} className="ac-btn ac-btn--primary ac-btn--sm">
+                    Register Device
+                  </button>
+                ) : (
+                  <button onClick={handleUnregister} className="ac-btn ac-btn--danger ac-btn--sm">
+                    Unregister
+                  </button>
+                )}
+                <button onClick={handleSaveSettings} className="ac-btn ac-btn--secondary ac-btn--sm">
+                  Save Settings
+                </button>
               </div>
-            )}
+
+              {status?.device_registered && (
+                <div style={{display: 'flex', alignItems: 'center', gap: 8, borderRadius: 8, border: '1px solid rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.1)', padding: '8px 12px', color: '#34d399', fontSize: 12}}>
+                  <IconCheck style={{width: 14, height: 14}} />
+                  Device registered
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="card space-y-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/20">
-              <IconRefresh className="size-5 text-blue-400" />
-            </div>
-            <div>
-              <h3 className="text-text-primary text-sm font-semibold">Sync Status</h3>
-              <p className="text-text-secondary text-xs">Last sync: {formatDate(status?.last_sync_at ?? null)}</p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-gpu-800 rounded-lg px-3 py-2">
-                <p className="text-text-secondary text-xs">Server</p>
-                <p className="text-text-primary truncate font-mono text-sm">
-                  {status?.server_url || 'Not configured'}
-                </p>
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+              <div style={{display: 'flex', width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: 'rgba(59,130,246,0.2)'}}>
+                <IconRefresh style={{width: 20, height: 20, color: '#60a5fa'}} />
               </div>
-              <div className="bg-gpu-800 rounded-lg px-3 py-2">
-                <p className="text-text-secondary text-xs">Registered</p>
-                <p className="text-text-primary text-sm">{status?.device_registered ? 'Yes' : 'No'}</p>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={sync} disabled={loading || !status?.device_registered} className="btn-primary px-4 py-2 text-xs">
-                {loading ? 'Syncing...' : 'Sync Now'}
-              </button>
-              <button onClick={toggleClient} className={`btn-${status?.device_registered ? 'danger' : 'primary'} px-4 py-2 text-xs`}>
-                {status?.device_registered ? 'Stop Sync Client' : 'Start Sync Client'}
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-text-secondary text-xs font-medium">Sync Settings</p>
               <div>
-                <label className="text-text-secondary mb-1 block text-xs font-medium">Sync Interval</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={interval}
-                    onChange={(e) => setInterval(Number(e.target.value))}
-                    min={30}
-                    className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-24 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-                  />
-                  <span className="text-text-secondary text-xs">seconds</span>
+                <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Sync Status</h3>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Last sync: {formatDate(status?.last_sync_at ?? null)}</p>
+              </div>
+            </div>
+
+            <div style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+              <div className="ac-grid-2" style={{gap: 12}}>
+                <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                  <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Server</p>
+                  <p style={{color: 'var(--ac-text-primary)', fontSize: 13, fontFamily: 'var(--ac-font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                    {status?.server_url || 'Not configured'}
+                  </p>
+                </div>
+                <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                  <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Registered</p>
+                  <p style={{color: 'var(--ac-text-primary)', fontSize: 13}}>{status?.device_registered ? 'Yes' : 'No'}</p>
                 </div>
               </div>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" checked={syncProfiles} onChange={(e) => setSyncProfiles(e.target.checked)} className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Sync profiles</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" checked={syncReports} onChange={(e) => setSyncReports(e.target.checked)} className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Sync reports</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" checked={syncPolicies} onChange={(e) => setSyncPolicies(e.target.checked)} className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Sync policies</span>
-              </label>
+
+              <div style={{display: 'flex', gap: 8}}>
+                <button onClick={sync} disabled={loading || !status?.device_registered} className="ac-btn ac-btn--primary ac-btn--sm">
+                  {loading ? 'Syncing...' : 'Sync Now'}
+                </button>
+                <button onClick={toggleClient} className={`ac-btn ac-btn--${status?.device_registered ? 'danger' : 'primary'} ac-btn--sm`}>
+                  {status?.device_registered ? 'Stop Sync Client' : 'Start Sync Client'}
+                </button>
+              </div>
+
+              <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12, fontWeight: 500}}>Sync Settings</p>
+                <div>
+                  <label className="ac-label">Sync Interval</label>
+                  <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                    <input
+                      type="number"
+                      value={interval}
+                      onChange={(e) => setInterval(Number(e.target.value))}
+                      min={30}
+                      className="ac-input ac-input--sm"
+                      style={{width: 96}}
+                    />
+                    <span style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>seconds</span>
+                  </div>
+                </div>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={syncProfiles} onChange={(e) => setSyncProfiles(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Sync profiles</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={syncReports} onChange={(e) => setSyncReports(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Sync reports</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={syncPolicies} onChange={(e) => setSyncPolicies(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Sync policies</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="card p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-text-primary text-sm font-semibold">Local Sync Server</h3>
-          <button
-            onClick={async () => {
-              const { isSyncServerRunning, startSyncServer, stopSyncServer } = await import('../services/syncService');
-              const running = await isSyncServerRunning();
-              if (running) {
-                await stopSyncServer();
-                setServerRunning(false);
-              } else {
-                await startSyncServer();
-                setServerRunning(true);
-              }
-            }}
-            className={`btn-${serverRunning ? 'danger' : 'primary'} px-3 py-1.5 text-xs`}
-          >
-            {serverRunning ? 'Stop Server' : 'Start Server'}
-          </button>
-        </div>
-        <p className="text-text-secondary mb-2 text-xs">
-          Run a local sync server to receive sync requests from other GPUControl Pro instances.
-          Other instances can sync to <code className="text-accent-primary">http://localhost:9878/api/sync</code>
-        </p>
-        {serverRunning && (
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-400">
-            Sync server running on port 9878
+      <div className="ac-page-card">
+        <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 12}}>
+          <div className="ac-page-header">
+            <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Local Sync Server</h3>
+            <button
+              onClick={async () => {
+                const { isSyncServerRunning, startSyncServer, stopSyncServer } = await import('../services/syncService');
+                const running = await isSyncServerRunning();
+                if (running) {
+                  await stopSyncServer();
+                  setServerRunning(false);
+                } else {
+                  await startSyncServer();
+                  setServerRunning(true);
+                }
+              }}
+              className={`ac-btn ac-btn--${serverRunning ? 'danger' : 'primary'} ac-btn--sm`}
+            >
+              {serverRunning ? 'Stop Server' : 'Start Server'}
+            </button>
           </div>
-        )}
+          <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>
+            Run a local sync server to receive sync requests from other GPUControl Pro instances.
+            Other instances can sync to <code style={{color: 'var(--ac-accent-cyan-bright)'}}>http://localhost:9878/api/sync</code>
+          </p>
+          {serverRunning && (
+            <div style={{borderRadius: 8, border: '1px solid rgba(52,211,153,0.3)', background: 'rgba(52,211,153,0.1)', padding: '8px 12px', color: '#34d399', fontSize: 12}}>
+              Sync server running on port 9878
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

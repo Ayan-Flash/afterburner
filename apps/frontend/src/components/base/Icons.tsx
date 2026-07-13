@@ -1,8 +1,8 @@
-type IconProps = { className?: string; size?: number };
+type IconProps = { className?: string; size?: number; style?: React.CSSProperties };
 
 const createIcon = (path: string, viewBox = '0 0 24 24') => {
-  const Icon = ({ className, size = 20 }: IconProps) => (
-    <svg className={className} width={size} height={size} viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  const Icon = ({ className, size = 20, style }: IconProps) => (
+    <svg className={className} width={size} height={size} viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}>
       {path.split('|').map((d, i) => <path key={i} d={d} />)}
     </svg>
   );

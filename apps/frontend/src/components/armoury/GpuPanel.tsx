@@ -3,19 +3,19 @@ import { motion, useSpring, useTransform } from 'framer-motion';
 import { PanelFrame } from './PanelFrame';
 
 /* ================================================================
-   GpuPanel — "GPU RTX 3060" info panel. Visually identical
+   GpuPanel — selected GPU info panel. Visually identical
    to CpuPanel. Replaces the Aura Sync panel from the original.
    ================================================================ */
 
 interface GpuPanelProps {
-  gpuName: string;      // e.g. "RTX 3060"
-  frequency: number;    // MHz (core clock)
+  gpuName: string;
+  frequency: number | null;    // MHz (core clock)
   voltage: number | null; // Volts — null when the GPU/driver does not expose it
-  temperature: number;  // Celsius
-  usage: number;        // percent
-  vramUsed: number;     // GB
-  vramTotal: number;    // GB
-  memoryClock?: number; // MHz
+  temperature: number | null;  // Celsius
+  usage: number | null;        // percent
+  vramUsed: number | null;     // GB
+  vramTotal: number | null;    // GB
+  memoryClock?: number | null; // MHz
   maxFrequency?: number;
 }
 
@@ -40,7 +40,7 @@ export function GpuPanel({
   memoryClock,
   maxFrequency = 2500,
 }: GpuPanelProps) {
-  const freqPercent = Math.min((frequency / maxFrequency) * 100, 100);
+  const freqPercent = frequency != null ? Math.min((frequency / maxFrequency) * 100, 100) : 0;
   const segmentCount = 20;
   const activeSegments = Math.round((freqPercent / 100) * segmentCount);
 
@@ -50,7 +50,11 @@ export function GpuPanel({
       <div className="ac-info-row">
         <span className="ac-info-row__label">Frequency</span>
         <span className="ac-info-row__value">
-          <SpringValue value={frequency} unit="MHz" />
+          {frequency != null && frequency > 0 ? (
+            <SpringValue value={frequency} unit="MHz" />
+          ) : (
+            'N/A'
+          )}
         </span>
       </div>
 
@@ -89,7 +93,11 @@ export function GpuPanel({
       <div className="ac-info-row">
         <span className="ac-info-row__label">Temperature</span>
         <span className="ac-info-row__value">
-          <SpringValue value={temperature} unit="°C" />
+          {temperature != null && temperature > 0 ? (
+            <SpringValue value={temperature} unit="°C" />
+          ) : (
+            'N/A'
+          )}
         </span>
       </div>
 
@@ -97,7 +105,11 @@ export function GpuPanel({
       <div className="ac-info-row">
         <span className="ac-info-row__label">Usage</span>
         <span className="ac-info-row__value">
-          <SpringValue value={usage} unit="%" />
+          {usage != null ? (
+            <SpringValue value={usage} unit="%" />
+          ) : (
+            'N/A'
+          )}
         </span>
       </div>
 
@@ -105,7 +117,13 @@ export function GpuPanel({
       <div className="ac-info-row">
         <span className="ac-info-row__label">VRAM</span>
         <span className="ac-info-row__value">
-          <SpringValue value={vramUsed} unit="" decimals={1} />/{vramTotal}GB
+          {vramUsed != null && vramTotal != null && vramTotal > 0 ? (
+            <>
+              <SpringValue value={vramUsed} unit="" decimals={1} />/{vramTotal}GB
+            </>
+          ) : (
+            'N/A'
+          )}
         </span>
       </div>
 
@@ -114,7 +132,11 @@ export function GpuPanel({
         <div className="ac-info-row">
           <span className="ac-info-row__label">GPU Memory Clock</span>
           <span className="ac-info-row__value">
-            <SpringValue value={memoryClock} unit="MHz" />
+            {memoryClock != null && memoryClock > 0 ? (
+              <SpringValue value={memoryClock} unit="MHz" />
+            ) : (
+              'N/A'
+            )}
           </span>
         </div>
       )}

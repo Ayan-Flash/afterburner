@@ -11,13 +11,15 @@ import { PanelFrame } from './PanelFrame';
 interface FanPanelProps {
   activeMode?: 'silence' | 'standard' | 'turbo' | 'full';
   onModeChange?: (mode: string) => void;
+  rpm?: number | null;
+  percent?: number | null;
 }
 
 const modes = [
-  { id: 'silence',  label: 'Silence',    speed: 0, rpm: 0,    pct: 0,   color: '#3d5a80' },
-  { id: 'standard', label: 'Standard',   speed: 1, rpm: 1200, pct: 35,  color: '#3b98e8' },
-  { id: 'turbo',    label: 'Turbo',      speed: 2, rpm: 2400, pct: 70,  color: '#e8a33b' },
-  { id: 'full',     label: 'Full Speed', speed: 3, rpm: 3600, pct: 100, color: '#e84040' },
+  { id: 'silence',  label: 'Silence',    speed: 0, pct: 0,   color: '#3d5a80' },
+  { id: 'standard', label: 'Standard',   speed: 1, pct: 35,  color: '#3b98e8' },
+  { id: 'turbo',    label: 'Turbo',      speed: 2, pct: 70,  color: '#e8a33b' },
+  { id: 'full',     label: 'Full Speed', speed: 3, pct: 100, color: '#e84040' },
 ] as const;
 
 /** Spring-animated digital RPM counter. */
@@ -146,19 +148,20 @@ function SpeedArc({ pct, color, size = 48 }: { pct: number; color: string; size?
   );
 }
 
-export function FanPanel({ activeMode = 'standard', onModeChange }: FanPanelProps) {
+export function FanPanel({ activeMode = 'standard', onModeChange, rpm, percent }: FanPanelProps) {
   const active = modes.find(m => m.id === activeMode) ?? modes[1];
+  const displayPercent = percent ?? null;
 
   return (
     <PanelFrame title="Fan Speed">
       {/* RPM display */}
       <div className="ac-fan-rpm">
         <span className="ac-fan-rpm__value" style={{ color: active.color, textShadow: `0 0 10px ${active.color}40` }}>
-          <AnimatedRPM value={active.rpm} />
+          {rpm != null && rpm > 0 ? <AnimatedRPM value={rpm} /> : 'N/A'}
         </span>
         <span className="ac-fan-rpm__unit">RPM</span>
         <span className="ac-fan-rpm__pct">
-          <AnimatedPct value={active.pct} />
+          {displayPercent != null ? <AnimatedPct value={displayPercent} /> : 'N/A'}
         </span>
       </div>
 

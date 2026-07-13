@@ -23,6 +23,8 @@ use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
 use sysinfo::{Components, System};
 
+use super::cpu_voltage::VoltageReader;
+
 /// Static CPU identity — queried once at startup.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CpuInfo {
@@ -57,6 +59,8 @@ pub struct CpuSample {
 pub struct CpuMonitor {
     inner: Mutex<Inner>,
     info: CpuInfo,
+    /// Rate-limited WMI voltage reader (updated every ~3s).
+    voltage: VoltageReader,
 }
 
 struct Inner {
@@ -119,6 +123,7 @@ impl CpuMonitor {
                 power: win_power::ProcessorPower::new(logical_cores),
             }),
             info,
+            voltage: VoltageReader::new(),
         }
     }
 
@@ -180,10 +185,12 @@ impl CpuMonitor {
             .map(|m| m as u64)
             .unwrap_or(0);
         let max_frequency_mhz = advertised_max
-            .max(((((inner.max_freq_seen as f64) * 1.05) / 100.0).ceil() as u64 * 100))
+            .max((((inner.max_freq_seen as f64) * 1.05) / 100.0).ceil() as u64 * 100)
             .max(3000);
 
         let temperature_celsius = read_cpu_temperature(&mut inner.components);
+
+        let voltage_volts = self.voltage.read().vcore;
 
         CpuSample {
             timestamp: chrono::Utc::now().timestamp_millis(),
@@ -191,8 +198,7 @@ impl CpuMonitor {
             max_frequency_mhz,
             usage_percent,
             temperature_celsius,
-            // Not available without a kernel-mode sensor driver — see module docs.
-            voltage_volts: None,
+            voltage_volts,
             cores,
         }
     }

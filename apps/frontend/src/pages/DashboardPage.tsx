@@ -44,8 +44,9 @@ export function DashboardPage() {
 
   const gpu = selectedGpuId ? currentData.get(selectedGpuId) : undefined;
   const gpuInfo = gpus.find((g) => g.id === selectedGpuId) ?? gpus[0];
-  const gpuLabel = (gpuInfo?.name ?? 'RTX 3060').replace(/^NVIDIA\s+/i, '').replace(/^GeForce\s+/i, '');
-  const vramTotal = gpuInfo?.memory_total_mb ? Math.round(gpuInfo.memory_total_mb / 1024) : 12;
+  const gpuLabel = (gpuInfo?.name ?? 'No GPU').replace(/^NVIDIA\s+/i, '').replace(/^GeForce\s+/i, '');
+  const vramTotalMb = gpu?.memory_total_mb ?? gpuInfo?.memory_total_mb ?? null;
+  const vramTotal = vramTotalMb ? Math.round(vramTotalMb / 1024) : null;
 
   return (
     <div className="ac-dashboard">
@@ -77,19 +78,24 @@ export function DashboardPage() {
             />
             <GpuPanel
               gpuName={gpuLabel}
-              frequency={gpu ? Math.round(gpu.core_clock_mhz) : 219}
-              voltage={gpu ? (gpu.core_voltage_mv > 0 ? gpu.core_voltage_mv / 1000 : null) : 0.625}
-              temperature={gpu ? Math.round(gpu.temperature_celsius) : 33}
-              usage={gpu ? Math.round(gpu.core_utilization_percent) : 8}
-              vramUsed={gpu ? gpu.memory_used_mb / 1024 : 1.3}
+              frequency={gpu ? Math.round(gpu.core_clock_mhz) : null}
+              voltage={gpu && gpu.core_voltage_mv > 0 ? gpu.core_voltage_mv / 1000 : null}
+              temperature={gpu ? Math.round(gpu.temperature_celsius) : null}
+              usage={gpu ? Math.round(gpu.core_utilization_percent) : null}
+              vramUsed={gpu ? gpu.memory_used_mb / 1024 : null}
               vramTotal={vramTotal}
-              memoryClock={gpu ? Math.round(gpu.memory_clock_mhz) : undefined}
+              memoryClock={gpu ? Math.round(gpu.memory_clock_mhz) : null}
             />
           </div>
 
           <div className="ac-right__bottom">
             <div className="ac-right__col">
-              <FanPanel activeMode={fanMode} onModeChange={(m) => setFanMode(m as typeof fanMode)} />
+              <FanPanel
+                activeMode={fanMode}
+                onModeChange={(m) => setFanMode(m as typeof fanMode)}
+                rpm={gpu && gpu.fan_rpm > 0 ? gpu.fan_rpm : null}
+                percent={gpu ? Math.round(gpu.fan_speed_percent) : null}
+              />
               <GameLauncher />
             </div>
           </div>

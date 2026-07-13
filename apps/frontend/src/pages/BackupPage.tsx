@@ -60,59 +60,59 @@ export function BackupPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="section-header">
-        <h2 className="text-text-primary text-lg font-semibold">Backup & Restore</h2>
-        <p className="text-text-secondary mt-1 text-sm">Create full system backups and restore your configuration</p>
+    <div className="ac-page ac-page--wide">
+      <div className="ac-page-header">
+        <div className="ac-page-header__left">
+          <span className="ac-page-header__title">Backup &amp; Restore</span>
+          <span className="ac-page-header__desc">Create full system backups and restore your configuration</span>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          {error}
-          <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
+        <div className="ac-banner ac-banner--error">
+          <span>{error}</span>
+          <button onClick={clearError} className="ac-banner__close">&times;</button>
         </div>
       )}
 
       {lastResult && (
-        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
-          <IconCheck className="size-4" />
-          Backup created: {lastResult.metadata.name} ({formatBytes(lastResult.metadata.file_size_bytes)})
+        <div className="ac-banner ac-banner--success">
+          <IconCheck size={16} />
+          <span>Backup created: {lastResult.metadata.name} ({formatBytes(lastResult.metadata.file_size_bytes)})</span>
         </div>
       )}
 
       {lastRestore && (
-        <div className={`rounded-lg px-4 py-3 text-sm ${lastRestore.success ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border border-amber-500/30 bg-amber-500/10 text-amber-400'}`}>
-          {lastRestore.success
+        <div className={`ac-banner ${lastRestore.success ? 'ac-banner--success' : 'ac-banner--warning'}`}>
+          <span>{lastRestore.success
             ? `Restore complete: ${lastRestore.restored_profiles} profiles, ${lastRestore.restored_rules} rules`
-            : `Restore completed with ${lastRestore.errors.length} errors`}
+            : `Restore completed with ${lastRestore.errors.length} errors`}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="card space-y-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="bg-accent-primary/20 flex size-10 items-center justify-center rounded-lg">
-              <IconSave className="text-accent-primary size-5" />
-            </div>
+      <div className="ac-grid-2">
+        <div className="ac-page-card">
+          <div className="ac-page-card__header">
+            <span className="ac-page-card__title">
+              <IconSave className="ac-page-card__title-icon" />
+              Create Backup
+            </span>
+          </div>
+          <div className="ac-page-card__body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <span style={{ fontSize: 12, color: 'var(--ac-text-secondary)' }}>Save your current configuration</span>
+
             <div>
-              <h3 className="text-text-primary text-sm font-semibold">Create Backup</h3>
-              <p className="text-text-secondary text-xs">Save your current configuration</p>
+              <label className="ac-label">Backup Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Before OC Tuning"
+                className="ac-input ac-input--wide"
+              />
             </div>
-          </div>
 
-          <div>
-            <label className="text-text-secondary mb-1 block text-xs font-medium">Backup Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Before OC Tuning"
-              className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-text-secondary text-xs font-medium">Include</p>
+            <span className="ac-subtitle">Include</span>
             {([
               ['profiles', 'GPU Profiles'] as const,
               ['automation_rules', 'Automation Rules'] as const,
@@ -124,100 +124,101 @@ export function BackupPage() {
               ['remote', 'Remote Config'] as const,
               ['reports', 'Reports'] as const,
             ]).map(([key, label]) => (
-              <label key={key} className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={scope[key]}
-                  onChange={() => toggleScope(key)}
-                  className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
-                />
-                <span className="text-text-primary text-sm">{label}</span>
+              <label key={key} className="ac-checkbox" onClick={() => toggleScope(key)}>
+                <div className={`ac-checkbox__box ${scope[key] ? 'ac-checkbox__box--checked' : ''}`} />
+                <span className="ac-checkbox__label">{label}</span>
               </label>
             ))}
-          </div>
 
-          <button onClick={handleCreate} disabled={loading || !name.trim()} className="btn-primary w-full px-4 py-2 text-xs">
-            {loading ? 'Creating...' : 'Create Backup'}
-          </button>
+            <button onClick={handleCreate} disabled={loading || !name.trim()} className="ac-btn ac-btn--primary" style={{ width: '100%' }}>
+              {loading ? 'Creating...' : 'Create Backup'}
+            </button>
+          </div>
         </div>
 
-        <div className="card space-y-4 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/20">
-              <IconDownload className="size-5 text-blue-400" />
-            </div>
-            <div>
-              <h3 className="text-text-primary text-sm font-semibold">Saved Backups</h3>
-              <p className="text-text-secondary text-xs">{backups.length} backup{backups.length !== 1 ? 's' : ''}</p>
-            </div>
-            <div className="ml-auto flex gap-1">
-              <button onClick={fetchBackups} className="btn-ghost p-1.5" title="Refresh">
-                <IconRefresh className="size-4" />
+        <div className="ac-page-card">
+          <div className="ac-page-card__header">
+            <span className="ac-page-card__title">
+              <IconDownload className="ac-page-card__title-icon" />
+              Saved Backups
+            </span>
+            <div className="ac-page-card__actions">
+              <button onClick={fetchBackups} className="ac-btn ac-btn--ghost ac-btn--icon" title="Refresh">
+                <IconRefresh />
               </button>
-              <button onClick={handleFileImport} className="btn-ghost p-1.5" title="Import backup file">
-                <IconUpload className="size-4" />
+              <button onClick={handleFileImport} className="ac-btn ac-btn--ghost ac-btn--icon" title="Import backup file">
+                <IconUpload />
               </button>
             </div>
           </div>
-
-          {backups.length === 0 ? (
-            <p className="text-text-muted py-6 text-center text-xs">No backups yet. Create one to get started.</p>
-          ) : (
-            <div className="max-h-80 space-y-2 overflow-y-auto">
-              {backups.map((b) => (
-                <div
-                  key={b.id}
-                  className={`cursor-pointer rounded-lg border px-3 py-2 transition-colors ${
-                    selectedId === b.id
-                      ? 'bg-accent-primary/10 border-accent-primary/40'
-                      : 'bg-gpu-800 border-gpu-700 hover:border-gpu-600'
-                  }`}
-                  onClick={() => {
-                    setSelectedId(b.id);
-                    setRestoreScope(b.scope);
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-text-primary text-sm font-medium">{b.name}</p>
-                      <p className="text-text-secondary text-xs">{formatDate(b.created_at)} &middot; {formatBytes(b.file_size_bytes)}</p>
+          <div className="ac-page-card__body" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {backups.length === 0 ? (
+              <div className="ac-empty">
+                <svg className="ac-empty__icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span className="ac-empty__text">No backups yet. Create one to get started.</span>
+              </div>
+            ) : (
+              <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {backups.map((b) => (
+                  <div
+                    key={b.id}
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: 'var(--ac-radius-panel)',
+                      border: '1px solid',
+                      padding: '10px 12px',
+                      transition: 'all 0.15s',
+                      background: selectedId === b.id ? 'var(--ac-bg-panel-header)' : 'var(--ac-bg-input)',
+                      borderColor: selectedId === b.id ? 'var(--ac-accent-cyan)' : 'var(--ac-border-subtle)',
+                    }}
+                    onClick={() => {
+                      setSelectedId(b.id);
+                      setRestoreScope(b.scope);
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--ac-text-primary)' }}>{b.name}</span>
+                        <div style={{ fontSize: 10, color: 'var(--ac-text-muted)', marginTop: 2 }}>
+                          {formatDate(b.created_at)} &middot; {formatBytes(b.file_size_bytes)}
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteBackup(b.id); }}
+                        className="ac-btn ac-btn--ghost ac-btn--sm ac-btn--icon"
+                        style={{ color: '#f55' }}
+                        title="Delete"
+                      >
+                        <IconTrash2 />
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); deleteBackup(b.id); }}
-                      className="btn-ghost text-text-muted p-1 hover:text-red-400"
-                      title="Delete"
-                    >
-                      <IconTrash2 className="size-3.5" />
-                    </button>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                      <span className="ac-badge ac-badge--blue">{b.profile_count} profiles</span>
+                      <span className="ac-badge ac-badge--blue">{b.rule_count} rules</span>
+                    </div>
                   </div>
-                  <div className="mt-1 flex gap-2">
-                    <span className="badge-ghost text-xs">{b.profile_count} profiles</span>
-                    <span className="badge-ghost text-xs">{b.rule_count} rules</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          {selectedId && (
-            <div className="border-gpu-700 space-y-2 border-t pt-2">
-              <p className="text-text-secondary text-xs font-medium">Restore scope</p>
-              {(['profiles', 'automation_rules', 'integrations', 'enterprise'] as const).map((key) => (
-                <label key={key} className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={restoreScope[key]}
-                    onChange={() => setRestoreScope((s) => ({ ...s, [key]: !s[key] }))}
-                    className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
-                  />
-                  <span className="text-text-primary text-sm">{key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</span>
-                </label>
-              ))}
-              <button onClick={handleRestore} disabled={loading} className="btn-primary w-full px-4 py-2 text-xs">
-                {loading ? 'Restoring...' : 'Restore Selected Backup'}
-              </button>
-            </div>
-          )}
+            {selectedId && (
+              <>
+                <div className="ac-divider" />
+                <span className="ac-subtitle">Restore scope</span>
+                {(['profiles', 'automation_rules', 'integrations', 'enterprise'] as const).map((key) => (
+                  <label key={key} className="ac-checkbox" onClick={() => setRestoreScope((s) => ({ ...s, [key]: !s[key] }))}>
+                    <div className={`ac-checkbox__box ${restoreScope[key] ? 'ac-checkbox__box--checked' : ''}`} />
+                    <span className="ac-checkbox__label">{key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+                  </label>
+                ))}
+                <button onClick={handleRestore} disabled={loading} className="ac-btn ac-btn--primary" style={{ width: '100%' }}>
+                  {loading ? 'Restoring...' : 'Restore Selected Backup'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

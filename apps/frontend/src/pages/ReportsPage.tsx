@@ -55,137 +55,147 @@ export function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="section-header">
-          <h2 className="text-text-primary text-lg font-semibold">Performance Reports</h2>
-          <p className="text-text-secondary mt-1 text-sm">Generate and export GPU performance reports</p>
+    <div className="ac-page">
+      <div className="ac-page-header">
+        <div className="ac-page-header__left">
+          <div className="ac-page-header__title">Performance Reports</div>
+          <div className="ac-page-header__desc">Generate and export GPU performance reports</div>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => fetchReports()} className="btn-ghost px-3 py-1.5 text-xs">
-            <IconRefresh className="mr-1.5 inline size-3.5" />
+        <div className="ac-page-header__right" style={{gap: 8}}>
+          <button onClick={() => fetchReports()} className="ac-btn ac-btn--ghost ac-btn--sm">
+            <IconRefresh style={{display: 'inline', width: 14, height: 14, marginRight: 6}} />
             Refresh
           </button>
-          <button onClick={() => setShowBuilder(!showBuilder)} className="btn-primary px-4 py-1.5 text-xs">
+          <button onClick={() => setShowBuilder(!showBuilder)} className="ac-btn ac-btn--primary ac-btn--sm">
             {showBuilder ? 'Cancel' : 'New Report'}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="ac-banner ac-banner--error">
           {error}
-          <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
+          <button onClick={clearError} className="ac-banner__close">&times;</button>
         </div>
       )}
 
       {showBuilder && (
-        <div className="card space-y-4 p-5">
-          <h3 className="text-text-primary text-sm font-semibold">Report Builder</h3>
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Report Builder</h3>
 
-          <div>
-            <label className="text-text-secondary mb-1 block text-xs font-medium">Report Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Gaming Session Report"
-              className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full max-w-md rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
             <div>
-              <label className="text-text-secondary mb-1 block text-xs font-medium">Time Range</label>
-              <div className="flex gap-1">
-                <input
-                  type="number"
-                  value={rangeValue}
-                  min={1}
-                  onChange={(e) => setRangeValue(Number(e.target.value))}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-20 rounded-lg border p-2 text-center text-sm focus:outline-none"
-                />
-                <select
-                  value={rangeType}
-                  onChange={(e) => setRangeType(e.target.value as 'minutes' | 'hours' | 'days')}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary rounded-lg border p-2 text-sm focus:outline-none"
-                >
-                  <option value="minutes">Minutes</option>
-                  <option value="hours">Hours</option>
-                  <option value="days">Days</option>
-                </select>
+              <label className="ac-label">Report Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Gaming Session Report"
+                className="ac-input ac-input--wide"
+                style={{maxWidth: 400}}
+              />
+            </div>
+
+            <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+              <div>
+                <label className="ac-label">Time Range</label>
+                <div style={{display: 'flex', gap: 4}}>
+                  <input
+                    type="number"
+                    value={rangeValue}
+                    min={1}
+                    onChange={(e) => setRangeValue(Number(e.target.value))}
+                    className="ac-input ac-input--sm"
+                    style={{width: 80, textAlign: 'center'}}
+                  />
+                  <select
+                    value={rangeType}
+                    onChange={(e) => setRangeType(e.target.value as 'minutes' | 'hours' | 'days')}
+                    className="ac-input ac-input--sm ac-select"
+                  >
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <label className="text-text-secondary mb-2 block text-xs font-medium">Metrics to Include</label>
-            <div className="flex flex-wrap gap-3">
-              <label className="flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={includeTemp} onChange={(e) => setIncludeTemp(e.target.checked)} className="accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Temperature</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={includeClocks} onChange={(e) => setIncludeClocks(e.target.checked)} className="accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Clocks</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={includeFan} onChange={(e) => setIncludeFan(e.target.checked)} className="accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Fan</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={includePower} onChange={(e) => setIncludePower(e.target.checked)} className="accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Power</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={includeUtil} onChange={(e) => setIncludeUtil(e.target.checked)} className="accent-accent-primary rounded" />
-                <span className="text-text-primary text-sm">Utilization</span>
-              </label>
+            <div>
+              <label className="ac-label">Metrics to Include</label>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: 12}}>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={includeTemp} onChange={(e) => setIncludeTemp(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Temperature</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={includeClocks} onChange={(e) => setIncludeClocks(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Clocks</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={includeFan} onChange={(e) => setIncludeFan(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Fan</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={includePower} onChange={(e) => setIncludePower(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Power</span>
+                </label>
+                <label className="ac-checkbox">
+                  <input type="checkbox" checked={includeUtil} onChange={(e) => setIncludeUtil(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                  <span className="ac-checkbox__label">Utilization</span>
+                </label>
+              </div>
             </div>
-          </div>
 
-          <button onClick={handleGenerate} disabled={generating || !name.trim()} className="btn-primary px-6 py-2 text-sm">
-            {generating ? 'Generating...' : 'Generate Report'}
-          </button>
+            <button onClick={handleGenerate} disabled={generating || !name.trim()} className="ac-btn ac-btn--primary" style={{alignSelf: 'flex-start', padding: '6px 24px', fontSize: 13}}>
+              {generating ? 'Generating...' : 'Generate Report'}
+            </button>
+          </div>
         </div>
       )}
 
       {loading && !reports.length ? (
-        <div className="flex h-32 items-center justify-center">
-          <div className="border-accent-primary size-6 animate-spin rounded-full border-b-2" />
+        <div style={{display: 'flex', height: 128, alignItems: 'center', justifyContent: 'center'}}>
+          <div className="ac-spinner" />
         </div>
       ) : reports.length === 0 ? (
-        <div className="card p-8 text-center">
-          <IconFile className="text-text-muted mx-auto mb-3 size-12" />
-          <p className="text-text-secondary text-sm">No reports yet. Generate your first performance report.</p>
+        <div className="ac-empty">
+          <IconFile className="ac-empty__icon" />
+          <div className="ac-empty__text">No reports yet. Generate your first performance report.</div>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
           {reports.map((r) => (
             <div
               key={r.id}
-              className="card hover:border-accent-primary/30 flex cursor-pointer items-center justify-between p-4 transition-colors"
+              className="ac-page-card"
+              style={{cursor: 'pointer'}}
               onClick={() => loadReport(r.id)}
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="bg-accent-primary/10 flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <IconFile className="w-4.5 h-4.5 text-accent-primary" />
+              <div className="ac-page-card__body">
+                <div className="ac-page-header">
+                  <div className="ac-page-header__left" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0}}>
+                    <div style={{display: 'flex', width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: 'rgba(0,170,220,0.1)', flexShrink: 0}}>
+                      <IconFile style={{width: 18, height: 18, color: 'var(--ac-accent-cyan-bright)'}} />
+                    </div>
+                    <div style={{minWidth: 0}}>
+                      <p style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{r.name}</p>
+                      <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>
+                        {formatDate(r.created_at)} &middot; {r.gpu_count} GPU{r.gpu_count !== 1 ? 's' : ''} &middot; {r.sample_count} samples &middot; {formatSize(r.file_size)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="ac-page-header__right" style={{gap: 8}}>
+                    <span className="ac-badge ac-badge--blue" style={{textTransform: 'none', fontSize: 12}}>{r.format}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeReport(r.id); }}
+                      className="ac-btn ac-btn--ghost ac-btn--icon"
+                      style={{color: 'rgba(255,68,68,0.6)'}}
+                    >
+                      <IconTrash2 style={{width: 14, height: 14}} />
+                    </button>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-text-primary truncate text-sm font-medium">{r.name}</p>
-                  <p className="text-text-secondary text-xs">
-                    {formatDate(r.created_at)} &middot; {r.gpu_count} GPU{r.gpu_count !== 1 ? 's' : ''} &middot; {r.sample_count} samples &middot; {formatSize(r.file_size)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="bg-gpu-800 text-text-secondary rounded px-2 py-0.5 text-xs">{r.format}</span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); removeReport(r.id); }}
-                  className="btn-ghost p-1.5 text-xs text-red-400/60 hover:text-red-400"
-                >
-                  <IconTrash2 className="size-3.5" />
-                </button>
               </div>
             </div>
           ))}
@@ -193,13 +203,13 @@ export function ReportsPage() {
       )}
 
       {currentReport && (
-        <div className="card">
-          <div className="border-gpu-800 flex items-center justify-between border-b p-4">
+        <div className="ac-page-card">
+          <div className="ac-page-card__header" style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
             <div>
-              <h3 className="text-text-primary text-sm font-semibold">{currentReport.name}</h3>
-              <p className="text-text-secondary text-xs">{formatDate(currentReport.created_at)}</p>
+              <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>{currentReport.name}</h3>
+              <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>{formatDate(currentReport.created_at)}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="ac-page-card__actions" style={{gap: 8}}>
               <button
                 onClick={async () => {
                   const { exportReportCsv } = await import('../services/reportingService');
@@ -212,42 +222,42 @@ export function ReportsPage() {
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
-                className="btn-secondary px-3 py-1.5 text-xs"
+                className="ac-btn ac-btn--secondary ac-btn--sm"
               >
-                <IconDownload className="mr-1 inline size-3.5" />
+                <IconDownload style={{display: 'inline', width: 14, height: 14, marginRight: 4}} />
                 Export CSV
               </button>
             </div>
           </div>
 
           {currentReport.sections.map((section) => (
-            <div key={section.gpu_id} className="border-gpu-800 border-b p-4 last:border-0">
-              <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-text-primary text-sm font-medium">{section.gpu_name}</h4>
-                <span className="text-text-secondary text-xs">
+            <div key={section.gpu_id} style={{borderBottom: '1px solid var(--ac-border-subtle)', padding: 14}} className={currentReport.sections.indexOf(section) === currentReport.sections.length - 1 ? '' : ''}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12}}>
+                <h4 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 500}}>{section.gpu_name}</h4>
+                <span style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>
                   {section.sample_count} samples over {section.sampling_duration_secs}s
                 </span>
               </div>
-              <table className="w-full text-sm">
+              <table style={{width: '100%', fontSize: 13, borderCollapse: 'collapse'}}>
                 <thead>
-                  <tr className="text-text-secondary text-xs uppercase tracking-wider">
-                    <th className="py-2 pr-4 text-left">Metric</th>
-                    <th className="px-2 text-right">Current</th>
-                    <th className="px-2 text-right text-blue-400">Min</th>
-                    <th className="px-2 text-right text-red-400">Max</th>
-                    <th className="px-2 text-right text-emerald-400">Avg</th>
-                    <th className="pl-2 text-right">Unit</th>
+                  <tr style={{color: 'var(--ac-text-secondary)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px'}}>
+                    <th style={{padding: '8px 16px 8px 0', textAlign: 'left'}}>Metric</th>
+                    <th style={{padding: '8px 8px', textAlign: 'right'}}>Current</th>
+                    <th style={{padding: '8px 8px', textAlign: 'right', color: '#60a5fa'}}>Min</th>
+                    <th style={{padding: '8px 8px', textAlign: 'right', color: '#f55'}}>Max</th>
+                    <th style={{padding: '8px 8px', textAlign: 'right', color: '#34d399'}}>Avg</th>
+                    <th style={{padding: '8px 0 8px 8px', textAlign: 'right'}}>Unit</th>
                   </tr>
                 </thead>
                 <tbody>
                   {section.metrics.map((m) => (
-                    <tr key={m.metric} className="border-gpu-800/50 border-t">
-                      <td className="text-text-primary py-2 pr-4 font-medium">{m.metric}</td>
-                      <td className="text-text-primary p-2 text-right font-mono">{m.current.toFixed(1)}</td>
-                      <td className="p-2 text-right font-mono text-blue-400">{m.min.toFixed(1)}</td>
-                      <td className="p-2 text-right font-mono text-red-400">{m.max.toFixed(1)}</td>
-                      <td className="p-2 text-right font-mono text-emerald-400">{m.avg.toFixed(1)}</td>
-                      <td className="text-text-secondary py-2 pl-2 text-right">{m.unit}</td>
+                    <tr key={m.metric} style={{borderTop: '1px solid rgba(255,255,255,0.04)'}}>
+                      <td style={{color: 'var(--ac-text-primary)', padding: '8px 16px 8px 0', fontWeight: 500}}>{m.metric}</td>
+                      <td className="ac-metric" style={{padding: '8px', textAlign: 'right'}}>{m.current.toFixed(1)}</td>
+                      <td className="ac-metric" style={{padding: '8px', textAlign: 'right', color: '#60a5fa'}}>{m.min.toFixed(1)}</td>
+                      <td className="ac-metric" style={{padding: '8px', textAlign: 'right', color: '#f55'}}>{m.max.toFixed(1)}</td>
+                      <td className="ac-metric" style={{padding: '8px', textAlign: 'right', color: '#34d399'}}>{m.avg.toFixed(1)}</td>
+                      <td style={{color: 'var(--ac-text-secondary)', padding: '8px 0 8px 8px', textAlign: 'right'}}>{m.unit}</td>
                     </tr>
                   ))}
                 </tbody>

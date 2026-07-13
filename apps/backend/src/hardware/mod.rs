@@ -1,5 +1,6 @@
 pub mod provider;
 pub mod cpu;
+pub mod cpu_voltage;
 pub mod simulated;
 pub mod nvidia;
 pub mod wmi_provider;

@@ -253,7 +253,9 @@ impl GpuProvider for NvidiaProvider {
             memory_used_mb: mem_used,
             memory_total_mb: if mem_total > 0 { mem_total } else { identity.memory_total_mb },
             fan_speed_percent: fan,
-            fan_rpm: (fan * 30.0) as u32,
+            // NVML exposes fan duty percent on many consumer cards, but not
+            // physical RPM. Keep RPM unavailable instead of fabricating it.
+            fan_rpm: 0,
             power_watts: power,
             // NVML does not expose real per-core voltage on consumer GPUs, so we
             // report 0.0 here; the UI renders "N/A" rather than a fabricated value.

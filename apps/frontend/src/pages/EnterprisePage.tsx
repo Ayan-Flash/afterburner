@@ -90,8 +90,8 @@ export function EnterprisePage() {
 
   if (loading && !config) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="border-accent-primary size-8 animate-spin rounded-full border-b-2" />
+      <div style={{display: 'flex', height: 256, alignItems: 'center', justifyContent: 'center'}}>
+        <div className="ac-spinner" style={{width: 32, height: 32}} />
       </div>
     );
   }
@@ -103,205 +103,211 @@ export function EnterprisePage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="section-header">
-        <h2 className="text-text-primary text-lg font-semibold">Enterprise</h2>
-        <p className="text-text-secondary mt-1 text-sm">Group policies, branding, and centralized management</p>
+    <div className="ac-page">
+      <div className="ac-page-header">
+        <div className="ac-page-header__left">
+          <div className="ac-page-header__title">Enterprise</div>
+          <div className="ac-page-header__desc">Group policies, branding, and centralized management</div>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="ac-banner ac-banner--error">
           {error}
-          <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
+          <button onClick={clearError} className="ac-banner__close">&times;</button>
         </div>
       )}
 
-      <div className="border-gpu-800 flex gap-1 border-b">
+      <div className="ac-tabs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? 'border-accent-primary text-text-primary'
-                : 'text-text-secondary hover:text-text-primary border-transparent'
-            }`}
+            className={`ac-tab ${activeTab === tab.id ? 'ac-tab--active' : ''}`}
+            style={{display: 'flex', alignItems: 'center', gap: 8}}
           >
-            <tab.icon className="size-4" />
+            <tab.icon style={{width: 16, height: 16}} />
             {tab.label}
           </button>
         ))}
       </div>
 
       {activeTab === 'branding' && (
-        <div className="card space-y-4 p-5">
-          <h3 className="text-text-primary text-sm font-semibold">Application Branding</h3>
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Application Branding</h3>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-text-secondary mb-1 block text-xs font-medium">Application Name</label>
-              <input
-                type="text"
-                value={appName}
-                onChange={(e) => setAppName(e.target.value)}
-                className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-text-secondary mb-1 block text-xs font-medium">Primary Color</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="bg-gpu-800 border-gpu-700 size-10 cursor-pointer rounded-lg border"
-                />
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16}}>
+              <div>
+                <label className="ac-label">Application Name</label>
                 <input
                   type="text"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary flex-1 rounded-lg border px-3 py-2 font-mono text-sm focus:outline-none"
+                  value={appName}
+                  onChange={(e) => setAppName(e.target.value)}
+                  className="ac-input ac-input--wide"
                 />
               </div>
-            </div>
-          </div>
 
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showBranding}
-              onChange={(e) => setShowBranding(e.target.checked)}
-              className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
-            />
-            <span className="text-text-primary text-sm">Show branding in UI</span>
-          </label>
-
-          {showBranding && (
-            <div className="bg-gpu-800 text-text-secondary rounded-lg p-3 text-xs">
-              <p className="mb-1">Preview:</p>
-              <div className="flex items-center gap-3">
-                <div className="size-8 rounded-lg" style={{ background: primaryColor }} />
-                <span className="text-sm font-semibold" style={{ color: primaryColor }}>{appName}</span>
-                <span className="text-text-muted">Enterprise Edition</span>
+              <div>
+                <label className="ac-label">Primary Color</label>
+                <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                  <input
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    style={{width: 40, height: 40, cursor: 'pointer', borderRadius: 8, border: '1px solid var(--ac-border-subtle)', background: 'var(--ac-bg-input)', padding: 0, outline: 'none'}}
+                  />
+                  <input
+                    type="text"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="ac-input ac-input--wide"
+                    style={{fontFamily: 'var(--ac-font-mono)'}}
+                  />
+                </div>
               </div>
             </div>
-          )}
+
+            <label className="ac-checkbox">
+              <input
+                type="checkbox"
+                checked={showBranding}
+                onChange={(e) => setShowBranding(e.target.checked)}
+                style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}}
+              />
+              <span className="ac-checkbox__label">Show branding in UI</span>
+            </label>
+
+            {showBranding && (
+              <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: 12, color: 'var(--ac-text-secondary)', fontSize: 12}}>
+                <p style={{marginBottom: 4}}>Preview:</p>
+                <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+                  <div style={{width: 32, height: 32, borderRadius: 8, background: primaryColor}} />
+                  <span style={{fontWeight: 600, color: primaryColor}}>{appName}</span>
+                  <span style={{color: 'var(--ac-text-muted)'}}>Enterprise Edition</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {activeTab === 'policies' && (
-        <div className="space-y-4">
-          <div className="card p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-text-primary text-sm font-semibold">Group Policies</h3>
-              <div className="flex items-center gap-3">
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={policiesEnabled}
-                    onChange={(e) => setPoliciesEnabled(e.target.checked)}
-                    className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
-                  />
-                  <span className="text-text-secondary text-xs">Enable policies</span>
-                </label>
+        <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+          <div className="ac-page-card">
+            <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+              <div className="ac-page-header">
+                <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Group Policies</h3>
+                <div className="ac-page-header__right">
+                  <label className="ac-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={policiesEnabled}
+                      onChange={(e) => setPoliciesEnabled(e.target.checked)}
+                      style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}}
+                    />
+                    <span className="ac-checkbox__label">Enable policies</span>
+                  </label>
+                </div>
               </div>
-            </div>
 
-            <div className="mb-4 flex items-center gap-2">
-              <select
-                value={enforcementLevel}
-                onChange={(e) => setEnforcementLevel(e.target.value as 'Recommended' | 'Enforced' | 'Strict')}
-                className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-2 py-1.5 text-sm"
-              >
-                <option value="Recommended">Recommended</option>
-                <option value="Enforced">Enforced</option>
-                <option value="Strict">Strict</option>
-              </select>
-              <span className="text-text-secondary text-xs">
-                {enforcementLevel === 'Recommended' && 'Users can override policy settings'}
-                {enforcementLevel === 'Enforced' && 'Policy settings are locked for users'}
-                {enforcementLevel === 'Strict' && 'Policies enforced with compliance logging'}
-              </span>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-text-secondary text-xs font-medium uppercase tracking-wider">Create New Policy</h4>
-              <div className="flex flex-wrap gap-2">
-                <input
-                  type="text"
-                  value={newPolicyName}
-                  onChange={(e) => setNewPolicyName(e.target.value)}
-                  placeholder="Policy name"
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-48 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value={newPolicyDesc}
-                  onChange={(e) => setNewPolicyDesc(e.target.value)}
-                  placeholder="Description"
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-64 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-                />
+              <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
                 <select
-                  value={newPolicyTarget}
-                  onChange={(e) => setNewPolicyTarget(e.target.value as 'all' | 'vendor')}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-2 py-1.5 text-sm"
+                  value={enforcementLevel}
+                  onChange={(e) => setEnforcementLevel(e.target.value as 'Recommended' | 'Enforced' | 'Strict')}
+                  className="ac-input ac-select ac-input--sm"
                 >
-                  <option value="all">All GPUs</option>
-                  <option value="vendor">By Vendor</option>
+                  <option value="Recommended">Recommended</option>
+                  <option value="Enforced">Enforced</option>
+                  <option value="Strict">Strict</option>
                 </select>
-                {newPolicyTarget === 'vendor' && (
+                <span style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>
+                  {enforcementLevel === 'Recommended' && 'Users can override policy settings'}
+                  {enforcementLevel === 'Enforced' && 'Policy settings are locked for users'}
+                  {enforcementLevel === 'Strict' && 'Policies enforced with compliance logging'}
+                </span>
+              </div>
+
+              <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                <h4 className="ac-subtitle" style={{marginBottom: 0}}>Create New Policy</h4>
+                <div style={{display: 'flex', flexWrap: 'wrap', gap: 8}}>
+                  <input
+                    type="text"
+                    value={newPolicyName}
+                    onChange={(e) => setNewPolicyName(e.target.value)}
+                    placeholder="Policy name"
+                    className="ac-input ac-input--sm"
+                    style={{width: 192}}
+                  />
+                  <input
+                    type="text"
+                    value={newPolicyDesc}
+                    onChange={(e) => setNewPolicyDesc(e.target.value)}
+                    placeholder="Description"
+                    className="ac-input ac-input--sm"
+                    style={{width: 256}}
+                  />
                   <select
-                    value={newPolicyVendor}
-                    onChange={(e) => setNewPolicyVendor(e.target.value)}
-                    className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-2 py-1.5 text-sm"
+                    value={newPolicyTarget}
+                    onChange={(e) => setNewPolicyTarget(e.target.value as 'all' | 'vendor')}
+                    className="ac-input ac-select ac-input--sm"
                   >
-                    <option value="nvidia">NVIDIA</option>
-                    <option value="amd">AMD</option>
-                    <option value="intel">Intel</option>
+                    <option value="all">All GPUs</option>
+                    <option value="vendor">By Vendor</option>
                   </select>
-                )}
-                <button onClick={handleCreatePolicy} className="btn-primary px-3 py-1.5 text-xs">
-                  Create
-                </button>
+                  {newPolicyTarget === 'vendor' && (
+                    <select
+                      value={newPolicyVendor}
+                      onChange={(e) => setNewPolicyVendor(e.target.value)}
+                      className="ac-input ac-select ac-input--sm"
+                    >
+                      <option value="nvidia">NVIDIA</option>
+                      <option value="amd">AMD</option>
+                      <option value="intel">Intel</option>
+                    </select>
+                  )}
+                  <button onClick={handleCreatePolicy} className="ac-btn ac-btn--primary ac-btn--sm">
+                    Create
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
           {policies.length === 0 ? (
-            <div className="card p-6 text-center">
-              <IconShield className="text-text-muted mx-auto mb-2 size-10" />
-              <p className="text-text-secondary text-sm">No group policies defined</p>
+            <div className="ac-empty">
+              <IconShield className="ac-empty__icon" />
+              <div className="ac-empty__text">No group policies defined</div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
               {policies.map((p) => (
-                <div key={p.id} className="card flex items-center justify-between p-4">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <button
-                      onClick={() => togglePolicy(p.id, !p.enabled)}
-                      className={`relative h-5 w-8 rounded-full transition-colors ${
-                        p.enabled ? 'bg-accent-primary' : 'bg-gpu-700'
-                      }`}
-                    >
-                      <div className={`absolute top-0.5 size-3.5 rounded-full bg-white transition-transform ${
-                        p.enabled ? 'translate-x-4' : 'translate-x-0.5'
-                      }`} />
-                    </button>
-                    <div className="min-w-0">
-                      <p className="text-text-primary text-sm font-medium">{p.name}</p>
-                      <p className="text-text-secondary text-xs">{p.description}</p>
-                      <p className="text-text-muted mt-0.5 text-xs">
-                        Priority {p.priority} &middot; {formatDate(p.created_at)}
-                      </p>
+                <div key={p.id} className="ac-page-card">
+                  <div className="ac-page-card__body">
+                    <div className="ac-page-header">
+                      <div className="ac-page-header__left" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0}}>
+                        <div className="ac-toggle" onClick={() => togglePolicy(p.id, !p.enabled)}>
+                          <div className={`ac-toggle__track ${p.enabled ? 'ac-toggle__track--on' : ''}`}>
+                            <div className="ac-toggle__thumb" />
+                          </div>
+                        </div>
+                        <div style={{minWidth: 0}}>
+                          <p style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 500}}>{p.name}</p>
+                          <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>{p.description}</p>
+                          <p style={{color: 'var(--ac-text-muted)', fontSize: 12, marginTop: 2}}>
+                            Priority {p.priority} &middot; {formatDate(p.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deletePolicy(p.id)}
+                        className="ac-btn ac-btn--ghost ac-btn--icon"
+                        style={{color: 'rgba(255,68,68,0.6)'}}
+                      >
+                        <IconX style={{width: 14, height: 14}} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deletePolicy(p.id)}
-                    className="btn-ghost p-1.5 text-xs text-red-400/60 hover:text-red-400"
-                  >
-                    <IconX className="size-3.5" />
-                  </button>
                 </div>
               ))}
             </div>
@@ -310,86 +316,91 @@ export function EnterprisePage() {
       )}
 
       {activeTab === 'centralized' && (
-        <div className="card space-y-4 p-5">
-          <h3 className="text-text-primary text-sm font-semibold">Centralized Management Server</h3>
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Centralized Management Server</h3>
 
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              checked={centralEnabled}
-              onChange={(e) => setCentralEnabled(e.target.checked)}
-              className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded"
-            />
-            <span className="text-text-primary text-sm">Enable centralized management</span>
-          </label>
+            <label className="ac-checkbox">
+              <input
+                type="checkbox"
+                checked={centralEnabled}
+                onChange={(e) => setCentralEnabled(e.target.checked)}
+                style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}}
+              />
+              <span className="ac-checkbox__label">Enable centralized management</span>
+            </label>
 
-          {centralEnabled && (
-            <div className="border-accent-primary/30 space-y-3 border-l-2 pl-6">
-              <div>
-                <label className="text-text-secondary mb-1 block text-xs font-medium">Server URL</label>
-                <input
-                  type="text"
-                  value={serverUrl}
-                  onChange={(e) => setServerUrl(e.target.value)}
-                  placeholder="https://mgmt.example.com"
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full max-w-md rounded-lg border px-3 py-2 text-sm focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-text-secondary mb-1 block text-xs font-medium">API Key</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full max-w-md rounded-lg border px-3 py-2 text-sm focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {centralEnabled && (
+              <div style={{borderLeft: '2px solid rgba(0,170,220,0.3)', paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 12}}>
                 <div>
-                  <label className="text-text-secondary mb-1 block text-xs font-medium">Machine Name</label>
+                  <label className="ac-label">Server URL</label>
                   <input
                     type="text"
-                    value={machineName}
-                    onChange={(e) => setMachineName(e.target.value)}
-                    className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 text-sm focus:outline-none"
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                    placeholder="https://mgmt.example.com"
+                    className="ac-input ac-input--wide"
+                    style={{maxWidth: 400}}
                   />
                 </div>
 
                 <div>
-                  <label className="text-text-secondary mb-1 block text-xs font-medium">Sync Interval</label>
-                  <div className="flex items-center gap-2">
+                  <label className="ac-label">API Key</label>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="ac-input ac-input--wide"
+                    style={{maxWidth: 400}}
+                  />
+                </div>
+
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16}}>
+                  <div>
+                    <label className="ac-label">Machine Name</label>
                     <input
-                      type="number"
-                      value={syncInterval}
-                      onChange={(e) => setSyncInterval(Number(e.target.value))}
-                      min={30}
-                      className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-24 rounded-lg border px-3 py-2 text-sm focus:outline-none"
+                      type="text"
+                      value={machineName}
+                      onChange={(e) => setMachineName(e.target.value)}
+                      className="ac-input ac-input--wide"
                     />
-                    <span className="text-text-secondary text-xs">seconds</span>
+                  </div>
+
+                  <div>
+                    <label className="ac-label">Sync Interval</label>
+                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                      <input
+                        type="number"
+                        value={syncInterval}
+                        onChange={(e) => setSyncInterval(Number(e.target.value))}
+                        min={30}
+                        className="ac-input ac-input--sm"
+                        style={{width: 96}}
+                      />
+                      <span style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>seconds</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <p className="text-text-secondary text-xs font-medium">Sync Settings</p>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input type="checkbox" checked={syncPolicies} onChange={(e) => setSyncPolicies(e.target.checked)} className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded" />
-                  <span className="text-text-primary text-sm">Sync group policies</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input type="checkbox" checked={syncProfiles} onChange={(e) => setSyncProfiles(e.target.checked)} className="border-gpu-600 bg-gpu-800 accent-accent-primary rounded" />
-                  <span className="text-text-primary text-sm">Sync GPU profiles</span>
-                </label>
+                <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                  <p style={{color: 'var(--ac-text-secondary)', fontSize: 12, fontWeight: 500}}>Sync Settings</p>
+                  <label className="ac-checkbox">
+                    <input type="checkbox" checked={syncPolicies} onChange={(e) => setSyncPolicies(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                    <span className="ac-checkbox__label">Sync group policies</span>
+                  </label>
+                  <label className="ac-checkbox">
+                    <input type="checkbox" checked={syncProfiles} onChange={(e) => setSyncProfiles(e.target.checked)} style={{accentColor: 'var(--ac-accent-cyan)', width: 14, height: 14}} />
+                    <span className="ac-checkbox__label">Sync GPU profiles</span>
+                  </label>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
-      <div className="flex justify-end">
-        <button onClick={handleSave} disabled={saving} className="btn-primary px-6 py-2 text-sm">
+      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+        <button onClick={handleSave} disabled={saving} className="ac-btn ac-btn--primary" style={{padding: '6px 24px', fontSize: 13}}>
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
       </div>

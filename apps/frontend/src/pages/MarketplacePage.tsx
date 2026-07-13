@@ -13,7 +13,7 @@ function formatCount(n: number) {
 
 function stars(rating: number) {
   const full = Math.round(rating);
-  return '★'.repeat(full) + '☆'.repeat(5 - full);
+  return '\u2605'.repeat(full) + '\u2606'.repeat(5 - full);
 }
 
 export function MarketplacePage() {
@@ -57,179 +57,190 @@ export function MarketplacePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="section-header">
-        <h2 className="text-text-primary text-lg font-semibold">Profile Marketplace</h2>
-        <p className="text-text-secondary mt-1 text-sm">Browse, share, and download community GPU tuning profiles</p>
+    <div className="ac-page">
+      <div className="ac-page-header">
+        <div className="ac-page-header__left">
+          <div className="ac-page-header__title">Profile Marketplace</div>
+          <div className="ac-page-header__desc">Browse, share, and download community GPU tuning profiles</div>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="ac-banner ac-banner--error">
           {error}
-          <button onClick={clearError} className="float-right text-red-400/70 hover:text-red-400">&times;</button>
+          <button onClick={clearError} className="ac-banner__close">&times;</button>
         </div>
       )}
 
-      <div className="card p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/20">
-              <IconStore className="size-5 text-emerald-400" />
-            </div>
-            <div>
-              <h3 className="text-text-primary text-sm font-semibold">Browse Profiles</h3>
-              <p className="text-text-secondary text-xs">{profiles.length} profile{profiles.length !== 1 ? 's' : ''}</p>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <button onClick={() => setShowImport(!showImport)} className="btn-ghost p-1.5" title="Import profile">
-              <IconUpload className="size-4" />
-            </button>
-            <button onClick={fetchProfiles} className="btn-ghost p-1.5" title="Refresh">
-              <IconRefresh className="size-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-4 flex gap-3">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="bg-gpu-800 border-gpu-700 text-text-primary rounded-lg border px-3 py-1.5 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="mine">My Profiles</option>
-            <option value="rated">Top Rated</option>
-            <option value="popular">Popular</option>
-          </select>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search profiles..."
-            className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary flex-1 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
-          />
-        </div>
-
-        {showImport && (
-          <div className="mb-4 space-y-2">
-            <textarea
-              value={importJson}
-              onChange={(e) => setImportJson(e.target.value)}
-              placeholder="Paste profile JSON here..."
-              rows={4}
-              className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary w-full rounded-lg border px-3 py-2 font-mono text-sm focus:outline-none"
-            />
-            <div className="flex gap-2">
-              <button onClick={handleImport} className="btn-primary px-4 py-1.5 text-xs">Import</button>
-              <button onClick={() => setShowImport(false)} className="btn-ghost px-4 py-1.5 text-xs">Cancel</button>
-            </div>
-          </div>
-        )}
-
-        {profiles.length === 0 ? (
-          <p className="text-text-muted py-6 text-center text-xs">No profiles found. Import one or check back later.</p>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {profiles.map((p) => (
-              <div
-                key={p.id}
-                className={`cursor-pointer rounded-lg border px-4 py-3 transition-colors ${
-                  selected?.id === p.id
-                    ? 'bg-accent-primary/10 border-accent-primary/40'
-                    : 'bg-gpu-800 border-gpu-700 hover:border-gpu-600'
-                }`}
-                onClick={() => selectProfile(p.id)}
-              >
-                <div className="mb-1 flex items-start justify-between">
-                  <h4 className="text-text-primary text-sm font-semibold">{p.name}</h4>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); deleteProfile(p.id); }}
-                    className="btn-ghost text-text-muted p-0.5 hover:text-red-400"
-                  >
-                    <IconTrash2 className="size-3" />
-                  </button>
-                </div>
-                <p className="text-text-secondary mb-1 line-clamp-2 text-xs">{p.description}</p>
-                <div className="text-text-muted flex items-center gap-2 text-xs">
-                  <span className="text-yellow-400">{stars(p.rating_avg)}</span>
-                  <span>({formatCount(p.rating_count)})</span>
-                  <span>&middot;</span>
-                  <span>{formatCount(p.download_count)} dl</span>
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-1">
-                  <span className="bg-gpu-700 text-text-muted rounded px-1.5 py-0.5 text-xs">{p.gpu_model}</span>
-                  {p.tags.slice(0, 2).map((t) => (
-                    <span key={t} className="bg-gpu-700 text-text-muted rounded px-1.5 py-0.5 text-xs">{t}</span>
-                  ))}
-                </div>
+      <div className="ac-page-card">
+        <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+          <div className="ac-page-header">
+            <div className="ac-page-header__left" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 12}}>
+              <div style={{display: 'flex', width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 8, background: 'rgba(52,211,153,0.2)'}}>
+                <IconStore style={{width: 20, height: 20, color: '#34d399'}} />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {selected && (
-        <div className="card p-5">
-          <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h3 className="text-text-primary text-sm font-semibold">{selected.name}</h3>
-              <p className="text-text-secondary text-xs">by {selected.author} &middot; {formatDate(selected.created_at)}</p>
+              <div>
+                <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>Browse Profiles</h3>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>{profiles.length} profile{profiles.length !== 1 ? 's' : ''}</p>
+              </div>
             </div>
-            <div className="flex gap-1">
-              <button onClick={handleExport} className="btn-ghost p-1.5" title="Export profile">
-                <IconDownload className="size-4" />
+            <div className="ac-page-header__right" style={{gap: 4}}>
+              <button onClick={() => setShowImport(!showImport)} className="ac-btn ac-btn--ghost ac-btn--icon" title="Import profile">
+                <IconUpload style={{width: 16, height: 16}} />
+              </button>
+              <button onClick={fetchProfiles} className="ac-btn ac-btn--ghost ac-btn--icon" title="Refresh">
+                <IconRefresh style={{width: 16, height: 16}} />
               </button>
             </div>
           </div>
 
-          <p className="text-text-secondary mb-3 text-sm">{selected.description}</p>
-
-          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <div className="bg-gpu-800 rounded-lg px-3 py-2">
-              <p className="text-text-secondary text-xs">GPU Model</p>
-              <p className="text-text-primary text-sm">{selected.gpu_model}</p>
-            </div>
-            <div className="bg-gpu-800 rounded-lg px-3 py-2">
-              <p className="text-text-secondary text-xs">Vendor</p>
-              <p className="text-text-primary text-sm">{selected.gpu_vendor}</p>
-            </div>
-            <div className="bg-gpu-800 rounded-lg px-3 py-2">
-              <p className="text-text-secondary text-xs">Driver</p>
-              <p className="text-text-primary text-sm">{selected.driver_version}</p>
-            </div>
-            <div className="bg-gpu-800 rounded-lg px-3 py-2">
-              <p className="text-text-secondary text-xs">Downloads</p>
-              <p className="text-text-primary text-sm">{formatCount(selected.download_count)}</p>
-            </div>
+          <div style={{display: 'flex', gap: 12}}>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="ac-input ac-input--sm ac-select"
+            >
+              <option value="all">All</option>
+              <option value="mine">My Profiles</option>
+              <option value="rated">Top Rated</option>
+              <option value="popular">Popular</option>
+            </select>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search profiles..."
+              className="ac-input ac-input--sm ac-input--wide"
+            />
           </div>
 
-          <div className="mb-4 flex flex-wrap gap-1">
-            {selected.tags.map((t) => (
-              <span key={t} className="bg-accent-primary/10 text-accent-primary rounded px-2 py-0.5 text-xs">{t}</span>
-            ))}
-          </div>
-
-          <div className="border-gpu-700 mt-4 border-t pt-4">
-            <h4 className="text-text-secondary mb-3 text-xs font-semibold uppercase tracking-wider">Rate this profile</h4>
-            <div className="flex items-center gap-3">
-              <select
-                value={ratingScore}
-                onChange={(e) => setRatingScore(Number(e.target.value))}
-                className="bg-gpu-800 border-gpu-700 text-text-primary rounded border px-2 py-1 text-sm"
-              >
-                {[5, 4, 3, 2, 1].map((n) => (
-                  <option key={n} value={n}>{'★'.repeat(n)}{'☆'.repeat(5 - n)}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={ratingComment}
-                onChange={(e) => setRatingComment(e.target.value)}
-                placeholder="Optional comment..."
-                className="bg-gpu-800 border-gpu-700 text-text-primary focus:border-accent-primary flex-1 rounded-lg border px-3 py-1.5 text-sm focus:outline-none"
+          {showImport && (
+            <div style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+              <textarea
+                value={importJson}
+                onChange={(e) => setImportJson(e.target.value)}
+                placeholder="Paste profile JSON here..."
+                rows={4}
+                className="ac-input ac-input--wide"
+                style={{fontFamily: 'var(--ac-font-mono)', resize: 'vertical'}}
               />
-              <button onClick={handleRate} className="btn-primary px-3 py-1.5 text-xs">Rate</button>
+              <div style={{display: 'flex', gap: 8}}>
+                <button onClick={handleImport} className="ac-btn ac-btn--primary ac-btn--sm">Import</button>
+                <button onClick={() => setShowImport(false)} className="ac-btn ac-btn--ghost ac-btn--sm">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {profiles.length === 0 ? (
+            <p style={{color: 'var(--ac-text-muted)', fontSize: 12, padding: 24, textAlign: 'center'}}>No profiles found. Import one or check back later.</p>
+          ) : (
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12}}>
+              {profiles.map((p) => (
+                <div
+                  key={p.id}
+                  className="ac-page-card"
+                  style={{
+                    cursor: 'pointer',
+                    borderColor: selected?.id === p.id ? 'rgba(0,170,220,0.4)' : undefined,
+                    background: selected?.id === p.id ? 'rgba(0,170,220,0.1)' : undefined,
+                  }}
+                  onClick={() => selectProfile(p.id)}
+                >
+                  <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+                    <div className="ac-page-header" style={{gap: 0}}>
+                      <h4 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1}}>{p.name}</h4>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteProfile(p.id); }}
+                        className="ac-btn ac-btn--ghost ac-btn--icon"
+                        style={{color: 'var(--ac-text-muted)', width: 20, height: 20}}
+                      >
+                        <IconTrash2 style={{width: 12, height: 12}} />
+                      </button>
+                    </div>
+                    <p style={{color: 'var(--ac-text-secondary)', fontSize: 12, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>{p.description}</p>
+                    <div style={{display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ac-text-muted)', fontSize: 12}}>
+                      <span style={{color: '#fbbf24'}}>{stars(p.rating_avg)}</span>
+                      <span>({formatCount(p.rating_count)})</span>
+                      <span>&middot;</span>
+                      <span>{formatCount(p.download_count)} dl</span>
+                    </div>
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4}}>
+                      <span style={{background: 'var(--ac-bg-input)', color: 'var(--ac-text-muted)', borderRadius: 3, padding: '1px 6px', fontSize: 12}}>{p.gpu_model}</span>
+                      {p.tags.slice(0, 2).map((t) => (
+                        <span key={t} style={{background: 'var(--ac-bg-input)', color: 'var(--ac-text-muted)', borderRadius: 3, padding: '1px 6px', fontSize: 12}}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selected && (
+        <div className="ac-page-card">
+          <div className="ac-page-card__body" style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <div className="ac-page-header">
+              <div>
+                <h3 style={{color: 'var(--ac-text-primary)', fontSize: 13, fontWeight: 600}}>{selected.name}</h3>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>by {selected.author} &middot; {formatDate(selected.created_at)}</p>
+              </div>
+              <div className="ac-page-header__right" style={{gap: 4}}>
+                <button onClick={handleExport} className="ac-btn ac-btn--ghost ac-btn--icon" title="Export profile">
+                  <IconDownload style={{width: 16, height: 16}} />
+                </button>
+              </div>
+            </div>
+
+            <p style={{color: 'var(--ac-text-secondary)', fontSize: 13}}>{selected.description}</p>
+
+            <div className="ac-grid-4">
+              <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>GPU Model</p>
+                <p style={{color: 'var(--ac-text-primary)', fontSize: 13}}>{selected.gpu_model}</p>
+              </div>
+              <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Vendor</p>
+                <p style={{color: 'var(--ac-text-primary)', fontSize: 13}}>{selected.gpu_vendor}</p>
+              </div>
+              <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Driver</p>
+                <p style={{color: 'var(--ac-text-primary)', fontSize: 13}}>{selected.driver_version}</p>
+              </div>
+              <div style={{background: 'var(--ac-bg-input)', borderRadius: 8, padding: '8px 12px'}}>
+                <p style={{color: 'var(--ac-text-secondary)', fontSize: 12}}>Downloads</p>
+                <p style={{color: 'var(--ac-text-primary)', fontSize: 13}}>{formatCount(selected.download_count)}</p>
+              </div>
+            </div>
+
+            <div style={{display: 'flex', flexWrap: 'wrap', gap: 4}}>
+              {selected.tags.map((t) => (
+                <span key={t} className="ac-badge ac-badge--blue" style={{textTransform: 'none', fontSize: 12}}>{t}</span>
+              ))}
+            </div>
+
+            <div style={{borderTop: '1px solid var(--ac-border-subtle)', paddingTop: 16}}>
+              <h4 className="ac-subtitle" style={{marginBottom: 12}}>Rate this profile</h4>
+              <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
+                <select
+                  value={ratingScore}
+                  onChange={(e) => setRatingScore(Number(e.target.value))}
+                  className="ac-input ac-input--sm ac-select"
+                >
+                  {[5, 4, 3, 2, 1].map((n) => (
+                    <option key={n} value={n}>{'\u2605'.repeat(n)}{'\u2606'.repeat(5 - n)}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={ratingComment}
+                  onChange={(e) => setRatingComment(e.target.value)}
+                  placeholder="Optional comment..."
+                  className="ac-input ac-input--sm ac-input--wide"
+                />
+                <button onClick={handleRate} className="ac-btn ac-btn--primary ac-btn--sm">Rate</button>
+              </div>
             </div>
           </div>
         </div>
