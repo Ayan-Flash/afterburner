@@ -162,7 +162,15 @@ try {
 /// Run a PowerShell script and return its stdout if successful.
 /// Timeout is set to 5 seconds to avoid hanging.
 fn run_powershell(script: &str) -> Option<String> {
-    let output = std::process::Command::new("powershell")
+    let mut cmd = std::process::Command::new("powershell");
+
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+
+    let output = cmd
         .args([
             "-NoProfile",
             "-NonInteractive",

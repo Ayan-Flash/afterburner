@@ -10,12 +10,14 @@ export interface CpuInfo {
   vendor: string;
   physical_cores: number;
   logical_cores: number;
+  is_elevated: boolean;
 }
 
 export interface CpuCoreSample {
   core_index: number;
   frequency_mhz: number;
   usage_percent: number;
+  temperature_celsius: number | null;
 }
 
 export interface CpuSample {

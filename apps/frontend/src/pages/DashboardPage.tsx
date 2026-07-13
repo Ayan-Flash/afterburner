@@ -24,7 +24,7 @@ import { useCpuData } from '../components/armoury/useCpuData';
    ================================================================ */
 
 export function DashboardPage() {
-  const { gpus, currentData, fetchData } = useGpuStore();
+  const { gpus, currentData, fetchData, setFanSpeed } = useGpuStore();
   const { selectedGpuId } = useUiStore();
   const [activeTab, setActiveTab] = useState('frequency');
   const [fanMode, setFanMode] = useState<'silence' | 'standard' | 'turbo' | 'full'>('standard');
@@ -41,6 +41,18 @@ export function DashboardPage() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [selectedGpuId, fetchData]);
+
+  const handleFanModeChange = async (mode: 'silence' | 'standard' | 'turbo' | 'full') => {
+    setFanMode(mode);
+    if (selectedGpuId) {
+      const speedPct = mode === 'silence' ? 0 : mode === 'standard' ? 35 : mode === 'turbo' ? 70 : 100;
+      try {
+        await setFanSpeed(selectedGpuId, speedPct);
+      } catch (e) {
+        console.error("Failed to set fan speed", e);
+      }
+    }
+  };
 
   const gpu = selectedGpuId ? currentData.get(selectedGpuId) : undefined;
   const gpuInfo = gpus.find((g) => g.id === selectedGpuId) ?? gpus[0];
@@ -63,7 +75,7 @@ export function DashboardPage() {
               </span>
             )}
           </div>
-          <CpuCoreCards cores={cpu.cores.slice(0, 4)} />
+          <CpuCoreCards cores={cpu.cores} />
         </div>
 
         {/* ---- Right column: info + utility panels ---- */}
@@ -75,6 +87,7 @@ export function DashboardPage() {
               voltage={cpu.voltage}
               temperature={cpu.temperature}
               maxFrequency={cpu.maxFrequency}
+              isElevated={cpu.isElevated}
             />
             <GpuPanel
               gpuName={gpuLabel}
@@ -92,7 +105,7 @@ export function DashboardPage() {
             <div className="ac-right__col">
               <FanPanel
                 activeMode={fanMode}
-                onModeChange={(m) => setFanMode(m as typeof fanMode)}
+                onModeChange={(m) => handleFanModeChange(m as typeof fanMode)}
                 rpm={gpu && gpu.fan_rpm > 0 ? gpu.fan_rpm : null}
                 percent={gpu ? Math.round(gpu.fan_speed_percent) : null}
               />

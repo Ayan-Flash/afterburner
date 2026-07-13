@@ -642,6 +642,27 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   padding: 0 4px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for core cards list */
+.ac-core-cards::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ac-core-cards::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.ac-core-cards::-webkit-scrollbar-thumb {
+  background: rgba(34, 119, 204, 0.3);
+  border-radius: 4px;
+}
+
+.ac-core-cards::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 119, 204, 0.5);
 }
 
 .ac-core-card {

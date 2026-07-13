@@ -30,11 +30,11 @@ impl SyncClient {
     }
 
     pub fn get_state(&self) -> SyncState {
-        self.state.lock().unwrap().clone()
+        self.state.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     pub fn update_state(&self, f: impl FnOnce(&mut SyncState)) {
-        let mut state = self.state.lock().unwrap();
+        let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
         f(&mut state);
         let store = SyncStore::new();
         store.save(&state);
@@ -64,7 +64,7 @@ impl SyncClient {
             info!("Sync client started");
 
             while running.load(Ordering::SeqCst) {
-                let state = state_arc.lock().unwrap().clone();
+                let state = state_arc.lock().unwrap_or_else(|e| e.into_inner()).clone();
 
                 if state.enabled && !state.server_url.is_empty() {
                     if let Err(e) = Self::do_sync(&state) {

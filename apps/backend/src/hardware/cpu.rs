@@ -32,6 +32,7 @@ pub struct CpuInfo {
     pub vendor: String,
     pub physical_cores: usize,
     pub logical_cores: usize,
+    pub is_elevated: bool,
 }
 
 /// Per-core live reading.
@@ -40,6 +41,7 @@ pub struct CpuCoreSample {
     pub core_index: usize,
     pub frequency_mhz: u64,
     pub usage_percent: f32,
+    pub temperature_celsius: Option<f64>,
 }
 
 /// Aggregate live reading for the whole package.
@@ -69,11 +71,9 @@ struct Inner {
     /// Highest package frequency observed so far — used to derive a stable
     /// gauge scale when the OS does not report a turbo ceiling directly.
     max_freq_seen: u64,
-    /// Live per-logical-processor clocks read from the native Windows power
-    /// API. `None` when that API is unavailable (non-Windows / load failure),
-    /// in which case we fall back to `sysinfo`'s frequency.
+    /// Live CPU performance percentage query on Windows.
     #[cfg(windows)]
-    power: Option<win_power::ProcessorPower>,
+    pdh: Option<win_power::PdhMonitor>,
 }
 
 impl Default for CpuMonitor {
@@ -112,6 +112,7 @@ impl CpuMonitor {
             vendor,
             physical_cores,
             logical_cores,
+            is_elevated: check_elevation(),
         };
 
         Self {
@@ -120,7 +121,7 @@ impl CpuMonitor {
                 components: Components::new_with_refreshed_list(),
                 max_freq_seen: 0,
                 #[cfg(windows)]
-                power: win_power::ProcessorPower::new(logical_cores),
+                pdh: win_power::PdhMonitor::new(),
             }),
             info,
             voltage: VoltageReader::new(),
@@ -138,13 +139,13 @@ impl CpuMonitor {
         let mut inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
         inner.sys.refresh_cpu_all();
 
-        // Read live per-core clocks from the native Windows power API. This is
-        // the reliable source on Windows; `sysinfo`'s frequency is only used as
-        // a fallback when the native reading is unavailable.
+        // Query CPU performance percentage via Windows PDH counter
         #[cfg(windows)]
-        let native = inner.power.as_ref().and_then(|p| p.read());
+        let perf_percent = inner.pdh.as_ref().and_then(|p| p.read_performance_percent());
         #[cfg(not(windows))]
-        let native: Option<Vec<win_power::CoreClock>> = None;
+        let perf_percent: Option<f64> = None;
+
+        let temperature_celsius = read_cpu_temperature(&mut inner.components);
 
         let cores: Vec<CpuCoreSample> = inner
             .sys
@@ -152,16 +153,18 @@ impl CpuMonitor {
             .iter()
             .enumerate()
             .map(|(i, c)| {
-                let frequency_mhz = native
-                    .as_ref()
-                    .and_then(|n| n.get(i))
-                    .map(|clock| clock.current_mhz as u64)
-                    .filter(|mhz| *mhz > 0)
-                    .unwrap_or_else(|| c.frequency());
+                let base_freq = c.frequency();
+                let frequency_mhz = if let Some(pct) = perf_percent {
+                    let calculated = ((base_freq as f64) * (pct / 100.0)) as u64;
+                    if calculated > 0 { calculated } else { base_freq }
+                } else {
+                    base_freq
+                };
                 CpuCoreSample {
                     core_index: i,
                     frequency_mhz,
                     usage_percent: c.cpu_usage(),
+                    temperature_celsius,
                 }
             })
             .collect();
@@ -174,21 +177,12 @@ impl CpuMonitor {
         if package_freq > inner.max_freq_seen {
             inner.max_freq_seen = package_freq;
         }
-        // Gauge scale: prefer the true max clock the OS advertises (native API);
-        // otherwise use the observed peak rounded up to the next 100 MHz with a
+
+        // Gauge scale: observed peak rounded up to the next 100 MHz with a
         // little headroom. Floored at 3000 MHz so the needle isn't pinned before
         // boost kicks in.
-        let advertised_max = native
-            .as_ref()
-            .and_then(|n| n.iter().map(|c| c.max_mhz).max())
-            .filter(|m| *m > 0)
-            .map(|m| m as u64)
-            .unwrap_or(0);
-        let max_frequency_mhz = advertised_max
-            .max((((inner.max_freq_seen as f64) * 1.05) / 100.0).ceil() as u64 * 100)
-            .max(3000);
-
-        let temperature_celsius = read_cpu_temperature(&mut inner.components);
+        let max_frequency_mhz = (((inner.max_freq_seen as f64) * 1.05) / 100.0).ceil() as u64 * 100;
+        let max_frequency_mhz = max_frequency_mhz.max(3000);
 
         let voltage_volts = self.voltage.read().vcore;
 
@@ -232,112 +226,135 @@ fn read_cpu_temperature(components: &mut Components) -> Option<f64> {
     fallback
 }
 
-/// A single logical processor's live clocks, as reported by the OS.
-#[derive(Debug, Clone, Copy)]
-pub struct CoreClock {
-    /// Live current clock (MHz).
-    pub current_mhz: u32,
-    /// Advertised maximum clock (MHz) — the turbo ceiling.
-    pub max_mhz: u32,
-}
-
-/// Native Windows per-core frequency via `CallNtPowerInformation`.
-///
-/// `sysinfo` on Windows reports the static registry base clock, so for an
-/// accurate live gauge we go straight to `powrprof.dll!CallNtPowerInformation`
-/// with `ProcessorInformation`, which fills one `PROCESSOR_POWER_INFORMATION`
-/// per logical processor — exactly what Task Manager reads.
+/// Native Windows per-core frequency via PDH query.
 #[cfg(windows)]
 pub mod win_power {
-    use std::ffi::c_void;
+    use libloading::Library;
 
-    use libloading::{Library, Symbol};
-
-    pub use super::CoreClock;
-
-    /// Mirror of the Win32 `PROCESSOR_POWER_INFORMATION` struct.
     #[repr(C)]
-    #[derive(Clone, Copy, Default)]
-    struct ProcessorPowerInformation {
-        number: u32,
-        max_mhz: u32,
-        current_mhz: u32,
-        mhz_limit: u32,
-        max_idle_state: u32,
-        current_idle_state: u32,
+    #[derive(Clone, Copy)]
+    pub struct PdhFmtCounterValue {
+        pub c_status: u32,
+        pub value: PdhFmtCounterValueUnion,
     }
 
-    /// `POWER_INFORMATION_LEVEL::ProcessorInformation`.
-    const PROCESSOR_INFORMATION: i32 = 11;
-    /// `STATUS_SUCCESS`.
-    const STATUS_SUCCESS: i32 = 0;
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub union PdhFmtCounterValueUnion {
+        pub long_value: i32,
+        pub double_value: f64,
+        pub large_value: i64,
+        pub ansi_string_value: *const u8,
+        pub wide_string_value: *const u16,
+    }
 
-    type CallNtPowerInformationFn =
-        unsafe extern "system" fn(i32, *mut c_void, u32, *mut c_void, u32) -> i32;
+    fn encode_wide(s: &str) -> Vec<u16> {
+        s.encode_utf16().chain(std::iter::once(0)).collect()
+    }
 
-    pub struct ProcessorPower {
-        // Keep the library loaded for the lifetime of the monitor so the
-        // resolved symbol stays valid.
+    pub struct PdhMonitor {
         _lib: Library,
-        call: CallNtPowerInformationFn,
-        cores: usize,
+        pdh_collect_query_data: unsafe extern "system" fn(isize) -> i32,
+        pdh_get_formatted_value: unsafe extern "system" fn(isize, u32, *mut u32, *mut PdhFmtCounterValue) -> i32,
+        pdh_close_query: unsafe extern "system" fn(isize) -> i32,
+        query: isize,
+        counter: isize,
     }
 
-    // The resolved function pointer is a plain `extern "system"` fn into a DLL
-    // that stays loaded for the struct's lifetime; sharing it across threads is
-    // sound (the underlying API is stateless and reentrant).
-    unsafe impl Send for ProcessorPower {}
-    unsafe impl Sync for ProcessorPower {}
+    unsafe impl Send for PdhMonitor {}
+    unsafe impl Sync for PdhMonitor {}
 
-    impl ProcessorPower {
-        pub fn new(cores: usize) -> Option<Self> {
-            if cores == 0 {
+    impl PdhMonitor {
+        pub fn new() -> Option<Self> {
+            let lib = unsafe { Library::new("pdh.dll") }.ok()?;
+            
+            type PdhOpenQueryW = unsafe extern "system" fn(*const u16, usize, *mut isize) -> i32;
+            type PdhAddEnglishCounterW = unsafe extern "system" fn(isize, *const u16, usize, *mut isize) -> i32;
+            type PdhCollectQueryData = unsafe extern "system" fn(isize) -> i32;
+            type PdhGetFormattedCounterValue = unsafe extern "system" fn(isize, u32, *mut u32, *mut PdhFmtCounterValue) -> i32;
+            type PdhCloseQuery = unsafe extern "system" fn(isize) -> i32;
+
+            let pdh_open_query: PdhOpenQueryW = unsafe { *lib.get(b"PdhOpenQueryW").ok()? };
+            let pdh_add_english_counter: PdhAddEnglishCounterW = unsafe { *lib.get(b"PdhAddEnglishCounterW").ok()? };
+            let pdh_collect_query_data: PdhCollectQueryData = unsafe { *lib.get(b"PdhCollectQueryData").ok()? };
+            let pdh_get_formatted_value: PdhGetFormattedCounterValue = unsafe { *lib.get(b"PdhGetFormattedCounterValue").ok()? };
+            let pdh_close_query: PdhCloseQuery = unsafe { *lib.get(b"PdhCloseQuery").ok()? };
+
+            let mut query = 0;
+            let status = unsafe { pdh_open_query(std::ptr::null(), 0, &mut query) };
+            if status != 0 {
                 return None;
             }
-            let lib = unsafe { Library::new("powrprof.dll") }.ok()?;
-            let call: CallNtPowerInformationFn = {
-                let sym: Symbol<CallNtPowerInformationFn> =
-                    unsafe { lib.get(b"CallNtPowerInformation").ok()? };
-                *sym
-            };
-            tracing::info!("CpuMonitor: using native CallNtPowerInformation for CPU clocks");
+
+            let path = encode_wide("\\Processor Information(_Total)\\% Processor Performance");
+            let mut counter = 0;
+            let status = unsafe { pdh_add_english_counter(query, path.as_ptr(), 0, &mut counter) };
+            if status != 0 {
+                unsafe { pdh_close_query(query); }
+                return None;
+            }
+
+            // Initialize query data
+            unsafe { pdh_collect_query_data(query); }
+
+            tracing::info!("CpuMonitor: using native PDH query for CPU performance tracking");
+
             Some(Self {
                 _lib: lib,
-                call,
-                cores,
+                pdh_collect_query_data,
+                pdh_get_formatted_value,
+                pdh_close_query,
+                query,
+                counter,
             })
         }
 
-        /// Read live per-core clocks. Returns `None` if the call fails so the
-        /// caller can fall back to `sysinfo`.
-        pub fn read(&self) -> Option<Vec<CoreClock>> {
-            let mut buf = vec![ProcessorPowerInformation::default(); self.cores];
-            let size = std::mem::size_of_val(buf.as_slice()) as u32;
-            let status = unsafe {
-                (self.call)(
-                    PROCESSOR_INFORMATION,
-                    std::ptr::null_mut(),
-                    0,
-                    buf.as_mut_ptr() as *mut c_void,
-                    size,
-                )
-            };
-            if status != STATUS_SUCCESS {
+        pub fn read_performance_percent(&self) -> Option<f64> {
+            let status = unsafe { (self.pdh_collect_query_data)(self.query) };
+            if status != 0 {
                 return None;
             }
-            Some(
-                buf.iter()
-                    .map(|p| CoreClock {
-                        current_mhz: p.current_mhz,
-                        max_mhz: p.max_mhz,
-                    })
-                    .collect(),
-            )
+
+            let mut value = PdhFmtCounterValue {
+                c_status: 0,
+                value: PdhFmtCounterValueUnion { double_value: 0.0 },
+            };
+            let mut counter_type = 0;
+            let status = unsafe {
+                (self.pdh_get_formatted_value)(self.counter, 0x200, &mut counter_type, &mut value)
+            };
+            if status != 0 {
+                return None;
+            }
+
+            unsafe { Some(value.value.double_value) }
+        }
+    }
+
+    impl Drop for PdhMonitor {
+        fn drop(&mut self) {
+            unsafe {
+                (self.pdh_close_query)(self.query);
+            }
         }
     }
 }
 
 #[cfg(not(windows))]
-pub mod win_power {
-    pub use super::CoreClock;
+pub mod win_power {}
+
+#[cfg(windows)]
+fn check_elevation() -> bool {
+    use std::os::windows::process::CommandExt;
+    std::process::Command::new("net")
+        .arg("session")
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+#[cfg(not(windows))]
+fn check_elevation() -> bool {
+    false
 }

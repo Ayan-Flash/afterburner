@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 
 interface CpuGaugeProps {
@@ -28,7 +28,7 @@ function arcPath(r: number, a1: number, a2: number) {
 
 const FULL_ARC = arcPath(90, START, START + SWEEP);
 
-function Needle({ frac, color }: { frac: any; color: string }) {
+function Needle({ frac, color, isBoosting }: { frac: any; color: string; isBoosting: boolean }) {
   const rotation = useTransform(frac, [0, 1], [START, START + SWEEP]);
 
   return (
@@ -43,31 +43,63 @@ function Needle({ frac, color }: { frac: any; color: string }) {
         points={`${CX + 96},${CY} ${CX},${CY - 8} ${CX + 75},${CY} ${CX},${CY + 8}`}
         fill={`hsl(200, 95%, 70%)`} opacity="0.9"
       />
-      <circle cx={CX + 96} cy={CY} r="2.5" fill={`hsl(200, 95%, 70%)`} opacity="0.95" />
+      <motion.circle
+        cx={CX + 96}
+        cy={CY}
+        r="3"
+        fill="#ffffff"
+        animate={isBoosting ? {
+          scale: [1, 1.8, 1],
+          fill: ['#ffffff', '#00ffcc', '#ffffff']
+        } : { scale: 1, fill: '#ffffff' }}
+        transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+        style={{ transformOrigin: `${CX + 96}px ${CY}px` }}
+        filter="url(#acGlow)"
+      />
     </motion.g>
   );
 }
 
-function Tick({ i, frac }: { i: number; frac: any }) {
+function Tick({ i, frac, color }: { i: number; frac: any; color: string }) {
   const isMajor = i % 12 === 0;
   const isMid = i % 6 === 0 && !isMajor;
-  const len = isMajor ? 10 : isMid ? 6 : 3.5;
+  const len = isMajor ? 12 : isMid ? 8 : 5;
   const a = START + (i / TICKS) * SWEEP;
   const p1 = polar(98, a);
   const p2 = polar(98 - len, a);
-  const opacity = useTransform(frac, [i / TICKS - 0.03, i / TICKS], [0.3, 1]);
+  
+  const threshold = i / TICKS;
+  const opacity = useTransform(frac, [threshold - 0.015, threshold], [0.15, 0.95]);
+  const strokeColor = useTransform(
+    frac,
+    [threshold - 0.015, threshold],
+    ['rgba(35, 45, 60, 0.3)', color]
+  );
+  const strokeWidth = isMajor ? 3.0 : isMid ? 2.0 : 1.0;
 
   return (
-    <motion.line
-      x1={p1.x}
-      y1={p1.y}
-      x2={p2.x}
-      y2={p2.y}
-      stroke={isMajor ? 'rgba(60,160,240,0.9)' : 'rgba(40,50,70,0.5)'}
-      strokeWidth={isMajor ? 2 : isMid ? 1.2 : 0.7}
-      strokeLinecap="round"
-      style={{ opacity }}
-    />
+    <g>
+      <line
+        x1={p1.x}
+        y1={p1.y}
+        x2={p2.x}
+        y2={p2.y}
+        stroke="rgba(25, 32, 48, 0.6)"
+        strokeWidth={strokeWidth}
+        strokeLinecap="butt"
+      />
+      <motion.line
+        x1={p1.x}
+        y1={p1.y}
+        x2={p2.x}
+        y2={p2.y}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap="butt"
+        style={{ opacity }}
+        filter={isMajor ? 'url(#acGlow)' : undefined}
+      />
+    </g>
   );
 }
 
@@ -96,6 +128,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
   const frac = useSpring(rawFrac, { stiffness: 70, damping: 18, mass: 0.5 });
   useEffect(() => { frac.set(rawFrac); }, [rawFrac, frac]);
 
+  const isBoosting = rawFrac > 0.75;
   const hue = 200;
   const color = `hsl(${hue}, 85%, 55%)`;
   const colorBright = `hsl(${hue}, 95%, 70%)`;
@@ -121,10 +154,10 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
   const ticks = useMemo(() => {
     const nodes: React.ReactNode[] = [];
     for (let i = 0; i <= TICKS; i++) {
-      nodes.push(<Tick key={i} i={i} frac={frac} />);
+      nodes.push(<Tick key={i} i={i} frac={frac} color={color} />);
     }
     return nodes;
-  }, [frac]);
+  }, [frac, color]);
 
   const dots = useMemo(() => {
     const nodes: React.ReactNode[] = [];
@@ -154,7 +187,19 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
     return nodes;
   }, []);
 
-  const animatedValue = useTransform(frac, (v) => Math.round(v * maxValue));
+  const textRef = useRef<SVGTextElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = frac.on("change", (v) => {
+      if (textRef.current) {
+        textRef.current.textContent = Math.round(v * maxValue).toString();
+      }
+    });
+    if (textRef.current) {
+      textRef.current.textContent = Math.round(rawFrac * maxValue).toString();
+    }
+    return unsubscribe;
+  }, [frac, maxValue, rawFrac]);
 
   return (
     <motion.div
@@ -201,13 +246,13 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
           return `${polar(14, a).x},${CY - 36 + polar(14, a).y - CY}`;
         }).join(' ')} fill="none" stroke="rgba(40,60,90,0.15)" strokeWidth="0.6" />
 
-        {/* Active arc — spring-driven pathLength */}
+        {/* Active arc — spring-driven pathLength, styled as segmented tachometer */}
         <motion.path d={FULL_ARC} fill="none" stroke="url(#acGrad)" strokeWidth="10"
-          strokeLinecap="round" style={{ pathLength: frac, opacity: 0.15 }} filter="url(#acGlowStrong)" />
+          strokeLinecap="butt" strokeDasharray="4 2.5" style={{ pathLength: frac, opacity: 0.15 }} filter="url(#acGlowStrong)" />
         <motion.path d={FULL_ARC} fill="none" stroke="url(#acGrad)" strokeWidth="6"
-          strokeLinecap="round" style={{ pathLength: frac }} />
+          strokeLinecap="butt" strokeDasharray="4 2.5" style={{ pathLength: frac }} />
         <motion.path d={arcPath(87, START, START + SWEEP)} fill="none" stroke={colorBright}
-          strokeWidth="0.8" strokeLinecap="round" style={{ pathLength: frac, opacity: 0.4 }} />
+          strokeWidth="0.8" strokeLinecap="butt" strokeDasharray="1 1" style={{ pathLength: frac, opacity: 0.4 }} />
 
         {/* Ticks + labels + dots */}
         {ticks}
@@ -215,7 +260,7 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
         {dots}
 
         {/* Needle */}
-        <Needle frac={frac} color={color} />
+        <Needle frac={frac} color={color} isBoosting={isBoosting} />
 
         {/* Center cap */}
         <motion.circle cx={CX} cy={CY} r="6" fill="#1a1e2e"
@@ -226,12 +271,19 @@ export function CpuGauge({ value, maxValue = 5000, size = 340 }: CpuGaugeProps) 
         <circle cx={CX} cy={CY} r={51} fill="url(#acCenter)" opacity="0.9" />
 
         {/* Animated value */}
-        <motion.text x={CX} y={CY - 6} textAnchor="middle" dominantBaseline="central"
-          fill="#f0f2f8" fontSize="36" fontWeight="800"
-          fontFamily="'Segoe UI', system-ui, sans-serif"
-          style={{ filter: `drop-shadow(0 0 8px ${color})` }}>
-          {animatedValue}
-        </motion.text>
+        <motion.g
+          animate={isBoosting ? {
+            scale: [1, 1.05, 1],
+          } : { scale: 1 }}
+          transition={{ repeat: Infinity, duration: 1.0, ease: "easeInOut" }}
+          style={{ transformOrigin: `${CX}px ${CY - 6}px` }}
+        >
+          <text ref={textRef} x={CX} y={CY - 6} textAnchor="middle" dominantBaseline="central"
+            fill={isBoosting ? '#ffffff' : '#f0f2f8'} fontSize="36" fontWeight="900"
+            fontFamily="'JetBrains Mono', 'Fira Code', monospace"
+            style={{ filter: isBoosting ? `drop-shadow(0 0 12px ${colorBright})` : `drop-shadow(0 0 6px ${color})` }}
+          />
+        </motion.g>
 
         <text x={CX} y={CY + 16} textAnchor="middle" fill="rgba(140,160,190,0.8)"
           fontSize="11" fontWeight="600" fontFamily="'Segoe UI', system-ui, sans-serif" letterSpacing="1.5">MHz</text>

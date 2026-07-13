@@ -22,19 +22,19 @@ impl AlertEngine {
     }
 
     pub fn add_rule(&self, rule: AlertRule) {
-        let mut rules = self.rules.write().unwrap();
+        let mut rules = self.rules.write().unwrap_or_else(|e| e.into_inner());
         rules.push(rule);
     }
 
     pub fn remove_rule(&self, rule_id: &str) -> bool {
-        let mut rules = self.rules.write().unwrap();
+        let mut rules = self.rules.write().unwrap_or_else(|e| e.into_inner());
         let len = rules.len();
         rules.retain(|r| r.id != rule_id);
         rules.len() < len
     }
 
     pub fn update_rule(&self, rule: AlertRule) -> bool {
-        let mut rules = self.rules.write().unwrap();
+        let mut rules = self.rules.write().unwrap_or_else(|e| e.into_inner());
         if let Some(existing) = rules.iter_mut().find(|r| r.id == rule.id) {
             *existing = rule;
             true
@@ -44,13 +44,13 @@ impl AlertEngine {
     }
 
     pub fn get_rules(&self) -> Vec<AlertRule> {
-        self.rules.read().unwrap().clone()
+        self.rules.read().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
     pub fn get_rules_for_gpu(&self, gpu_id: &str) -> Vec<AlertRule> {
         self.rules
             .read()
-            .unwrap()
+            .unwrap_or_else(|e| e.into_inner())
             .iter()
             .filter(|r| r.gpu_id == gpu_id)
             .cloned()
@@ -58,7 +58,7 @@ impl AlertEngine {
     }
 
     pub fn evaluate_sample(&self, sample: &GpuSample) -> Vec<AlertEvent> {
-        let rules = self.rules.read().unwrap();
+        let rules = self.rules.read().unwrap_or_else(|e| e.into_inner());
         let mut events = Vec::new();
 
         let metrics: HashMap<AlertMetric, f64> = [
@@ -90,13 +90,13 @@ impl AlertEngine {
     }
 
     pub fn get_history(&self, limit: usize) -> Vec<AlertEvent> {
-        let history = self.history.read().unwrap();
+        let history = self.history.read().unwrap_or_else(|e| e.into_inner());
         let start = history.len().saturating_sub(limit);
         history[start..].to_vec()
     }
 
     pub fn acknowledge_alert(&self, alert_id: &str) -> bool {
-        let mut history = self.history.write().unwrap();
+        let mut history = self.history.write().unwrap_or_else(|e| e.into_inner());
         if let Some(event) = history.iter_mut().find(|a| a.id == alert_id) {
             event.acknowledged = true;
             true
@@ -106,7 +106,7 @@ impl AlertEngine {
     }
 
     pub fn clear_history(&self) {
-        let mut history = self.history.write().unwrap();
+        let mut history = self.history.write().unwrap_or_else(|e| e.into_inner());
         history.clear();
     }
 
@@ -115,7 +115,7 @@ impl AlertEngine {
     }
 
     fn add_to_history(&self, event: AlertEvent) {
-        let mut history = self.history.write().unwrap();
+        let mut history = self.history.write().unwrap_or_else(|e| e.into_inner());
         history.push(event);
         if history.len() > self.max_history {
             history.remove(0);
@@ -158,7 +158,7 @@ impl AlertEngine {
             },
         ];
 
-        let mut my_rules = self.rules.write().unwrap();
+        let mut my_rules = self.rules.write().unwrap_or_else(|e| e.into_inner());
         for rule in rules.iter() {
             my_rules.push(rule.clone());
         }

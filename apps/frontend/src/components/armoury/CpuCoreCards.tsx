@@ -8,6 +8,7 @@
 interface CoreData {
   coreIndex: number;
   frequency: number; // MHz
+  temperature: number | null; // °C
 }
 
 interface CpuCoreCardsProps {
@@ -38,11 +39,20 @@ export function CpuCoreCards({ cores }: CpuCoreCardsProps) {
               </svg>
             </div>
             <div className="ac-core-card__info">
-              <span className="ac-core-card__label">CPU Core {core.coreIndex}</span>
-              <span className="ac-core-card__value">
+              <div className="ac-core-card__label">Thread #{core.coreIndex}</div>
+              <div className="ac-core-card__value">
                 {core.frequency}
                 <span className="ac-core-card__unit">MHz</span>
-              </span>
+              </div>
+              {core.temperature != null ? (
+                <div className="ac-core-card__label" style={{ marginTop: 2, color: isRed ? '#ff5555' : '#3399ff', fontWeight: 600 }}>
+                  {Math.round(core.temperature)}°C
+                </div>
+              ) : (
+                <div className="ac-core-card__label" style={{ marginTop: 2, color: 'var(--ac-text-muted)', fontSize: '8px' }}>
+                  N/A (No Admin)
+                </div>
+              )}
             </div>
           </div>
         );

@@ -10,6 +10,7 @@ export interface CpuCoreData {
   coreIndex: number;
   frequency: number; // MHz
   usage: number; // %
+  temperature: number | null;
 }
 
 export interface CpuData {
@@ -23,6 +24,7 @@ export interface CpuData {
   temperature: number | null;
   maxFrequency: number;
   cores: CpuCoreData[];
+  isElevated: boolean;
 }
 
 const DEFAULT_DATA: CpuData = {
@@ -36,6 +38,7 @@ const DEFAULT_DATA: CpuData = {
   temperature: null,
   maxFrequency: 5000,
   cores: [],
+  isElevated: false,
 };
 
 export function useCpuData(): CpuData {
@@ -68,7 +71,9 @@ export function useCpuData(): CpuData {
           coreIndex: c.core_index,
           frequency: c.frequency_mhz,
           usage: c.usage_percent,
+          temperature: c.temperature_celsius,
         })),
+        isElevated: info?.is_elevated ?? false,
       });
     } catch {
       /* Backend not reachable — keep last known values. */

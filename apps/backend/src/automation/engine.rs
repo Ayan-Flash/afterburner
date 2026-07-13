@@ -102,7 +102,9 @@ impl AutomationEngine {
             info!("Automation engine stopped");
         });
 
-        *self.thread_handle.lock().unwrap() = Some(handle);
+        if let Ok(mut handle_lock) = self.thread_handle.lock() {
+            *handle_lock = Some(handle);
+        }
     }
 
     pub fn stop(&self) {

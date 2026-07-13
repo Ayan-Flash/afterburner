@@ -90,12 +90,12 @@ impl SyncServer {
             .with_header(
                 "Content-Type: application/json"
                     .parse::<tiny_http::Header>()
-                    .unwrap(),
+                    .expect("static content-type header"),
             )
             .with_header(
                 "Access-Control-Allow-Origin: *"
                     .parse::<tiny_http::Header>()
-                    .unwrap(),
+                    .expect("static CORS header"),
             )
     }
 

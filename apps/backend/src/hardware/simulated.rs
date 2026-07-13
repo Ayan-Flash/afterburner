@@ -132,12 +132,12 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn enumerate(&self) -> Result<Vec<GpuIdentity>, GpuProviderError> {
-        let gpus = self.gpus.lock().unwrap();
+        let gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         Ok(gpus.iter().map(|g| g.identity.clone()).collect())
     }
 
     fn read_sample(&self, gpu_id: &str) -> Result<GpuSample, GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)
@@ -147,7 +147,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn read_control_state(&self, gpu_id: &str) -> Result<GpuControlState, GpuProviderError> {
-        let gpus = self.gpus.lock().unwrap();
+        let gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter()
             .find(|g| g.identity.id == gpu_id)
@@ -164,7 +164,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn set_fan_speed(&self, gpu_id: &str, percent: f64) -> Result<(), GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)
@@ -176,7 +176,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn set_core_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)
@@ -187,7 +187,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn set_memory_clock_offset(&self, gpu_id: &str, offset_mhz: i32) -> Result<(), GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)
@@ -198,7 +198,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn set_power_limit(&self, gpu_id: &str, percent: f64) -> Result<(), GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)
@@ -209,7 +209,7 @@ impl GpuProvider for SimulatedGpuProvider {
     }
 
     fn set_voltage_offset(&self, gpu_id: &str, offset_mv: i32) -> Result<(), GpuProviderError> {
-        let mut gpus = self.gpus.lock().unwrap();
+        let mut gpus = self.gpus.lock().unwrap_or_else(|e| e.into_inner());
         let state = gpus
             .iter_mut()
             .find(|g| g.identity.id == gpu_id)

@@ -14,6 +14,7 @@ interface CpuPanelProps {
   voltage: number | null;        // Volts (null when unavailable)
   temperature: number | null;    // Celsius (null when unavailable)
   maxFrequency?: number;
+  isElevated?: boolean;
 }
 
 function SpringValue({ value, unit = '', decimals = 0 }: { value: number; unit?: string; decimals?: number }) {
@@ -32,6 +33,7 @@ export function CpuPanel({
   voltage,
   temperature,
   maxFrequency = 5000,
+  isElevated = false,
 }: CpuPanelProps) {
   const freqPercent = Math.min((frequency / maxFrequency) * 100, 100);
   const segmentCount = 20;
@@ -81,11 +83,13 @@ export function CpuPanel({
       {/* Temperature */}
       <div className="ac-info-row">
         <span className="ac-info-row__label">Temperature</span>
-        <span className="ac-info-row__value">
+        <span className="ac-info-row__value" style={{ display: 'flex', alignItems: 'center' }}>
           {temperature != null ? (
             <SpringValue value={temperature} unit="°C" />
           ) : (
-            'N/A'
+            <span style={{ fontSize: '10px', color: 'var(--ac-text-muted)', fontWeight: 500 }}>
+              {isElevated ? 'N/A' : 'N/A (Requires Admin)'}
+            </span>
           )}
         </span>
       </div>

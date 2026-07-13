@@ -65,12 +65,12 @@ impl ObsSource {
                             .with_header(
                                 "Access-Control-Allow-Origin: *"
                                     .parse::<tiny_http::Header>()
-                                    .unwrap(),
+                                    .expect("static CORS header"),
                             )
                             .with_header(
                                 "Content-Type: application/json"
                                     .parse::<tiny_http::Header>()
-                                    .unwrap(),
+                                    .expect("static content-type header"),
                             );
                         let _ = request.respond(response);
                     }

@@ -21,13 +21,13 @@ impl AuthManager {
     }
 
     pub fn set_key(&self, key: String) {
-        let mut api_key = self.api_key.write().unwrap();
+        let mut api_key = self.api_key.write().unwrap_or_else(|e| e.into_inner());
         *api_key = Some(key);
         self.enabled.store(true, Ordering::SeqCst);
     }
 
     pub fn clear_key(&self) {
-        let mut api_key = self.api_key.write().unwrap();
+        let mut api_key = self.api_key.write().unwrap_or_else(|e| e.into_inner());
         *api_key = None;
         self.enabled.store(false, Ordering::SeqCst);
     }
@@ -36,7 +36,7 @@ impl AuthManager {
         if !self.enabled.load(Ordering::SeqCst) {
             return true;
         }
-        let api_key = self.api_key.read().unwrap();
+        let api_key = self.api_key.read().unwrap_or_else(|e| e.into_inner());
         match (header, api_key.as_ref()) {
             (Some(h), Some(key)) => h == key,
             _ => false,

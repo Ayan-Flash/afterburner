@@ -11,6 +11,12 @@ fn test_database_open_and_schema() {
     assert!(version >= 1);
 }
 
+
+
+
+
+
+
 #[test]
 fn test_setting_roundtrip() {
     let db = Database::open().expect("Failed to open database");
@@ -97,3 +103,4 @@ fn test_clear_samples() {
     let deleted = db.clear_samples(1000).unwrap();
     assert!(deleted > 0);
 }
+
